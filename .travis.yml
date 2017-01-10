@@ -1,0 +1,18 @@
+sudo: false
+before_install:
+- mkdir -p $HOME/texlive && curl -L https://github.com/urdh/texlive-blob/releases/download/20150712/texlive.tar.xz
+  | tar -JxC $HOME/texlive
+script:
+- PATH=$HOME/texlive/bin/x86_64-linux:$PATH
+- pdflatex NCL-EEE-MICRO-MEMO-2016-204
+- bibtex NCL-EEE-MICRO-MEMO-2016-204
+- pdflatex NCL-EEE-MICRO-MEMO-2016-204
+- pdflatex NCL-EEE-MICRO-MEMO-2016-204
+deploy:
+  provider: releases
+  api_key:
+    secure: bikF4Pwzud0ixNntIywNyxM1+JT3eqXMI5WO7LC4Xx16kIgGqDE4OCcpDvXjq4As0Iuv1+7brRqWSpYajhj3mNZM4PFSrdNcA8FqTQpWLEF9Sqlcavzac6yylg/Ugwo3HcFWKF6MMD1XzgRiA9S6FcC+HRMVWYEoXX/bUYQaK92kc5bnEMqRicTDo5XE+S9k0fN+m5xHYlDyngpowXDmAa+YOWslPQvG7L/8LkFrv6tsrkc4eW7k7ZXz3fbdn1NrmfL/XVq9z/LmlAgm3x5HArNvYVzr2hqtKG4kNHQBtdw2f3Ak+Xhle2qqU9yhY5LjmMMaovWcg5Wp5jN12jnOlI8zkCLtGsHIOTZ88LmLpXxd7BXcwrOV0FCaewAc9QpzXNVGfpQ1HGDs5DD2dzUk86WAfOvs0WsXHzMvPQLcfMIzec4fzWBASZ89z4uUoLR4Czhel9qWwkg9e6UOVnDppm6GU26K+oc9k280/DqYgC5CvM/NHGSa8BsDYmg+OMoKsOQ0EG9pPM3AA1D/DOMPh386/uWiXUAnswGWQkM2Znt56k2OPctu2I3JK2wT2QmmLRMS/JMUL4nzmWHqS8kBgn8jrMWA7dT1S6iQUy6A8bGDy6utQtRCDwr8xH75Lyd9sknOb3N0k35MYn0+2AP+Rc/O8lH1aBqQY2i4WRD+ADI=
+  file: Concepts.pdf
+  skip_cleanup: true
+  on:
+    repo: jrbeaumont/concepts-tool-paper
