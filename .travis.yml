@@ -4,15 +4,14 @@ before_install:
   | tar -JxC $HOME/texlive
 script:
 - PATH=$HOME/texlive/bin/x86_64-linux:$PATH
-- pdflatex NCL-EEE-MICRO-MEMO-2016-204
-- bibtex NCL-EEE-MICRO-MEMO-2016-204
-- pdflatex NCL-EEE-MICRO-MEMO-2016-204
-- pdflatex NCL-EEE-MICRO-MEMO-2016-204
+- pdflatex Concepts
+- bibtex Concepts
+- pdflatex Concepts
+- pdflatex Concepts
 deploy:
   provider: releases
   api_key:
-    secure: bikF4Pwzud0ixNntIywNyxM1+JT3eqXMI5WO7LC4Xx16kIgGqDE4OCcpDvXjq4As0Iuv1+7brRqWSpYajhj3mNZM4PFSrdNcA8FqTQpWLEF9Sqlcavzac6yylg/Ugwo3HcFWKF6MMD1XzgRiA9S6FcC+HRMVWYEoXX/bUYQaK92kc5bnEMqRicTDo5XE+S9k0fN+m5xHYlDyngpowXDmAa+YOWslPQvG7L/8LkFrv6tsrkc4eW7k7ZXz3fbdn1NrmfL/XVq9z/LmlAgm3x5HArNvYVzr2hqtKG4kNHQBtdw2f3Ak+Xhle2qqU9yhY5LjmMMaovWcg5Wp5jN12jnOlI8zkCLtGsHIOTZ88LmLpXxd7BXcwrOV0FCaewAc9QpzXNVGfpQ1HGDs5DD2dzUk86WAfOvs0WsXHzMvPQLcfMIzec4fzWBASZ89z4uUoLR4Czhel9qWwkg9e6UOVnDppm6GU26K+oc9k280/DqYgC5CvM/NHGSa8BsDYmg+OMoKsOQ0EG9pPM3AA1D/DOMPh386/uWiXUAnswGWQkM2Znt56k2OPctu2I3JK2wT2QmmLRMS/JMUL4nzmWHqS8kBgn8jrMWA7dT1S6iQUy6A8bGDy6utQtRCDwr8xH75Lyd9sknOb3N0k35MYn0+2AP+Rc/O8lH1aBqQY2i4WRD+ADI=
+    secure: UjiTe2jeKb5r+FJ0qwtJ31Cp2lZdEpLv5j6S30BXoXqUTpLXdMfKpzlSuTIFED1uDFTJndrBBw8A6iQbF7V1tN0P0BKIhsBFyhEglaYCYYK2VA3hRUu8WDZxShCXc8Z1zfdZR441bIbITBTtjOj115h2eQtkOLZ0FmSMk3Jbr8rfClN8NsOKh7Y6cSvRg/M4uUdW5+A2iBgflYApiSLDG2tTFE9Q89isEMGJugaD27cO5GQsD7zIEvykRpHt0lBM2dVXcxB+lxQbrDGH4/IjQWx9VrmRR8bDnU3s5KPcHALZuzuPlSXDYD7zr7rLin0eT+C89mcLZogkYSAb8E448v1Xu3Nd63qWOsZkEL63ttSLaIBspA3ZOVQ4L+9J80ORS+4o51Q+kbTbfsQQCQyM+i0RkqkzjTewvJEZYGXmYM31eoFN7IXLrx6/BjdxwMDrTZt/7rfnbZ5rPLthgnLyix6qRxVlApCtKfsHcsIH6pSoxDHDzQjIsFzohUz1J8ce0xJtvzKHl/A52yjsr3UlIE85C4/vC+PLwSbRRLUqZCdAe3HPCJLEg5NedZpFmjaDjQZ3hjvrO7Pm+J/07AO9NkKuES03n9hGu6bvx4KMA1pbb0yY/qjHwKQCa5Ld0f2dEpCvW/QTHAOIlrCaHlCuGfZ9Rex3yGWDLLQmZB/7LeA=
   file: Concepts.pdf
-  skip_cleanup: true
   on:
     repo: jrbeaumont/concepts-tool-paper
