@@ -39,8 +39,8 @@ UK}}
 
 \begin{abstract}
 Asynchronous circuits are becoming increasingly important in
-system design for Internet-of-Things, where they orchestrate
-the interface between big synchronous computation components
+system design, where they orchestrate
+the interface between synchronous computation components
 and the analogue environment, which is inherently asynchronous
 and has high uncertainty with respect to power supply,
 temperature and long-term ageing effects.
@@ -54,24 +54,27 @@ Previously, we have introduced a novel high-level description language
 for asynchronous circuits, which is based on behavioural
 \textit{concepts} -- high-level descriptions of asynchronous circuit
 requirements, that can be shared, reused and extended by users. 
-In this paper we will discuss more examples using concepts, and an algorithm to
-automatically translate these to Signal Transition Graphs for further processing
+In this paper we will discuss our open-source Haskell based tool which
+allows the specification of asynchronous circuits using concepts, and features
+the ability to automatically translate these to Signal Transition Graphs for further processing
 by conventional asynchronous and synchronous EDA tools, such as \noun{Petrify}
-and \noun{Mpsat}. Our aim is to simplify the process of capturing system
-requirements in the form of a formal specification, and to promote behavioural
-concepts as a means for design reuse. The proposed design flow is fully
-automated in open-source toolsuite \noun{Workcraft}.
+and \noun{Mpsat}. We will discuss the translation algorithm, and the design flow using 
+both the stand-alone too and the design flow using open-source toolsuite \noun{Workcraft}
+in which the tool is integrated.
 \end{abstract}
 
 \sloppy
 \thispagestyle{empty}
-%%\vspace{-3mm}
+
+
 \section{Introduction}
 
+\vspace{-3mm}
+
 \emph{Concepts} have been presented in order to provide a more compact, adaptive and intuitive method of
-designing asynchronous circuits, using a fully compositional text based description method. 
+designing asynchronous circuits, using a fully compositional description method. 
 This was born out of the use of algebra for designing systems,
-such as the model Conditional Partial Order Graphs~\cite{CPOG1}\cite{CPOG2}\cite{2014_mokhov_pg},
+such as the model Conditional Partial Order Graphs~\cite{CPOG1}\cite{CPOG2}\cite{2014_mokhov_pg} and
 the algebra of switching networks~\cite{mokhov2015algebra}. Composition is an important part of concepts
  and the use of composition in some algebraic representations, such as with DI algebra~\cite{270632} 
  and Conditional Signal Graphs~\cite{6243877} helped to inspire this. 
@@ -88,7 +91,7 @@ The scalability of this is poor: as the system grows in complexity its monolithi
 challenging to comprehend and debug. The problem becomes particularly severe when designing 
 multi-mode systems, such as power regulators, where capturing all aspects of system behaviour in a
 consistent specification is a major design challenge~\cite{2014_sokolov_ftfc}\cite{sokolov2015design}. 
-Moreover, the STG models of components and  operating modes are difficult to reuse when designing 
+Moreover, the STG models of components and operating modes are difficult to reuse when designing 
 other specifications, and thus each new design must be built from the ground up. This is particularly 
 undesirable for industry, as this increases the design time of each design greatly. 
 
@@ -99,58 +102,68 @@ supported by multiple EDA tools, such as \noun{Petrify}~\cite{Cortadella},
 \noun{Mpsat}~\cite{khomenko2004detecting}, \noun{Versify}~\cite{i1997formal},
 \noun{Workcraft}~\cite{2007_poliakov_workcraft}\cite{Workcraft_website}, and
 others.
-These tools take an STG specification of a complete controller and can
+These tools take an STG specification and can
 formally verify its correctness, as well as synthesise an asynchronous
 circuit implementation that is \emph{speed-independent}, i.e. guaranteed
 to work correctly regardless of component delays~\cite{Muller_1959_ts}.
 
 Concepts are not supported by these tools, and rather than reinvent the wheel by authoring tools
 to verify and synthesize concepts directly, we can \emph{translate} concepts to STGs, for use with 
-these existing tools. Previously, we have introduced a prototype algorithm for translating concepts
-to STGs. However, this version would not allow for some important features of circuits to be
-translated. 
+these existing tools.
 
-In this paper we display all concept types necessary for a complete specification, and some 
-example concept specifications. These will display the possibilities of concepts, as well as the 
-problems with the prototype translation algorithm, namely \emph{OR-causality}, which is 
-much more complex than AND-causality which is standard within concepts. 
-This will lead us to a new translation algorithm, which has been implemented as a tool. 
-%along with the domain specific language~\cite{2016_concepts_github} embedded in 
-%Haskell~\cite{1996_hudak_dsl}, and integrated into 
-%\noun{Workcraft}~\cite{Workcraft_website}, an open-source EDA tool which also 
-%features some verification and synthesis tools for STGs. 
+In this paper, we will discuss the implementation of the domain specific language and translation tool
+for concepts~\cite{2016_concepts_github} embedded in Haskell. The tool is also integrated into
+\noun{Workcraft}~\cite{Workcraft_website}, an open-source EDA tool which also
+features some verification and synthesis tools for STGs, and we will discuss the use of the tool 
+from within \noun{Workcraft}.
 
-Our contributions are as follows:
+The paper is laid out as follows:
+\vspace{-6mm}
 \begin{itemize}
-  \item We detail the concepts required for a successful  
-  translation in Section~\ref{sec:trans-concepts}
-  \item We introduce some new gate examples and their specifications in
-  Section~\ref{sec:examples}, presenting what can be acheived with
-  concepts, and how OR-causality becomes necessary in specifications.
+  \item We detail the notations of concepts within the tool and the built in
+  concepts and their uses in Section~\ref{sec:tool-func}
+  \item We explain how to use the tool both stand-alone and within
+  \noun{Workcraft} translate concepts in Section~\ref{sec:tool-use}.
   \item We present the implemented algorithm for translating concepts to STGs
-  including OR-causality in Section~\ref{sec:algorithm}.
+  and some examples in Section~\ref{sec:algorithm}.
 \end{itemize}
-
-\noindent
-We start with a brief recap of asynchronous concepts as a specification language in
-Section~\ref{sec:async-concepts}, and discuss the interoperability of the provided tool 
-with existing standard STG based tools in Section~\ref{sub:interop-with-stg}.
 
 %\vspace{-3mm}
 
-\section{Asynchronous Concepts\label{sec:async-concepts}}
+\section{Features of the concepts tool\label{sec:tool-func}}
 
 %\vspace{-2mm}
 
 The abstract base of the concepts, on which these asynchronous specific circuits
 is discussed in~\cite{2015_Beaumont_MEMOCODE}.
 
-\textbf{\label{signal-level}Signal-level concepts:} Asynchronous circuit specifications
+\subsection{Concept notation \label{sub:concept-notation}}
+
+Concepts can be composed of other concepts, and this applies to the behaviours of
+signals, as well as the specifying of the initial states and the signal types. This allows
+there to be different levels of concepts, each level of which will feature a composition
+of concepts from a lower level. 
+
+In this section we will explain these levels, and the standard notations of concepts 
+for these. 
+
+\subsubsection{\label{signal-level}Signal-level concepts}Asynchronous circuit specifications
 are mainly composed of signal transitions, and interactions between these, to show
 causal relationships. Signal transitions are denoted as $a^{+}$ and $a^{-}$, where $a$ is
 any signal name, at least one character, and the $+$ or $-$ indicates which way the 
 this signal transitions, $+$ denoting a low-to-high or 0 to 1 transition, and $-$ denoting
 a high-to-low, 1 to 0 transition. 
+
+The concept tool is written in Haskell, a functional programming language. The domain
+specific language which we have implemented therefore uses Haskell notations, and
+this means some notations are different to standard signal transition specifications. 
+$a^{+}$ and $a^{-}$ are in post-fix notation, where the operator is stated after the 
+operand. Haskell does not support post-fix notation, and as such, we have to use
+a differing signal transition notation. 
+
+For the tool, signal transitions $a^{+}$ and $a^{-}$ are noted as $rise\,a$ and $fall\,a$
+respectively. We will use the tool notation for examples, but describe these using
+standard notation.
 
 Signal-level concepts are the base level of concepts, and are 
 the type all other concepts are built on. Here we display the standard concepts
@@ -160,7 +173,7 @@ A key concept in asynchronous circuits is \emph{causality}:
 one signal transition \emph{causes} another signal transition, a cause and an effect.
 This is denoted in the form: 
 \[
-a^{+}\rightsquigarrow c^{+}
+rise\,a\rightsquigarrow rise\,c
 \]
 This is read as $a^{+}$ causes $c^{+}$, meaning that for the $c^{+}$ transition to
 occur, $a^{+}$ must have occurred previously. The $\rightsquigarrow$ operator is
@@ -176,7 +189,7 @@ One can compose any concepts using the $\diamond$ (diamond) operator, and this a
 to concepts of any level, whether predefined or user-defined. For example, 
 two causality concepts can be composed.
 \[
-a^{+}\rightsquigarrow c^{+}\ \diamond\ b^{+}\rightsquigarrow c^{+}
+rise\,a\rightsquigarrow rise\,c\ \diamond\ rise\,b\rightsquigarrow rise\,c
 \]
 In words, $a^{+}$ \emph{and} $b^{+}$ must occur before $c^{+}$ can occur. 
 This corresponds to so-called AND-causality in the fact that several cause transitions \emph{must all}
@@ -189,7 +202,7 @@ To solve this we provise a listing option. The following will acheive the same r
 %\vspace{-3mm}
 
 \[
-[a^{+}, b^{+}]\sim\hspace{-1.5mm}\&\hspace{-1.5mm}\sim\hspace{-1.5mm}>c^{+}
+[rise\,a, rise\,b]\sim\hspace{-1.5mm}\&\hspace{-1.5mm}\sim\hspace{-1.5mm}>rise\,c
 \]
 This form of concept can be composed as usual with any other concepts.
 
@@ -202,53 +215,50 @@ With OR-causality, the notation used lists all possible causes for the stated ef
 %\vspace{-3mm}
 
 \[
-[x^{+}, y^{+}]\sim\hspace{-1.5mm}|\hspace{-1.5mm}\sim\hspace{-1.5mm}>z^{+}
+[rise\,x, rise\,y]\sim\hspace{-1.5mm}|\hspace{-1.5mm}\sim\hspace{-1.5mm}>rise\,z
 \]
 
 This is, \emph{either} $x^{+}$ \emph{or} $y^{+}$ must occur in order for 
 $z^{+}$ to occur.
 
 The interactions when an effect transition is included in both AND- and OR-causality are interesting, and
-an example of when this occurs can be found in Section~\ref{sec:algorithm}, along with a description
-of the implemented algorithm, which discusses the issues OR-causality poses with translation.
+an example of when this occurs can be found in Section~\ref{sec:algorithm}.
 
-\textbf{Gate-level concepts:} Using the causality concept we can express
+\subsubsection{Gate-level concepts} Using the causality concept we can express
 the behaviour of gates in asynchronous circuits. For example, a \emph{buffer}
-is a gate with one input signal and one output signal ,
+is a gate with one input signal and one output signal,
 whose output transitions causally depend on the input ones:
 \[
-\mathsf{buffer}(a, b)=a^{+}\rightsquigarrow b^{+}\ \diamond\
-a^{-}\rightsquigarrow b^{-}
+\mathsf{buffer}\,a\,b=rise\,a\rightsquigarrow rise\,b\ \diamond\
+fall\,a\rightsquigarrow fall\,b
 \]
 
 \noindent An \emph{inverter} has a similar conceptual specification, but the
 output transition is inverted:
 \[
-\mathsf{inverter}(a, b)=a^{+}\rightsquigarrow b^{-}\ \diamond\
-a^{-}\rightsquigarrow b^{+}
+\mathsf{inverter}\,a\,b=rise\,a\rightsquigarrow fall\,b\ \diamond\
+fall\,a\rightsquigarrow rise\,b
 \]
 
-\noindent A \emph{C-element} is a gate with two inputs, in this example $a$ and $b$ and one
+\noindent A \emph{C-element} is a gate with two inputs, in this example $a$ and $b$, and one
 output~$c$, which synchronises both rising and falling input transitions
 via AND-causality:
 \[
-\mathsf{cElement}(a, b, c)=a^{+}\!\rightsquigarrow\! c^{+}\ \diamond\
-b^{+}\!\rightsquigarrow\! c^{+}\ \diamond\ a^{-}\!\rightsquigarrow\! c^{-}\
-\diamond\ b^{-}\!\rightsquigarrow\! c^{-}
+\begin{array}{lcl}
+\mathsf{cElement}\,a\, b\, c =& rise\,a\!\rightsquigarrow\! rise\,c\ \diamond rise\,b\!\rightsquigarrow\! rise\,c\ \\
+&\diamond\ fall\,a\!\rightsquigarrow\! fall\,c\ \diamond\ fall\,b\!\rightsquigarrow\! fall\,c
+\end{array}
 \]
 
 An alternative way to express the same concept is to reuse the buffer concept:
 \[
-\mathsf{cElement}(a, b, c)=\mathsf{buffer}(a, c) \diamond \mathsf{buffer}(b, c)
+\mathsf{cElement}\,a\, b\, c=\mathsf{buffer}\,a\, c \diamond \mathsf{buffer}\,b\, c
 \]
 A C-element combines the constraints imposed on the output
-transitions by two `virtual' buffers. An expanded example of a C-element can be
-found in~\cite{2015_Beaumont_MEMOCODE}.
+transitions by two `virtual' buffers. Behaviour of other gates can be similarly defined in this way.
+An expanded example of a C-element and other examples can be found in~\cite{2015_Beaumont_MEMOCODE}.
 
-Behaviour of other gates can be similarly defined using concepts. We will dicuss
-this in Section~\ref{sec:examples}.
-
-\textbf{Protocol-level concepts:} In addition to gate-level concepts
+\subsubsection{Protocol-level concepts} In addition to gate-level concepts
 described above it is often important to specify \emph{protocols}
 of interaction between multiple gates, components or signals. 
 
@@ -258,9 +268,10 @@ and mutual exclusion mechanisms.
 Given two signals $a$ and $b$, a \emph{handshake} between them is
 the following composition of causality concepts:
 \[
-\mathsf{handshake}(a, b)=a^{+}\!\rightsquigarrow\! b^{+}\ \diamond\
-b^{+}\!\rightsquigarrow\! a^{-}\ \diamond\ a^{-}\!\rightsquigarrow\! b^{-}\
-\diamond\ b^{-}\ \rightsquigarrow\! a^{+}
+\begin{array}{lcl}
+\mathsf{handshake}\,a\, b=&rise\,a\!\rightsquigarrow\! rise\,b\ \diamond\ rise\,b\!\rightsquigarrow\! fall\,a \\
+&\diamond\ fall\,a\!\rightsquigarrow\! fall\,b \, \diamond\ fall\,b \rightsquigarrow\! rise\,a
+\end{array}
 \]
 Intuitively, we have a two-way asynchronous communication channel,
 where one party sends transitions $a^{+}$ and $a^{-}$ and the other
@@ -269,42 +280,15 @@ Note that the four causality concepts match those found
 in the buffer and inverter concepts, which leads to an alternative
 way to express a handshake between~$a$ and~$b$:
 \[
-\mathsf{handshake}(a, b)=\mathsf{buffer}(a, b) \diamond\mathsf{inverter}(b, a)
+\mathsf{handshake}\,a\, b=\mathsf{buffer}\,a\, b \diamond\mathsf{inverter}\,b\, a
 \]
 This conceptual understanding of a handshake as being composed
 from a buffer and an inverter is often used by circuit designers as
 a convenient way of reasoning.
 
-The last standard concept is \emph{mutual
-exclusion} between two signals~$a$ and~$b$:
-\[
-\mathsf{me}(a, b) = a^{-}\rightsquigarrow b^{+}\ \diamond\ b^{-}\rightsquigarrow
-a^{+}
-\]
-The concept states that, in terms of causality, rising transitions 
-$a^{+}$ and $b^{+}$ can only occur after
-the opposite falling signal transitions. Therefore, even if all other cause-transitions for
-either $a^{+}$ or $b^{+}$ have occurred, while the one signal is high, this blocks 
-the other from transitioning high. This guarantees that $a$ and
-$b$ are never set to $1$ at the same time, i.e. they are mutually
-exclusive.
-
-We can now specify a \emph{mutual exclusion
-element}~\cite{2008_kinniment_synchronisation}
-that receives asynchronous requests $r_{1}$ and $r_{2}$ to a shared
-resource and grants access to it by corresponding mutually exclusive
-signals $g_{1}$ and $g_{2}$:
-
-%\vspace{-3mm}
-{\small
-\[
-\mathsf{meElement}(r_{1}, r_{2}, g_{1}, g_{2})\!=\!\mathsf{buffer}(r_{1}, g_{1})
-\diamond \mathsf{buffer}(r_{2}, g_{2}) \diamond \mathsf{me}(g_{1}, g_{2})
-\]}
-
 %\vspace{-8mm}
 
-\section{Concepts for translation\label{sec:trans-concepts}}
+\subsection{Concepts for translation\label{sub:trans-concepts}}
 
 The concepts we have discussed so far are aimed at specifying the behaviour of signals in a circuit.
 When translating these to STGs however, these behaviours do not necessarily result in a correct
@@ -316,18 +300,14 @@ for specification, namely \emph{interface} and \emph{initial states}.
 
 %\vspace{-5mm}
 
-\subsection{Interface concepts \label{sub:interface}} 
+\subsubsection{Interface concepts\label{sub:interface}} 
 
 An important part of a specification is how these signals interact with the outside world, which could
 be another scenario or another circuit, for example. These signals can be inputs from the outside world,
 outputs or an internal signal, which is used only within this scenario. 
 
 To specify the type of a signal (\emph{input},
-\emph{output} or \emph{internal}) we introduce the \textsf{interface} concept:
-\[
-\mathsf{interface} : A \rightarrow \{\mathsf{Input}, \mathsf{Output},
-\mathsf{Internal}\}
-\]
+\emph{output} or \emph{internal}) we introduce the \textsf{interface} concept.
 Signal types are composed according to the following rules:
 \[
 \begin{array}{|l||l|l|l|}
@@ -362,34 +342,29 @@ concepts. For example, to specify
 that signals $a$ and $b$ are inputs, $c$ is an output, and $t$ is internal, it
 is possible to write:
 \[
-\mathsf{inputs}(\{a, b\}) \diamond \mathsf{outputs}(\{c\}) \diamond
-\mathsf{internals}(\{t\}).
+\mathsf{inputs}\,[a, b] \diamond \mathsf{outputs}\,[c] \diamond
+\mathsf{internals}\,[t].
 \]
 
 %\vspace{-5mm}
 
-\subsection{Initial state concepts \label{sub:initState}}
+\subsubsection{Initial state concepts\label{sub:initState}}
 
 Specifying the initial state is important, as it determines what the first transitions
 of a scenario will be. Without these, no transition can occur.
 
 Each signal must have it's initial state declared before translation can occur. 
 In order to specify the initial state of a handshake between signals~$a$
-and~$b$, we use the $\mathsf{initialise}$ concept:
-\[
-\mathsf{initialise}(\mathit{signal},\mathit{value})=\mathsf{after}(signal,
-value)
-\]
-
-\noindent The possible initial states are \emph{high} or \emph{low}, referred to as \emph{0} 
+and~$b$, we use the $\mathsf{initialise}$ concept.
+The possible initial states are \emph{high} or \emph{low}, referred to as \emph{0} 
 or \emph{1} respectively:
 
 \[
-\mathsf{initialise}(a,0) \diamond \mathsf{initialise}(x, 1)
+\mathsf{initialise}\,a\,0 \diamond \mathsf{initialise}\,x\, 1
 \]
 
 \noindent A signal can only be declared as initially high or low. If the initial state of a signal is 
-not defined, and error will occur, and the translation will not continue. Conversely, 
+not defined, an error will occur, and the translation will not continue. Conversely, 
 if the event a signal has it's initial state declared as both high and low,
 and is thus inconsistent, in a specification then the translation will also fail.
 
@@ -397,25 +372,25 @@ For the ease of use, and to speed up the process, initial states can also be dec
 in lists by on state:
 
 \[
-\mathsf{initialise0} [a, b, c] \diamond \mathsf{initialise1} [x, y]
+\mathsf{initialise0}\, [a, b, c] \diamond \mathsf{initialise1}\, [x, y]
 \]
 
 
 \noindent As an example, we can include this in the specification of a handshake, to 
 create a handshake with built-in initial state.
-$\mathsf{initialise}(a, 0)$ sets the state of the signal
+$\mathsf{initialise}\,a\, 0$ sets the state of the signal
 $a$ to $0$. We can compose an initial state concept with the handshake concept
-into a combined $\mathsf{handshake00}(a, b)$ concept as
+into a combined $\mathsf{handshake00}\,a\, b$ concept as
 \[
-\mathsf{handshake00} = \mathsf{handshake}(a, b) \diamond \mathsf{initialise}(a, 0) \diamond
-\mathsf{initialise}(b, 0)
+\mathsf{handshake00} = \mathsf{handshake}\,a\, b \diamond \mathsf{initialise}\,a\, 0 \diamond
+\mathsf{initialise}\,b\, 0
 \]
 The resulting concept corresponds to a handshake between signals~$a$
 and~$b$ that are both initially $0$.
 
 %\vspace{-3mm}
 
-\section{Concept examples \label{sec:examples}}
+\subsection{Built-in concepts \label{sub:built-in}}
 
 In our previous paper, \cite{2015_Beaumont_MEMOCODE}, we have 
 used a C-element as a small example of how we can specify a standard gate with concepts,
