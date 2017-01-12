@@ -28,8 +28,7 @@
 
 \twocolumn
 
-\title{Automated translation of asynchronous concepts \\
-to Signal Transition Graphs}
+\title{Concepts - A tool for behavioural \\ sepcification of asynchronous circuits}
 \author{Jonathan Beaumont\\
 \texttt{j.r.beaumont@ncl.ac.uk}\\
 \emph{School of Electrical and Electronic Engineering, Newcastle University,
@@ -185,11 +184,11 @@ timings, such as any $\mathit{cause}$ transition immediately forcing the
 list all possible $\mathit{cause}$ transitions which need to occur in order
  for an $\mathit{effect}$ transition.
 
-One can compose any concepts using the $\diamond$ (diamond) operator, and this applies
+One can compose any concepts using the $<>$ (diamond) operator, and this applies
 to concepts of any level, whether predefined or user-defined. For example, 
 two causality concepts can be composed.
 \[
-rise\,a\rightsquigarrow rise\,c\ \diamond\ rise\,b\rightsquigarrow rise\,c
+rise\,a\rightsquigarrow rise\,c\ <> \ rise\,b\rightsquigarrow rise\,c
 \]
 In words, $a^{+}$ \emph{and} $b^{+}$ must occur before $c^{+}$ can occur. 
 This corresponds to so-called AND-causality in the fact that several cause transitions \emph{must all}
@@ -229,14 +228,14 @@ the behaviour of gates in asynchronous circuits. For example, a \emph{buffer}
 is a gate with one input signal and one output signal,
 whose output transitions causally depend on the input ones:
 \[
-\mathsf{buffer}\,a\,b=rise\,a\rightsquigarrow rise\,b\ \diamond\
+\mathsf{buffer}\,a\,b=rise\,a\rightsquigarrow rise\,b\ <>\
 fall\,a\rightsquigarrow fall\,b
 \]
 
 \noindent An \emph{inverter} has a similar conceptual specification, but the
 output transition is inverted:
 \[
-\mathsf{inverter}\,a\,b=rise\,a\rightsquigarrow fall\,b\ \diamond\
+\mathsf{inverter}\,a\,b=rise\,a\rightsquigarrow fall\,b\ <>\
 fall\,a\rightsquigarrow rise\,b
 \]
 
@@ -245,14 +244,14 @@ output~$c$, which synchronises both rising and falling input transitions
 via AND-causality:
 \[
 \begin{array}{lcl}
-\mathsf{cElement}\,a\, b\, c =& rise\,a\!\rightsquigarrow\! rise\,c\ \diamond rise\,b\!\rightsquigarrow\! rise\,c\ \\
-&\diamond\ fall\,a\!\rightsquigarrow\! fall\,c\ \diamond\ fall\,b\!\rightsquigarrow\! fall\,c
+\mathsf{cElement}\,a\, b\, c=&\hspace{-10mm}rise\,a\!\rightsquigarrow\! rise\,c\ <> rise\,b\!\rightsquigarrow\! rise\,c\ \\
+&\hspace{-5mm}<>\ fall\,a\!\rightsquigarrow\! fall\,c\ \,<>\ fall\,b\!\rightsquigarrow\! fall\,c
 \end{array}
 \]
 
 An alternative way to express the same concept is to reuse the buffer concept:
 \[
-\mathsf{cElement}\,a\, b\, c=\mathsf{buffer}\,a\, c \diamond \mathsf{buffer}\,b\, c
+\mathsf{cElement}\,a\, b\, c=\mathsf{buffer}\,a\, c <> \mathsf{buffer}\,b\, c
 \]
 A C-element combines the constraints imposed on the output
 transitions by two `virtual' buffers. Behaviour of other gates can be similarly defined in this way.
@@ -269,8 +268,8 @@ Given two signals $a$ and $b$, a \emph{handshake} between them is
 the following composition of causality concepts:
 \[
 \begin{array}{lcl}
-\mathsf{handshake}\,a\, b=&rise\,a\!\rightsquigarrow\! rise\,b\ \diamond\ rise\,b\!\rightsquigarrow\! fall\,a \\
-&\diamond\ fall\,a\!\rightsquigarrow\! fall\,b \, \diamond\ fall\,b \rightsquigarrow\! rise\,a
+\mathsf{handshake}\,a\, b=&\hspace{-8mm}rise\,a\!\rightsquigarrow\! rise\,b\ <>\ rise\,b\!\rightsquigarrow\! fall\,a \\
+&\hspace{-5mm}<>\ fall\,a\!\rightsquigarrow\! fall\,b \, <>\ fall\,b \rightsquigarrow\! rise\,a
 \end{array}
 \]
 Intuitively, we have a two-way asynchronous communication channel,
@@ -280,7 +279,7 @@ Note that the four causality concepts match those found
 in the buffer and inverter concepts, which leads to an alternative
 way to express a handshake between~$a$ and~$b$:
 \[
-\mathsf{handshake}\,a\, b=\mathsf{buffer}\,a\, b \diamond\mathsf{inverter}\,b\, a
+\mathsf{handshake}\,a\, b=\mathsf{buffer}\,a\, b <>\mathsf{inverter}\,b\, a
 \]
 This conceptual understanding of a handshake as being composed
 from a buffer and an inverter is often used by circuit designers as
@@ -312,7 +311,7 @@ Signal types are composed according to the following rules:
 \[
 \begin{array}{|l||l|l|l|}
 \hline
-\multicolumn{1}{|c||}{\diamond} & \mathsf{Input} & \mathsf{Output} &
+\multicolumn{1}{|c||}{<>} & \mathsf{Input} & \mathsf{Output} &
 \mathsf{Internal} \\ \hline \hline
 \mathsf{Input} & \mathsf{Input} & \mathsf{Output} & \mathsf{Internal} \\ \hline
 \mathsf{Output} & \mathsf{Output} & \mathsf{Output} & \mathsf{Internal} \\
@@ -342,7 +341,7 @@ concepts. For example, to specify
 that signals $a$ and $b$ are inputs, $c$ is an output, and $t$ is internal, it
 is possible to write:
 \[
-\mathsf{inputs}\,[a, b] \diamond \mathsf{outputs}\,[c] \diamond
+\mathsf{inputs}\,[a, b] <> \mathsf{outputs}\,[c] <>
 \mathsf{internals}\,[t].
 \]
 
@@ -360,7 +359,7 @@ The possible initial states are \emph{high} or \emph{low}, referred to as \emph{
 or \emph{1} respectively:
 
 \[
-\mathsf{initialise}\,a\,0 \diamond \mathsf{initialise}\,x\, 1
+\mathsf{initialise}\,a\,0 <> \mathsf{initialise}\,x\, 1
 \]
 
 \noindent A signal can only be declared as initially high or low. If the initial state of a signal is 
@@ -372,7 +371,7 @@ For the ease of use, and to speed up the process, initial states can also be dec
 in lists by on state:
 
 \[
-\mathsf{initialise0}\, [a, b, c] \diamond \mathsf{initialise1}\, [x, y]
+\mathsf{initialise0}\, [a, b, c] <> \mathsf{initialise1}\, [x, y]
 \]
 
 
@@ -381,9 +380,12 @@ create a handshake with built-in initial state.
 $\mathsf{initialise}\,a\, 0$ sets the state of the signal
 $a$ to $0$. We can compose an initial state concept with the handshake concept
 into a combined $\mathsf{handshake00}\,a\, b$ concept as
+
 \[
-\mathsf{handshake00} = \mathsf{handshake}\,a\, b \diamond \mathsf{initialise}\,a\, 0 \diamond
-\mathsf{initialise}\,b\, 0
+\begin{array}{lcl}
+\mathsf{handshake00}\, a\, b =&\hspace{-2mm}\mathsf{handshake}\,a\, b <> \mathsf{initialise}\,a\, 0 \\
+&\hspace{-6mm}<> \mathsf{initialise}\,b\, 0
+\end{array}
 \]
 The resulting concept corresponds to a handshake between signals~$a$
 and~$b$ that are both initially $0$.
@@ -392,388 +394,73 @@ and~$b$ that are both initially $0$.
 
 \subsection{Built-in concepts \label{sub:built-in}}
 
-In our previous paper, \cite{2015_Beaumont_MEMOCODE}, we have 
-used a C-element as a small example of how we can specify a standard gate with concepts,
-and how there are several ways of describing these with concepts. 
+In our previous paper, \cite{2015_Beaumont_MEMOCODE}, we have displayed several examples of
+different concepts and how they can be described in terms of concepts in several ways,
+either from base level signal-level concepts, or through reuse of pre-defined 
+gate- and protocol-level concepts.
 
-In this section, we will discuss the concept specification of some different gates,
-a Set-Reset latch which uses AND-causality, and an OR-gate and an AND-gate, both of 
-which use both AND- and OR-causality, and this proves to be more difficult to translate,
-which we will use an example in Section~\label{translation-algorithm}.
-
-%\vspace{-3mm}
-
-\subsection{Set-reset latch \label{sub:srlatch}}
-
-A set-reset latch (S-R latch) is a particularly simple logic gate, used to store either a zero or one,
-depending on the inputs. 
-
-%\vspace{-5mm}
-
-\begin{figure}[h]
-\begin{centering}
-\includegraphics[scale=0.51]{Images/sr-latch-circuit}
-\par\end{centering}
-%\vspace{-1mm}
-\protect\caption{\label{fig:sr-latch-circuit} The symbol of an SR-latch}
-%\vspace{-3mm}
-\end{figure}
-
-\noindent There are two input signals for this gate, $s$ and $r$, and a single output, $q$: 
+In this section, we will detail further concepts included with the tool along with those 
+already described in Sections~\ref{sub:concept-notation} and~\ref{sub:trans-concepts}. 
+All of these are often used in the specification of asynchronous circuits and 
+therefore it is useful to include them, to avoid a user having to define these for 
+each specification. For each of these we will explain their use for asynchronous 
+circuits, and give the standard usage of the concept. 
 
 \begin{itemize}
-  \item $s$: \emph{set} - When this signal is high, it sets the output, meaning it sets it high.
-  \item $r$: \emph{reset} - When this signal is high, it resets the output, meaning it sets it low.
-  \item $q$: \emph{latched bit} - This stores the desired value, set depending on the values of the input signals.
+  
+  \item $\mathsf{handshake11}\,a \,b$ is a protocol-level concept, similar to 
+  $\mathsf{handshake00}\,a \,b$ as discussed in Section~\ref{sub:initState}. 
+  The behaviours of the signals are the same as in the standard 
+  \texttt{handshake} concepts, but this includes initial states for the signals. 
+   For this concept, both signals will be initialised to 1, or high.
+  
+  \item []
+  
+  \item $\mathsf{me}\,a \,b$ is a protocol-level concept. This concept defines 
+  \emph{Mutual Exclusion} between two signals. This means that when one 
+  of these signals is high, the other cannot transition high.
+
+  \item []
+  
+  \item $\mathsf{meElement}\,r1\,r2\,g1\,g2$ is a gate-level concept to 
+  apply the mutual exclusion protocol. In this case, there are four signals. 
+  Two are intputs ($r1$ and $r2$), the other two are 
+  outputs~($g1$ and $g2$). $r1$ transitioning high will cause $g1$ to go
+  transition high, and this is the same for $r2$ and $g2$, however,
+  $g1$ and $g2$ are mutually exclusive. The aim of this concept is to 
+  ensure that the request signals, $r1$ and $r2$, cause their respective
+  grant signals, $g1$ and $g2$, to transition high but never at the same 
+  time. 
+
+  \item []
+  
+  \item $\mathsf{andGate}\,a\,b\,c$ is a gate-level concept, using 
+  OR-causality to implement a standard AND gate. Signals $a$ and 
+  $b$ are inputs to the gate, and $c$ is the output. \emph{Both} 
+  $rise a$ \emph{and} $rise b$ must occur for $rise c$ to occur. 
+  Following this, \emph{either} $fall a$ \emph{or} $fall b$ must 
+  occur for $fall c$ to occur.
+
+  \item []  
+
+  \item $\mathsf{orGate}\,a\,b\,c$ is a gate-level concept, also using 
+  OR-causality. Signals $a$ and $b$ are inputs to the gate, and $c$ is the 
+  output. \emph{Either} $rise a$ \emph{or} $rise b$ must occur for $rise c$ to 
+  occur. Following this, \emph{both} $fall a$ and $fall b$ must occur for 
+  $fall c$ to occur. 
+  
 \end{itemize}
 
-\noindent From this information, we can start to specify the gate with concepts.
+\noindent All of the concepts described in this section are some of the most
+common behaviours found in asynchronous circuits, and these can be used
+to specify many different asynchronous circuits. 
 
-First of all, we know the types of these signals, so let us sepcify the interface concept.
+These can also be used in order to define new protocols and gates for a designer
+to use in their own specifications, making the design process easier in future 
+systems. 
 
-%\vspace{-2mm}
+\section{Usage of the tool\label{sec:tool-use}}
 
-\[
-\begin{array}{lcl}
-\mathsf{interface}&\hspace{-2mm}=&\hspace{-2mm}\mathsf{inputs}[s, r]~\diamond~\mathsf{outputs}[q]
-\end{array}
-\]
-
-\noindent Now we move onto the interaction between signals. First of all, to set the output high.
-When $s$ is high, this causes $q$ to go high. However, only after $s$ goes low can $q$ go low.
-In concepts this is: 
-
-%\vspace{-3mm}
-
-\[
-\begin{array}{lcl}
-\mathsf{set}&\hspace{-2mm}=&\hspace{-2mm}s^{+} \rightsquigarrow q^{+} \diamond\, s^{-} \rightsquigarrow q^{-}
-\end{array}
-\]
-
-\noindent The interaction between the reset signal and the output will be opposite to this; $r$ going high causes $q$ 
-to go low. Only after $r$ goes low can $q$ go low. The concept for this is:
-
-%\vspace{-2mm}
-\[
-\begin{array}{lcl}
-\mathsf{reset}&\hspace{-2mm}=&\hspace{-2mm}r^{+} \rightsquigarrow q^{-} \diamond\, r^{-} \rightsquigarrow q^{+}
-\end{array}
-\]
-
-\noindent The next concept to specify is the initial state. The description given mentions nothing
-to help with the initial state, but let's assume we would like the output to initially be 0. 
-To then allow the S-R latch to react only to the inputs, we can set the initial states of the 
-inputs to 0 too. This will mean that $s$ is not trying to take the output high, and $q$ is not
-blocking the output from going high. 
-
-\[
-\begin{array}{lcl}
-\mathsf{initialState}&\hspace{-2mm}=&\hspace{-2mm}\mathsf{initialise0} [s, r, q]
-\end{array}
-\]
-
-\noindent Finally, we can compose all of these concepts, in order to translate them to an STG. This concept will be:
-
-%\vspace{-3mm}
-
-\[
-\begin{array}{lcl}
-\mathsf{SRLatch}&\hspace{-2mm}=&\hspace{-2mm}\mathsf{set} \diamond\, \mathsf{reset} \diamond\, \mathsf{interface} 
-\diamond\, \mathsf{initialState}.
-\end{array}
-\]
-
-\noindent It is possible reuse some previously defined concepts for the specification of an SRLatch,
-which may be preferred by users, as these describe their behaviour in terms of gates.  
-
-The $set$ concept features the same signal-level concepts as a buffer, and thus can be redefined
-as a buffer of $s$ and $q$. Similarly, the $reset$ concept can be replaced by an inverter between
-$r$ and $q$. Two gates cannot be connected in this way in an actual circuit, however
-it defines their behaviours in a different way, which may be understood better in some cases.
-
-Since this now reduces the number of concepts, and thus the length of the specification, we
-can define an SR-latch as follows:
-
-%\vspace{-3mm}
-
- \[
-\begin{array}{lcl}
-\mathsf{SRLatch}&\hspace{-2mm}=\mathsf{buffer}(s, q) \diamond\, \mathsf{inverter}(r, q) \diamond\, \mathsf{inputs}[s, r]\\ 
-&\diamond\, \mathsf{outputs}[q] \diamond\, \mathsf{initialise0} [s, r, q]
-\end{array}
-\]
-
-\noindent It's isn't necessary to split a scenario specification up into several concepts. 
-Depending on the size of the specification, it may be simpler and quicker to 
-produce a single concept like this.
-
-Either of these concept specifications can be translated to produce an STG. 
-The translated STG can be found in Figure~\ref{fig:sr-latch-stg}.
-
-%\vspace{-3mm}
-
-\begin{figure}[h]
-\begin{centering}
-\includegraphics[scale=0.25]{Images/sr-latch-stg}
-\par\end{centering}
-%\vspace{-1mm}
-\protect\caption{\label{fig:sr-latch-stg} An SR-latch STG}
-%\vspace{-5mm}
-\end{figure}
-
-%\vspace{-5mm}
-\subsection{OR-gate \label{sub:or-gate}}
-
-The S-R latch features only AND-causality, and as we displayed 
-in~\cite{2015_Beaumont_MEMOCODE}, with the examples of a C-element 
-and a Buck controller, which only feature AND-causality, these can be translated
-to an STG. 
-
-OR-causality is quite different however, and causes some significant differences 
-in a resulting STG, as we will see with the example of an OR-gate. 
-
-\begin{figure}[h]
-\begin{centering}
-\includegraphics[scale=0.55]{Images/or-gate-circuit}
-\par\end{centering}
-
-\protect\caption{\label{fig:or-gate-circuit} The circuit diagram of an OR-gate}
-%\vspace{-3mm}
-\end{figure}
-
-Let's start by specifying the OR-gate. There are three signals, which for this 
-example we will call $a$ and $b$ which are inputs, and $c$ which is the only output:
-
-\begin{itemize}
-  \item $a$ - When either this signal or $b$ is high, the output should be set high.
-  \item $b$ - When either this signal or $a$ is high, the output should be set high.
-  \item $c$ - This output signal is high when at least one of the inputs is high, but low when
-		\emph{both} input signals are low.
-\end{itemize}
-
-As with the S-R latch, we can start by specifying the interface: 
-
-%\vspace{-4mm}
-
-\[
-\begin{array}{lcl}
-\mathsf{interface}&\hspace{-2mm}=&\hspace{-2mm}\mathsf{inputs}[a, b]~\diamond~\mathsf{outputs}[c]
-\end{array}
-\]
-
-\noindent Again, there is no information on the initial state. By the description, we can
-assume that setting all signals to be initially low will mean that the output
-will not be able to go high. Thus we can define the initial state as:
-
-%\vspace{-2mm}
-
-\[
-\begin{array}{lcl}
-\mathsf{initialState}&\hspace{-2mm}=&\hspace{-2mm}\mathsf{initialise0} [a, b, c]
-\end{array}
-\]
-
-\noindent For the interaction between signals, let's start by specifying the concept which 
-describes what causes the output to go low:
-
-%\vspace{-4mm}
-\[
-\begin{array}{lcl}
-\mathsf{outputFall}&\hspace{-2mm}=&\hspace{-2mm}a^{-} \rightsquigarrow c^{-} \diamond\, b^{-} \rightsquigarrow c^{-}
-\end{array}
-\]
-
-\noindent In words, this means that both $a^{-}$ and $b^{-}$ must have occured before $c^{-}$ can occur. 
-This is AND-causality as we have used in previous examples. 
-
-For a slightly more compact specification, we can rewrite this concept as:
-%\vspace{-3mm}
-\[
-\begin{array}{lcl}
-\mathsf{outputFall}&\hspace{-2mm}=&\hspace{-2mm}[a^{-}, b^{-}] \sim\hspace{-1.5mm}\&\hspace{-1.5mm}\sim\hspace{-1.5mm}> c^{-} 
-\end{array}
-\]
-
-\noindent The concept specifying the output going high is slightly different, because only one of
-$a$ and $b$ must be high in order for $c$ to go high. This is OR-causality and specifying 
-this in concepts is not too difficult: 
-                                                                                                                                                                                                                                                                                                                                                        
-%\vspace{-3mm}
-\[
-\begin{array}{lcl}
-\mathsf{outputRise}&\hspace{-2mm}=&\hspace{-2mm}[a^{+}, b^{+}] \sim\hspace{-1.5mm}|\hspace{-1.5mm}\sim\hspace{-1.5mm}> c^{+} 
-\end{array}
-\]
-
-\noindent This lists the possible cause transitions of $c^{+}$, namely $a^{+}$ and $b^{+}$. 
-
-This completes the specification, so let's compose these conepts for the full OR-gate
-specification:
-
-%\vspace{-3mm}
-\[
-\begin{array}{lcl}
-\mathsf{orGate}&\hspace{-2mm}=&\hspace{-2mm}\mathsf{outputFall} \diamond\, \mathsf{outputRise} \diamond\, \mathsf{interface} 
-\diamond\, \mathsf{initialState}
-\end{array}
-\]
-
-\noindent With the OR-gate it is not possible to use pre-defined concepts, but we do not need to
-specify the individual concepts for a similarly sized specification:
-
-%\vspace{-3mm}
-\[
-\begin{array}{lcl}
-\mathsf{orGate}\,a \,b \,c&\hspace{-2mm}=[a^{-}, b^{-}] \sim\hspace{-1.5mm}\&\hspace{-1.5mm}\sim\hspace{-1.5mm}> c^{-} \diamond\, [a^{+}, b^{+}] \sim\hspace{-1.5mm}|\hspace{-1.5mm}\sim\hspace{-1.5mm}> c^{+} \\
-&\diamond\, \mathsf{inputs}[a, b] \diamond\, \mathsf{outputs}[c] \diamond\, \mathsf{initialise0} [a, b, c]
-\end{array}
-\]
-
-\noindent The difficulty with OR-causality comes with translation. The translated STG for an OR-gate
-can be found in Figure~\ref{fig:or-gate-stg}, and features one major difference.
-%\vspace{-3mm}
-\begin{figure}[h]
-\begin{centering}
-\includegraphics[scale=0.25]{Images/or-gate-stg}
-\par\end{centering}
-%\vspace{-1mm}
-\protect\caption{\label{fig:or-gate-stg} An OR-gate STG}
-%\vspace{-3mm}
-\end{figure}
-
-This STG features 2 different $c^{+}$ transitions, due to the OR-causality. 
-This is for each possible cause, and it is visible that one is connected via a 
-read-arc to the $a1$ place and the other is connected via a read-arc to 
-the $b1$ place. This allows $c^{+}$ to transition if either $a^{+}$, 
-$b^{+}$ or both of these has occured.
-
-Note that there is still only one $c^{-}$ transition, as this requires both
-$a^{-}$ and $b{-}$ to have transitioned.
-
-%\vspace{-3mm}
-
-\subsection{AND-gate}
-
-An AND-gate, unlike what the name suggests also features OR-causality. 
-For the output to go high, the input signals are in an AND-causality relationship
-with the output, however, only one of the inputs needs to transition low for the 
-output to go low. 
-
-%\vspace{-3mm}
-
-\begin{figure}[h]
-\begin{centering}
-\includegraphics[scale=0.55]{Images/and-gate-circuit}
-\par\end{centering}
-
-\protect\caption{\label{fig:or-gate-circuit} The circuit diagram of an AND-gate}
-%\vspace{-3mm}
-\end{figure}
-
-This example also features 3 signals, $a$ and $b$ which are inputs, and $c$
-which is an output:
-
-\begin{itemize}
-  \item $a$ - When this signal and $b$ are high, the output should be set high.
-  \item $b$ - When this signal and $a$ are high, the output should be set high.
-  \item $c$ - This output signal is high when all of the inputs are high, but low when
-		\emph{at least} one of the input signals are low.
-\end{itemize}
-
-\noindent Again, we can start with the interface: 
-
-%\vspace{-1mm}
-\[
-\begin{array}{lcl}
-\mathsf{interface}&\hspace{-2mm}=&\hspace{-2mm}\mathsf{inputs}[a, b]~\diamond~\mathsf{outputs}[c]
-\end{array}
-\]
-
-\noindent With the initial state, we can again assume that setting all signals low initially will mean 
-that no signals are causing any other signal transitions:
-
-%\vspace{-2mm}
-\[
-\begin{array}{lcl}
-\mathsf{initialState}&\hspace{-2mm}=&\hspace{-2mm}\mathsf{initialise0} [a, b, c]
-\end{array}
-\]
-
-\noindent Now for signal interactions. For the output to go high, both input signals must
-transition high. This concept is: 
-
-%\vspace{-1mm}
-\[
-\begin{array}{lcl}
-\mathsf{outputRise}&\hspace{-2mm}=&\hspace{-2mm}a^{+} \rightsquigarrow c^{+} \diamond\, b^{+} \rightsquigarrow c^{+}
-\end{array}
-\]
-
-\noindent This concept can also be written as:
-
-\[
-\begin{array}{lcl}
-\mathsf{outputRise}&\hspace{-2mm}=&\hspace{-2mm}[a^{+}, b^{+}] \sim\hspace{-1.5mm}\&\hspace{-1.5mm}\sim\hspace{-1.5mm}> c^{+} 
-\end{array}
-\]
-
-\noindent OR-causality is necessary for an AND-gate when specifying the output falling. Either $a^{-}$,
-$b^{-}$ or both must occur before $c^{-}$ can occur. In concepts, we list the possible
-causes for the effect:
-
-%\vspace{-3mm}
-\[
-\begin{array}{lcl}
-\mathsf{outputFall}&\hspace{-2mm}=&\hspace{-2mm}[a^{-}, b^{-}] \sim\hspace{-1.5mm}|\hspace{-1.5mm}\sim\hspace{-1.5mm}> c^{-} 
-\end{array}
-\]
-
-\noindent We can now compose these for an AND-gate specification. As with the previous examples
-this can be in two forms.
-
-%\vspace{-3mm}
-\[
-\begin{array}{lcl}
-\mathsf{andGate}&\hspace{-2mm}=&\hspace{-2mm}\mathsf{outputRise} \diamond\, \mathsf{outputFall} \diamond\, \mathsf{interface} 
-\diamond\, \mathsf{initialState}
-\end{array}
-\]
-
-\noindent A compact version can be formed in this way:
-
-%\vspace{-2mm}
- \[
-\begin{array}{lcl}
-\mathsf{andGate}&\hspace{-2mm}=[a^{+}, b^{+}] \sim\hspace{-1.5mm}\&\hspace{-1.5mm}\sim\hspace{-1.5mm}> c^{-} \diamond\, [a^{-}, b^{-}] \sim\hspace{-1.5mm}|\hspace{-1.5mm}\sim\hspace{-1.5mm}> c^{-} \\
-&\diamond\, \mathsf{inputs}[a, b] \diamond\, \mathsf{outputs}[c] \diamond\, \mathsf{initialise0} [a, b, c]
-\end{array}
-\]
-\\
-\noindent This can now be translated, and the resulting STG can be viewed in Figure~\ref{fig:and-gate-stg}
-
-%\vspace{-3mm}
-
-\begin{figure}[h]
-\begin{centering}
-\includegraphics[scale=0.25]{Images/and-gate-stg}
-\par\end{centering}
-%\vspace{-1mm}
-\protect\caption{\label{fig:and-gate-stg} An AND-gate STG}
-%\vspace{-2mm}
-\end{figure}
-
-This STG is similar to the OR-gate STG~(Figure~\ref{fig:or-gate-stg}), however
-in this image, there are two $c^{-}$ transitions, one of which connects to $a0$
-via a read-arc, the other of which connects to $b0$. This way, either $a^{+}$ 
-, $b^{+}$, or both of these will allow $c^{+}$ to occur. However, both $a$ and
-$b$ transitioning high is necessary for $c$ to transition high. 
-
-We have shown the difference that OR-casuality can make to an STG in this
-section, but not how this affects the translation. In Section~\ref{sec:algorithm} we 
-will discuss the implemented translation algorithm. 
-
-%\vspace{-3mm}
 \section{Concepts to STG translation algorithm\label{sec:algorithm}}
 
 Concepts are a useful way of specifying asynchronous circuits, but
@@ -811,7 +498,7 @@ the interaction of the control signal is:
 %\vspace{-4mm}
 \[
 \begin{array}{lcl}
-\mathsf{control}&\hspace{-2mm}=&\hspace{-2mm}x^{+} \rightsquigarrow c^{+} \diamond x^{+} \rightsquigarrow c^{-} 
+\mathsf{control}&\hspace{-2mm}=&\hspace{-2mm}x^{+} \rightsquigarrow c^{+} <> x^{+} \rightsquigarrow c^{-} 
 \end{array}
 \]
 
@@ -822,9 +509,9 @@ scenario for this translation:
 %\vspace{-3mm}
 \[
 \begin{array}{lcl}
-\hspace{-2mm}\mathsf{orGateCtrl}\,  a \, b \, c \, x &\hspace{-2mm}=&\hspace{-2mm}\mathsf{orGate}\, a\, b\, c \diamond\, \mathsf{control}
-\diamond\, \mathsf{inputs}\, [a,\, b,\, x] \\
-&& \diamond \, \mathsf{outputs} \,  [c] \diamond\, \mathsf{initialise0}\, [a,\, b,\, c,\, x]
+\hspace{-2mm}\mathsf{orGateCtrl}\,  a \, b \, c \, x &\hspace{-2mm}=&\hspace{-2mm}\mathsf{orGate}\, a\, b\, c <>\, \mathsf{control}
+<>\, \mathsf{inputs}\, [a,\, b,\, x] \\
+&& <> \, \mathsf{outputs} \,  [c] <>\, \mathsf{initialise0}\, [a,\, b,\, c,\, x]
 \end{array}
 \]
 
@@ -863,10 +550,10 @@ For this example, the specification is broken down into these signal-level conce
 \[
 \begin{array}{lcl}
 \hspace{-2mm}\mathsf{orGateCtrl}\,a,\,b,\,c\,x&\hspace{-2mm}=&\hspace{-2mm}[a^{+}, b^{+}]\sim\hspace{-1.5mm}|\hspace{-1.5mm}\sim\hspace{-1.5mm}>c^{+} 
-\diamond a^{-}\rightsquigarrow c^{-} \diamond b^{-}\rightsquigarrow c^{-}\\
-~&\hspace{-2mm}\diamond&\hspace{-2mm}x^{+}\rightsquigarrow c^{+} \diamond
-x^{+}\rightsquigarrow c^{-} \diamond \mathsf{inputs} \, [a,\,b,\,x] \\
-~&\hspace{-2mm}\diamond&\hspace{-2mm}\mathsf{outputs}\,[c]\diamond\mathsf{initialise0}\,[a,\,b,\,c,\,x]
+<> a^{-}\rightsquigarrow c^{-} <> b^{-}\rightsquigarrow c^{-}\\
+~&\hspace{-2mm}<>&\hspace{-2mm}x^{+}\rightsquigarrow c^{+} <>
+x^{+}\rightsquigarrow c^{-} <> \mathsf{inputs} \, [a,\,b,\,x] \\
+~&\hspace{-2mm}<>&\hspace{-2mm}\mathsf{outputs}\,[c]<>\mathsf{initialise0}\,[a,\,b,\,c,\,x]
 \end{array}
 \]
 
