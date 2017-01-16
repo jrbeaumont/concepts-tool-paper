@@ -27,7 +27,8 @@
 
 \twocolumn
 
-\title{Concepts - A tool for behavioural \\ sepcification of asynchronous circuits}
+\title{Concepts - A tool for behavioural 
+\\ sepcification of asynchronous circuits}
 \author{Jonathan Beaumont\\
 \texttt{j.r.beaumont@ncl.ac.uk}\\
 \emph{School of Electrical and Electronic Engineering, Newcastle University,
@@ -54,11 +55,11 @@ for asynchronous circuits, which is based on behavioural
 requirements, that can be shared, reused and extended by users. 
 In this paper we will discuss our open-source Haskell based tool which
 allows the specification of asynchronous circuits using concepts, and features
-the ability to automatically translate these to Signal Transition Graphs for further processing
-by conventional asynchronous and synchronous EDA tools, such as \noun{Petrify}
-and \noun{Mpsat}. We will discuss the translation algorithm, and the design flow using 
-both the stand-alone too and the design flow using open-source toolsuite \noun{Workcraft}
-in which the tool is integrated.
+the ability to automatically translate these to Signal Transition Graphs for 
+further processing by conventional asynchronous and synchronous EDA tools, such
+as \noun{Petrify} and \noun{Mpsat}. We will discuss the translation algorithm, 
+and the design flow using both the stand-alone too and the design flow using 
+open-source toolsuite \noun{Workcraft} in which the tool is integrated.
 \end{abstract}
 
 \sloppy
@@ -69,51 +70,59 @@ in which the tool is integrated.
 
 \vspace{-3mm}
 
-\emph{Concepts} have been presented in order to provide a more compact, adaptive and intuitive method of
-designing asynchronous circuits, using a fully compositional description method. 
-This was born out of the use of algebra for designing systems,
-such as the model Conditional Partial Order Graphs~\cite{CPOG1}\cite{CPOG2}\cite{2014_mokhov_pg} and
-the algebra of switching networks~\cite{mokhov2015algebra}. Composition is an important part of concepts
- and the use of composition in some algebraic representations, such as with DI algebra~\cite{270632} 
- and Conditional Signal Graphs~\cite{6243877} helped to inspire this. 
+\emph{Concepts} have been presented in order to provide a more compact, 
+adaptive and intuitive method of designing asynchronous circuits, using a fully
+compositional description method. This was born out of the use of algebra for 
+designing systems, such as the model Conditional Partial Order
+Graphs~\cite{CPOG1}\cite{CPOG2}\cite{2014_mokhov_pg} and
+the algebra of switching networks~\cite{mokhov2015algebra}. Composition is an 
+important part of concepts and the use of composition in some algebraic 
+representations, such as with DI algebra~\cite{270632} and Conditional Signal 
+Graphs~\cite{6243877} helped to inspire this. 
 
-As discussed in~\cite{2015_Beaumont_MEMOCODE}, concepts are a useful language for specifying
-the behaviours of asynchronous circuits, in the preferred form of the user. This can be as low-level 
-signal-level concepts, or higher-level gate- or protocol-level concepts. It also allows the definition of 
-their own concepts, which can be reused within the same or any other specification that they wish
-to increase the speed of designing a system, and future systems. 
+As discussed in~\cite{2015_Beaumont_MEMOCODE}, concepts are a useful language 
+for specifying the behaviours of asynchronous circuits, in the preferred form 
+of the user. This can be as low-level signal-level concepts, or higher-level 
+gate- or protocol-level concepts. It also allows the definition of their own 
+concepts, which can be reused within the same or any other specification that 
+they wish to increase the speed of designing a system, and future systems. 
 
-With concepts, we aim to solve the problems that can arise from the more commonly used
-monolithic approach, where a user must design each system in the form of an STG from a blank page. 
-The scalability of this is poor: as the system grows in complexity its monolithic specification becomes 
-challenging to comprehend and debug. The problem becomes particularly severe when designing 
-multi-mode systems, such as power regulators, where capturing all aspects of system behaviour in a
-consistent specification is a major design challenge~\cite{2014_sokolov_ftfc}\cite{sokolov2015design}. 
-Moreover, the STG models of components and operating modes are difficult to reuse when designing 
-other specifications, and thus each new design must be built from the ground up. This is particularly 
-undesirable for industry, as this increases the design time of each design greatly. 
+With concepts, we aim to solve the problems that can arise from the more 
+commonly used monolithic approach, where a user must design each system in the 
+form of an STG from a blank page. The scalability of this is poor: as the 
+system grows in complexity its monolithic specification becomes challenging to 
+comprehend and debug. The problem becomes particularly severe when designing 
+multi-mode systems, such as power regulators, where capturing all aspects of 
+system behaviour in a consistent specification is a major design 
+challenge~\cite{2014_sokolov_ftfc}\cite{sokolov2015design}. 
+Moreover, the STG models of components and operating modes are difficult to 
+reuse when designing other specifications, and thus each new design must be 
+built from the ground up. This is particularly undesirable for industry, as 
+this increases the design time of each design greatly. 
 
-STGs~\cite{Chu_1987_phd}\cite{Rosenblum_1985_tpn}
-are commonly used for the specification,
-verification and synthesis of asynchronous control circuits as they are
-supported by multiple EDA tools, such as \noun{Petrify}~\cite{Cortadella},
-\noun{Mpsat}~\cite{khomenko2004detecting}, \noun{Versify}~\cite{i1997formal},
-\noun{Workcraft}~\cite{2007_poliakov_workcraft}\cite{Workcraft_website}, and
-others.
-These tools take an STG specification and can
-formally verify its correctness, as well as synthesise an asynchronous
-circuit implementation that is \emph{speed-independent}, i.e. guaranteed
-to work correctly regardless of component delays~\cite{Muller_1959_ts}.
+STGs~\cite{Chu_1987_phd}\cite{Rosenblum_1985_tpn} are commonly used for the 
+specification, verification and synthesis of asynchronous control circuits as 
+they are supported by multiple EDA tools, such as 
+\noun{Petrify}~\cite{Cortadella}, \noun{Mpsat}~\cite{khomenko2004detecting}, 
+\noun{Versify}~\cite{i1997formal}, 
+\noun{Workcraft}~\cite{2007_poliakov_workcraft}\cite{Workcraft_website}, 
+and others.
 
-Concepts are not supported by these tools, and rather than reinvent the wheel by authoring tools
-to verify and synthesize concepts directly, we can \emph{translate} concepts to STGs, for use with 
-these existing tools.
+These tools take an STG specification and can formally verify its correctness, 
+as well as synthesise an asynchronous circuit implementation that is \
+emph{speed-independent}, i.e. guaranteed to work correctly regardless of 
+component delays~\cite{Muller_1959_ts}.
 
-In this paper, we will discuss the implementation of the domain specific language and translation tool
-for concepts~\cite{2016_concepts_github} embedded in Haskell. The tool is also integrated into
+Concepts are not supported by these tools, and rather than reinvent the wheel by
+authoring tools to verify and synthesize concepts directly, we can 
+\emph{translate} concepts to STGs, for use with these existing tools.
+
+In this paper, we will discuss the implementation of the domain specific 
+language and translation tool for concepts~\cite{2016_concepts_github} embedded 
+in Haskell. The tool is also integrated into 
 \noun{Workcraft}~\cite{Workcraft_website}, an open-source EDA tool which also
-features some verification and synthesis tools for STGs, and we will discuss the use of the tool 
-from within \noun{Workcraft}.
+features some verification and synthesis tools for STGs, and we will discuss 
+the use of the tool from within \noun{Workcraft}.
 
 The paper is laid out as follows:
 \vspace{-6mm}
@@ -137,45 +146,48 @@ is discussed in~\cite{2015_Beaumont_MEMOCODE}.
 
 \subsection{Concept notation \label{sub:concept-notation}}
 
-Concepts can be composed of other concepts, and this applies to the behaviours of
-signals, as well as the specifying of the initial states and the signal types. This allows
-there to be different levels of concepts, each level of which will feature a composition
-of concepts from a lower level. 
+Concepts can be composed of other concepts, and this applies to the behaviours 
+of signals, as well as the specifying of the initial states and the signal 
+types. This allows there to be different levels of concepts, each level of 
+which will feature a composition of concepts from a lower level. 
 
-In this section we will explain these levels, and the standard notations of concepts 
-for these. 
+In this section we will explain these levels, and the standard notations of 
+concepts for these. 
 
-\subsubsection{\label{signal-level}Signal-level concepts}Asynchronous circuit specifications
-are mainly composed of signal transitions, and interactions between these, to show
-causal relationships. Signal transitions are denoted as $a^{+}$ and $a^{-}$, where $a$ is
-any signal name, at least one character, and the $+$ or $-$ indicates which way the 
-this signal transitions, $+$ denoting a low-to-high or 0 to 1 transition, and $-$ denoting
-a high-to-low, 1 to 0 transition. 
+\subsubsection{\label{signal-level}Signal-level concepts}Asynchronous circuit 
+specifications are mainly composed of signal transitions, and interactions 
+between these, to show causal relationships. Signal transitions are denoted as 
+$a^{+}$ and $a^{-}$, where $a$ is any signal name, at least one character, and 
+the $+$ or $-$ indicates which way the this signal transitions, $+$ denoting a 
+low-to-high or 0 to 1 transition, and $-$ denoting a high-to-low, 1 to 0 
+transition. 
 
-The concept tool is written in Haskell, a functional programming language. The domain
-specific language which we have implemented therefore uses Haskell notations, and
-this means some notations are different to standard signal transition specifications. 
-$a^{+}$ and $a^{-}$ are in post-fix notation, where the operator is stated after the 
-operand. Haskell does not support post-fix notation, and as such, we have to use
-a differing signal transition notation. 
+The concept tool is written in Haskell, a functional programming language. The 
+domain specific language which we have implemented therefore uses Haskell 
+notations, and this means some notations are different to standard signal 
+transition specifications. $a^{+}$ and $a^{-}$ are in post-fix notation, where 
+the operator is stated after the operand. Haskell does not support post-fix 
+notation, and as such, we have to use a differing signal transition notation. 
 
-For the tool, signal transitions $a^{+}$ and $a^{-}$ are noted as $rise\,a$ and $fall\,a$
-respectively. We will use the tool notation for examples, but describe these using
-standard notation.
+For the tool, signal transitions $a^{+}$ and $a^{-}$ are noted as $rise\,a$ and 
+$fall\,a$ respectively. We will use the tool notation for examples, but 
+describe these using standard notation.
 
 Signal-level concepts are the base level of concepts, and are 
 the type all other concepts are built on. Here we display the standard concepts
 available at this level.
 
 A key concept in asynchronous circuits is \emph{causality}:
-one signal transition \emph{causes} another signal transition, a cause and an effect.
-This is denoted in the form: 
+one signal transition \emph{causes} another signal transition, a cause and an 
+effect. This is denoted in the form: 
+
 \[
 rise\,a\rightsquigarrow rise\,c
 \]
-This is read as $a^{+}$ causes $c^{+}$, meaning that for the $c^{+}$ transition to
-occur, $a^{+}$ must have occurred previously. The $\rightsquigarrow$ operator is
-used to show causal relationships between signals.
+
+This is read as $a^{+}$ causes $c^{+}$, meaning that for the $c^{+}$ transition 
+to occur, $a^{+}$ must have occurred previously. The $\rightsquigarrow$ 
+operator is used to show causal relationships between signals.
  
 While this concept is called \emph{causality}, this doesn't necessarily imply
 timings, such as any $\mathit{cause}$ transition immediately forcing the
@@ -190,25 +202,30 @@ two causality concepts can be composed.
 rise\,a\rightsquigarrow rise\,c\ <> \ rise\,b\rightsquigarrow rise\,c
 \]
 In words, $a^{+}$ \emph{and} $b^{+}$ must occur before $c^{+}$ can occur. 
-This corresponds to so-called AND-causality in the fact that several cause transitions \emph{must all}
-have occurred before an event can occur. AND-causality is commonly used
-to imply behaviours in circuits, for specific requirements of effect transitions.  
+This corresponds to so-called AND-causality in the fact that several cause 
+transitions \emph{must all} have occurred before an event can occur. 
+AND-causality is commonly used to imply behaviours in circuits, for specific 
+requirements of effect transitions.  
 
-The above notation can cause long-winded specifications when lots of AND-causality is involved. 
-To solve this we provise a listing option. The following will acheive the same results:
+The above notation can cause long-winded specifications when lots of 
+AND-causality is involved. To solve this we provise a listing option. The 
+following will acheive the same results:
 
 %\vspace{-3mm}
 
 \[
 [rise\,a, rise\,b]\sim\hspace{-1.5mm}\&\hspace{-1.5mm}\sim\hspace{-1.5mm}>rise\,c
 \]
+
 This form of concept can be composed as usual with any other concepts.
 
-A less common, but still useful form of causality is OR-causality. This is where an effect transition
-can have several possible cause transitions. Only one cause transition is required to occur to allow
-the effect transition to occur. 
+A less common, but still useful form of causality is OR-causality. This is 
+where an effect transition can have several possible cause transitions. Only 
+one cause transition is required to occur to allow the effect transition to 
+occur. 
 
-With OR-causality, the notation used lists all possible causes for the stated effect:
+With OR-causality, the notation used lists all possible causes for the stated 
+effect:
 
 %\vspace{-3mm}
 
@@ -219,8 +236,9 @@ With OR-causality, the notation used lists all possible causes for the stated ef
 This is, \emph{either} $x^{+}$ \emph{or} $y^{+}$ must occur in order for 
 $z^{+}$ to occur.
 
-The interactions when an effect transition is included in both AND- and OR-causality are interesting, and
-an example of when this occurs can be found in Section~\ref{sec:algorithm}.
+The interactions when an effect transition is included in both AND- and 
+OR-causality are interesting, and an example of when this occurs can be found 
+in Section~\ref{sec:algorithm}.
 
 \subsubsection{Gate-level concepts} Using the causality concept we can express
 the behaviour of gates in asynchronous circuits. For example, a \emph{buffer}
@@ -243,18 +261,23 @@ output~$c$, which synchronises both rising and falling input transitions
 via AND-causality:
 \[
 \begin{array}{lcl}
-\mathsf{cElement}\,a\, b\, c=&\hspace{-10mm}rise\,a\!\rightsquigarrow\! rise\,c\ <> rise\,b\!\rightsquigarrow\! rise\,c\ \\
-&\hspace{-5mm}<>\ fall\,a\!\rightsquigarrow\! fall\,c\ \,<>\ fall\,b\!\rightsquigarrow\! fall\,c
+\mathsf{cElement}\,a\, b\, c=&\hspace{-10mm}rise\,a\!\rightsquigarrow\! 
+	rise\,c\ <> rise\,b\!\rightsquigarrow\! rise\,c\ \\
+&\hspace{-5mm}<>\ fall\,a\!\rightsquigarrow\! fall\,c\ \,
+	<>\ fall\,b\!\rightsquigarrow\! fall\,c
 \end{array}
 \]
 
 An alternative way to express the same concept is to reuse the buffer concept:
+
 \[
 \mathsf{cElement}\,a\, b\, c=\mathsf{buffer}\,a\, c <> \mathsf{buffer}\,b\, c
 \]
+
 A C-element combines the constraints imposed on the output
-transitions by two `virtual' buffers. Behaviour of other gates can be similarly defined in this way.
-An expanded example of a C-element and other examples can be found in~\cite{2015_Beaumont_MEMOCODE}.
+transitions by two `virtual' buffers. Behaviour of other gates can be similarly
+defined in this way. An expanded example of a C-element and other examples can 
+be found in~\cite{2015_Beaumont_MEMOCODE}.
 
 \subsubsection{Protocol-level concepts} In addition to gate-level concepts
 described above it is often important to specify \emph{protocols}
@@ -265,12 +288,16 @@ and mutual exclusion mechanisms.
 
 Given two signals $a$ and $b$, a \emph{handshake} between them is
 the following composition of causality concepts:
+
 \[
 \begin{array}{lcl}
-\mathsf{handshake}\,a\, b=&\hspace{-8mm}rise\,a\!\rightsquigarrow\! rise\,b\ <>\ rise\,b\!\rightsquigarrow\! fall\,a \\
-&\hspace{-5mm}<>\ fall\,a\!\rightsquigarrow\! fall\,b \, <>\ fall\,b \rightsquigarrow\! rise\,a
+\mathsf{handshake}\,a\, b=&\hspace{-8mm}rise\,a\!\rightsquigarrow\! rise\,b\ 
+	<>\ rise\,b\!\rightsquigarrow\! fall\,a \\
+&\hspace{-5mm}<>\ fall\,a\!\rightsquigarrow\! fall\,b \, 
+	<>\ fall\,b \rightsquigarrow\! rise\,a
 \end{array}
 \]
+
 Intuitively, we have a two-way asynchronous communication channel,
 where one party sends transitions $a^{+}$ and $a^{-}$ and the other
 party responds by corresponding $b^{+}$ and $b^{-}$ transitions.
@@ -288,25 +315,29 @@ a convenient way of reasoning.
 
 \subsection{Concepts for translation\label{sub:trans-concepts}}
 
-The concepts we have discussed so far are aimed at specifying the behaviour of signals in a circuit.
-When translating these to STGs however, these behaviours do not necessarily result in a correct
-specification, meaning they will not be verifiable by standard tools, and therefore not useful in 
-further operations, such as synthesis.
+The concepts we have discussed so far are aimed at specifying the behaviour of 
+signals in a circuit. When translating these to STGs however, these behaviours 
+do not necessarily result in a correct specification, meaning they will not be 
+verifiable by standard tools, and therefore not useful in further operations, 
+such as synthesis.
 
-This is due to various parts of an STG that we have not yet discussed, which are important
-for specification, namely \emph{interface} and \emph{initial states}.
+This is due to various parts of an STG that we have not yet discussed, which 
+are important for specification, namely \emph{interface} and 
+\emph{initial states}.
 
 %\vspace{-5mm}
 
 \subsubsection{Interface concepts\label{sub:interface}} 
 
-An important part of a specification is how these signals interact with the outside world, which could
-be another scenario or another circuit, for example. These signals can be inputs from the outside world,
-outputs or an internal signal, which is used only within this scenario. 
+An important part of a specification is how these signals interact with the 
+outside world, which could be another scenario or another circuit, for example.
+These signals can be inputs from the outside world, outputs or an internal 
+signal, which is used only within this scenario. 
 
 To specify the type of a signal (\emph{input},
 \emph{output} or \emph{internal}) we introduce the \textsf{interface} concept.
 Signal types are composed according to the following rules:
+
 \[
 \begin{array}{|l||l|l|l|}
 \hline
@@ -319,12 +350,15 @@ Signal types are composed according to the following rules:
 \hline
 \end{array}
 \]
+
 The intuition is as follows:
 \begin{itemize}
     \item If a signal is an input in one component of the system, but is an
     output in another components, then in the composition it will be an output.
     \item An internal signal is similar to an output signal in the sense
-that it is driven by the circuit (not the environment), but it is hidden, i.e.not accessible via the circuit interface. Once a signal is hidden and declared    internal it cannot be revealed.
+that it is driven by the circuit (not the environment), but it is hidden, 
+i.e.not accessible via the circuit interface. Once a signal is hidden and 
+declared internal it cannot be revealed.
 \end{itemize}
 
 \noindent Specifying signal types is important when designing asynchronous
@@ -335,10 +369,10 @@ in the algorithm for automated translation of concepts to
 STGs (Section~\ref{sec:algorithm}).
 
 Concepts \textsf{inputs}, \textsf{outputs}, \textsf{internals} are defined for
-specifying types of sets of signals for convenience, and to be included inline with other
-concepts. For example, to specify
-that signals $a$ and $b$ are inputs, $c$ is an output, and $t$ is internal, it
-is possible to write:
+specifying types of sets of signals for convenience, and to be included inline 
+with other concepts. For example, to specify that signals $a$ and $b$ are 
+inputs, $c$ is an output, and $t$ is internal, it is possible to write:
+
 \[
 \mathsf{inputs}\,[a, b] <> \mathsf{outputs}\,[c] <>
 \mathsf{internals}\,[t].
@@ -348,44 +382,47 @@ is possible to write:
 
 \subsubsection{Initial state concepts\label{sub:initState}}
 
-Specifying the initial state is important, as it determines what the first transitions
-of a scenario will be. Without these, no transition can occur.
+Specifying the initial state is important, as it determines what the first 
+transitions of a scenario will be. Without these, no transition can occur.
 
 Each signal must have it's initial state declared before translation can occur. 
 In order to specify the initial state of a handshake between signals~$a$
 and~$b$, we use the $\mathsf{initialise}$ concept.
-The possible initial states are \emph{high} or \emph{low}, referred to as \emph{0} 
-or \emph{1} respectively:
+The possible initial states are \emph{high} or \emph{low}, referred to as 
+\emph{0} or \emph{1} respectively:
 
 \[
 \mathsf{initialise}\,a\,0 <> \mathsf{initialise}\,x\, 1
 \]
 
-\noindent A signal can only be declared as initially high or low. If the initial state of a signal is 
-not defined, an error will occur, and the translation will not continue. Conversely, 
-if the event a signal has it's initial state declared as both high and low,
-and is thus inconsistent, in a specification then the translation will also fail.
+\noindent A signal can only be declared as initially high or low. If the 
+initial state of a signal is not defined, an error will occur, and the 
+translation will not continue. Conversely, if the event a signal has it's 
+initial state declared as both high and low, and is thus inconsistent, in a 
+specification then the translation will also fail.
 
-For the ease of use, and to speed up the process, initial states can also be declared
-in lists by on state:
+For the ease of use, and to speed up the process, initial states can also be 
+declared in lists by on state:
 
 \[
 \mathsf{initialise0}\, [a, b, c] <> \mathsf{initialise1}\, [x, y]
 \]
 
 
-\noindent As an example, we can include this in the specification of a handshake, to 
-create a handshake with built-in initial state.
+\noindent As an example, we can include this in the specification of a 
+handshake, to create a handshake with built-in initial state.
 $\mathsf{initialise}\,a\, 0$ sets the state of the signal
 $a$ to $0$. We can compose an initial state concept with the handshake concept
 into a combined $\mathsf{handshake00}\,a\, b$ concept as
 
 \[
 \begin{array}{lcl}
-\mathsf{handshake00}\, a\, b =&\hspace{-2mm}\mathsf{handshake}\,a\, b <> \mathsf{initialise}\,a\, 0 \\
+\mathsf{handshake00}\, a\, b =&\hspace{-2mm}\mathsf{handshake}\,a\, b 
+	<> \mathsf{initialise}\,a\, 0 \\
 &\hspace{-6mm}<> \mathsf{initialise}\,b\, 0
 \end{array}
 \]
+
 The resulting concept corresponds to a handshake between signals~$a$
 and~$b$ that are both initially $0$.
 
@@ -393,25 +430,26 @@ and~$b$ that are both initially $0$.
 
 \subsection{Built-in concepts \label{sub:built-in}}
 
-In our previous paper, \cite{2015_Beaumont_MEMOCODE}, we have displayed several examples of
-different concepts and how they can be described in terms of concepts in several ways,
-either from base level signal-level concepts, or through reuse of pre-defined 
-gate- and protocol-level concepts.
+In our previous paper, \cite{2015_Beaumont_MEMOCODE}, we have displayed several
+examples of different concepts and how they can be described in terms of 
+concepts in several ways, either from base level signal-level concepts, or 
+through reuse of pre-defined gate- and protocol-level concepts.
 
-In this section, we will detail further concepts included with the tool along with those 
-already described in Sections~\ref{sub:concept-notation} and~\ref{sub:trans-concepts}. 
-All of these are often used in the specification of asynchronous circuits and 
-therefore it is useful to include them, to avoid a user having to define these for 
-each specification. For each of these we will explain their use for asynchronous 
-circuits, and give the standard usage of the concept. 
+In this section, we will detail further concepts included with the tool along 
+with those already described in Sections~\ref{sub:concept-notation} 
+and~\ref{sub:trans-concepts}. All of these are often used in the specification 
+of asynchronous circuits and therefore it is useful to include them, to avoid a 
+user having to define these for each specification. For each of these we will 
+explain their use for asynchronous circuits, and give the standard usage of the 
+concept. 
 
 \begin{itemize}
   
   \item $\mathsf{handshake11}\,a \,b$ is a protocol-level concept, similar to 
   $\mathsf{handshake00}\,a \,b$ as discussed in Section~\ref{sub:initState}. 
   The behaviours of the signals are the same as in the standard 
-  \texttt{handshake} concepts, but this includes initial states for the signals. 
-   For this concept, both signals will be initialised to 1, or high.
+  \texttt{handshake} concepts, but this includes initial states for the 
+   signals. For this concept, both signals will be initialised to 1, or high.
   
   \item []
   
@@ -464,7 +502,7 @@ In this section, we will cover how to install the tool, how to prepare a
 concepts file and  run the tool either through command line, or through 
 \noun{Workcraft}, and the output it produces for each of these cases.
 
-\subsection{Installing the tool}
+\subsection{Installing the tool \label{sub:installing}}
 
 The concepts tool can be downloaded from~\cite{2016_concepts_github} on it's
 own, or it is included in the download of Workcraft. It can be used on 
@@ -494,7 +532,7 @@ the concepts tool, simply run:
   $ stack build
 \end{lstlisting}
 
-\subsection{Concepts file layout}
+\subsection{Concepts file layout \label{sub:file_layout}}
 
 \begin{figure}[H]
 \begin{centering}
@@ -523,7 +561,7 @@ $\,\,\,\,\,\,\mathsf{operation}= \mathsf{orGate}\,a\,b\,c$
 \par\end{flushleft}
 
 \begin{flushleft}
-$\,\,\,\,\,\,\mathsf{initialState}= \, \mathsf{initialise0}[a,\,b,\,c]$
+$\,\,\,\,\,\,\mathsf{initialState}= \, \mathsf{initialise0}\,[a,\,b,\,c]$
 \par\end{flushleft}
 
 \par\end{centering}
@@ -589,7 +627,8 @@ The three parts of this are as follows:
   	are installed when running.
   \item \texttt{runghc} - This runs the translation function.
   \item \texttt{<path-to-translate>} - This is file path pointing to the 
-  	translate code file, which performs the necessary operations to translate concepts to STGs.
+  	translate code file, which performs the necessary operations to translate 
+	concepts to STGs.
   \item \texttt{<path-to-concepts-file>} - This is the path pointing to the file
   	containing the concepts to be translated.
   \item \texttt{[--stack-yaml <path-to-stack-file>]} - This is optional. If 
@@ -602,56 +641,51 @@ translate code, the concepts file and the \texttt{stack.yaml} file are correct,
 it doesn't matter from which directory the tool is run.  The \texttt{stack.yaml}
 file is located in the base of the concepts directory.
 
-As an example, we will use one of the examples included with the concepts tool.
-These can be found in the \texttt{examples} directory of the concepts tool. For
-this section, we will assume that we have alread navigated to the concepts tool
-directory. The example we will use is the file titled 
-"\texttt{Celement\_with\_env\_1.hs}". To translate this concepts file to an STG,
-the following command must be run:
+As an example, we will use the example from Section~\ref{sub:file_layout}, an 
+OR-gate. Using a plain-text editor, type this concept specification and save it
+as "\texttt{or\_gate.hs}". For this example we will store it in the concepts
+tool directory, but it can be saved anywhere, as long as you know the path.
+We will assume that we have alread navigated to the concepts tool
+directory. To translate this concepts file to an STG, the following command
+must be used:
 
 \begin{lstlisting}[language=bash]
   $ stack runghc translate/Main.hs 
-  	examples/Celement_with_env_1.hs
+  	or_gate.hs
 \end{lstlisting}
 
 When the translation is complete, the tool will output the following:
 
 \begin{lstlisting}[language=bash]
-  .model out
-  .inputs A B
-  .outputs C
-  .internals
-  .graph
-  A0 A+
-  A+ A1
-  A1 A-
-  A- A0
-  B0 B+
-  B+ B1
-  B1 B-
-  B- B0
-  C0 C+
-  C+ C1
-  C1 C-
-  C- C0
-  A1 C+
-  C+ A1
-  B1 C+
-  C+ B1
-  C1 A-
-  A- C1
-  C1 B-
-  B- C1
-  A0 C-
-  C- A0
-  B0 C-
-  C- B0
-  C0 A+
-  A+ C0
-  C0 B+
-  B+ C0
-  .marking {A0 B0 C0}
-  .end
+	.model out
+	.inputs A B
+	.outputs C
+	.internal
+	.graph
+	A0 A+
+	A+ A1
+	A1 A-
+	A- A0
+	B0 B+
+	B+ B1
+	B1 B-
+	B- B0
+	C0 C+
+	C+ C1
+	C1 C-
+	C- C0
+	A0 C-
+	C- A0
+	B0 C-
+	C- B0
+	C0 C+/1
+	C+/1 C1
+	A1 C+
+	C+ A1
+	B1 C+/1
+	C+/1 B1
+	.marking {A0 B0 C0}
+	.end
 \end{lstlisting}
 
 This output is the STG representation in \emph{.g} format. \emph{.g} files are 
@@ -673,60 +707,18 @@ these can be found at~\cite{Workcraft_website}.
  
 \subsubsection{Translating and authoring concepts}
 
-First of all, \noun{Workcraft} must be started. This can be done by running the start up script, located in the \noun{Workcraft} directory in \emph{Windows} and \emph{Linux}. In 
-\emph{Windows}, this script is named ``\texttt{workcraft.bat}". In \emph{Linux}, it is simply "\texttt{workcraft}". In \emph{OS X}, \noun{Workcraft} can be started instead by double 
-clicking the \noun{Workcraft} icon, which is the app container for the necessary files. 
+First of all, the concepts tool should be installed, as per the instructions in
+Section~\ref{sub:installing}. To start using concepts from within Workcraft, 
+start Workcraft, and open a new Signal Transition Graph work. 
 
-When workcraft starts, you will be greeted by blank screen, as seen in Figure~\ref{fig:blank_workcraft_screen}.
+To start specifying and translating concepts, open the concepts dialog.  This is
+done from the menu bar, by selecting the ``\emph{Conversion}'' menu, and then
+the ``\emph{Translate concepts...}'' option. The concepts dialog will look as 
+shown in Figure~\ref{fig:concepts_dialog_screenshot}.
 
-%\begin{figure}[H]
-%\begin{centering}
-%\includegraphics[scale=0.2]{images/blank_workcraft_screenshot}
-%\par\end{centering}
-%
-%\begin{centering}
-%\protect\caption{\label{fig:blank_workcraft_screen}Workcraft immediately after starting.}
-%
-%\par\end{centering}
-%
-%\end{figure}
-
-Now, we need to open a new work, specifically a new STG work. Open the "New work" dialog using the menu bar, \texttt{File -> Create work...}, or by pressing \texttt{Ctrl-N} 
-(\texttt{CMD-N} on \emph{OS X}). This will bring up a menu as seen in Figure~\ref{fig:new_work_screen}.
-
-%\begin{figure}[H]
-%\begin{centering}
-%\includegraphics[scale=0.4]{images/new_work_screenshot}
-%\par\end{centering}
-%
-%\begin{centering}
-%\protect\caption{\label{fig:new_work_screen}The create work window.}
-%
-%\par\end{centering}
-%
-%\end{figure}
-
-In this window, select ``\emph{Signal Transition Graph}' and cick the ``OK'' button at the bottom of the window. This will the open a blank workspace in which we can create an STG, which 
-will look similar to Figure~\ref{fig:blank_stg_work}.
-
-%\begin{figure}[H]
-%\begin{centering}
-%\includegraphics[scale=0.2]{images/new_stg_screenshot}
-%\par\end{centering}
-%
-%\begin{centering}
-%\protect\caption{\label{fig:blank_stg_work}A new STG workspace}
-%
-%\par\end{centering}
-%
-%\end{figure}
-
-Now, we can start translating concepts. To do this, first we need to open the concepts dialog.  This is done from the menu bar, by selecting the ``\emph{Conversion}'' menu, and then the 
-``\emph{Translate concepts...}'' option. The concepts dialog will look as shown in Figure~\ref{fig:concepts_dialog_screenshot}.
-
-\begin{figure}[H]
+\begin{figure}[h]
 \begin{centering}
-\includegraphics[scale=0.4]{Images/concepts_dialog_screenshot.pdf}
+\includegraphics[scale=0.45]{Images/concepts_dialog_screenshot.png}
 \par\end{centering}
 
 \begin{centering}
@@ -736,74 +728,88 @@ Now, we can start translating concepts. To do this, first we need to open the co
 
 \end{figure}
 
-From within this dialog, one can write their own concepts, from the default template as shown in Figure~\ref{fig:concepts_dialog_screenshot}, or open an existing concepts file, with the  
-\emph{.hs} extension. When satisfied with the concepts written, a user can choose to save the file, if not already saved, and then translate these concepts.
+From within this dialog, one can write their own concepts, from the default 
+template as shown in Figure~\ref{fig:concepts_dialog_screenshot}, or open an 
+existing concepts file, with the \emph{.hs} extension. When satisfied with the 
+concepts written, a user can choose to save the file, if not already saved, and
+then translate these concepts.
 
-%\begin{figure}[H]
-%\begin{centering}
-%\includegraphics[scale=0.4]{images/concepts_dialog_Celement}
-%\par\end{centering}
-%
-%\begin{centering}
-%\protect\caption{\label{fig:concepts_dialog_Celement}The concepts dialog with a concept file opened.}
-%
-%\par\end{centering}
-%
-%\end{figure}
+\begin{figure}[H]
+\begin{centering}
+\includegraphics[scale=0.45]{Images/concepts_dialog_or_gate.png}
+\par\end{centering}
 
-Figure~\ref{fig:concepts_dialog_Celement} is the concepts dialog after we have opened the Celement with environment example, named ``\emph{Celement\_with\_env\_1.hs}'', from the 
-concepts tool examples directory. Clicking translate at this point will produce an STG representation of these concepts in the workspace. 
+\begin{centering}
+\protect\caption{\label{fig:concepts_dialog_or_gate}The concepts dialog with a 
+			specification typed in.}
 
-%\begin{figure}[H]
-%\begin{centering}
-%\includegraphics[scale=0.2]{images/concepts_translated}
-%\par\end{centering}
-%
-%\begin{centering}
-%\protect\caption{\label{fig:concepts_translated}The STG produced from translating the concepts.}
-%
-%\par\end{centering}
-%
-%\end{figure}
+\par\end{centering}
 
-The translated concepts will look similar to Figure~\ref{fig:concepts_translated}
+\end{figure}
 
-Now, a user can choose to insert more concepts, make changes to this STG, and once they are satisfied with it, can then perform various functions on this STG. One can perform 
-transformations, verifications, simulations and synthesis on this STG using the menus within this workspace now. Any further changes to this STG, based on the results of these operations 
-can be made to this STG or to the concepts file. 
+Figure~\ref{fig:concepts_dialog_or_gate} is the concepts dialog after we have 
+opened the OR-gate example concept specification 
+(Section~\ref{sub:file_layout}). Clicking translate at this point will produce 
+an STG representation of these concepts inthe workspace. 
+
+\begin{figure}[H]
+\begin{centering}
+\includegraphics[scale=0.2]{Images/concepts_translated.png}
+\par\end{centering}
+
+\begin{centering}
+\protect\caption{\label{fig:concepts_translated}The STG produced from 
+			translating the concepts.}
+
+\par\end{centering}
+
+\end{figure}
+
+The translated concepts will look as shown in 
+Figure~\ref{fig:concepts_translated}.
+
+Now, a user can choose to insert more concepts, make changes to this STG, and 
+once they are satisfied with it, can then perform various functions on this STG.
+One can perform transformations, verifications, simulations and synthesis on 
+this STG using the menus within this workspace. Any further changes to this 
+STG, based on the results of these operations can be made to this STG or to the
+concepts file. 
 
 \subsection{Importing concepts directly}
 
-In \noun{Workcraft} it is also possible to import concepts directly from a file, without having to view the concepts first. 
-This can be done from the ``\emph{File}'' menu, by selecting the ``\emph{Import...}'' option. 
+In \noun{Workcraft} it is also possible to import concepts directly from a file,
+without having to view the concepts first. This can be done from the 
+``\emph{File}'' menu, by selecting the ``\emph{Import...}'' option. 
 
-%\begin{figure}[H]
-%\begin{centering}
-%\includegraphics[scale=0.4]{images/import_menu_screenshot}
-%\par\end{centering}
-%
-%\begin{centering}
-%\protect\caption{\label{fig:import_menu_screenshot}The STG produced from translating the concepts.}
-%
-%\par\end{centering}
-%
-%\end{figure}
+\begin{figure}[H]
+\begin{centering}
+\includegraphics[scale=0.4]{Images/import_menu_screenshot.png}
+\par\end{centering}
 
-When importing concepts using this menu, ensure to set the ``\emph{Files of Type}'' option to ``\emph{Concepts file (.hs)}'', as shown in Figure~\ref{fig:import_menu_screenshot}
+\begin{centering}
+\protect\caption{\label{fig:import_menu_screenshot}The import menu and the 
+			option of \emph{.hs} files.}
+
+\par\end{centering}
+
+\end{figure}
+
+When importing concepts using this menu, ensure to set the 
+``\emph{Files of Type}'' option to ``\emph{Concepts file (.hs)}'', as shown in 
+Figure~\ref{fig:import_menu_screenshot}. Any concept files imported will be
+automatically translated to an STG.
 
 \subsection{Errors}
 
-If any errors are encountered during the translation process, \noun{Workcraft} will produce a helpful error message. 
-This usually can tell you with more detail what the issue that is causing the error is, but will ask you to refer to \noun{Workcraft}'s console window for specific line numbers or signals which 
+If any errors are encountered during the translation process, \noun{Workcraft} 
+will produce a helpful error message. This usually can tell you with more 
+detail what the issue that is causing the error is, but will ask you to refer 
+to \noun{Workcraft}'s console window for specific line numbers or signals which
 need to be corrected. 
-These errors will include whether a signal has not been declared as an input or output,
-a signal has not had it's initial state given, or even that the concepts tool has not been installed correctly. 
 
-\section{Writing concepts \label{sec:concepts_layout}}
-
-In this section, we will discuss how to write a concepts file. 
-We will use an example and go through it based on lines, explaining what is necessary. For this example we will be using the same 
-as example as in previous sections, from the examples included with the concepts repo. This is ``\emph{Celement\_with\_env1.hs}''.
+These errors will include whether a signal has not been declared as an input or
+output, a signal has not had it's initial state given, or even that the 
+concepts tool has not been installed correctly. 
 
 \section{Concepts to STG translation algorithm\label{sec:algorithm}}
 
@@ -818,7 +824,8 @@ such as \noun{Petrify}~\cite{Cortadella} and
 In order to reuse the tools developed by the community, it is
 necessary to be able to automatically translate concept specifications to STGs.
 In this section, we will display an example of how the translation algorithm 
-operates, and present a pseudocode form of the algorithm in Algorithm~\ref{alg:translation}. 
+operates, and present a pseudocode form of the algorithm in 
+Algorithm~\ref{alg:translation}. 
 
 %\vspace{-3mm}
 
@@ -842,7 +849,8 @@ the interaction of the control signal is:
 %\vspace{-4mm}
 \[
 \begin{array}{lcl}
-\mathsf{control}&\hspace{-2mm}=&\hspace{-2mm}x^{+} \rightsquigarrow c^{+} <> x^{+} \rightsquigarrow c^{-} 
+\mathsf{control}&\hspace{-2mm}=&\hspace{-2mm}x^{+} \rightsquigarrow c^{+} 
+	<> x^{+} \rightsquigarrow c^{-} 
 \end{array}
 \]
 
@@ -853,14 +861,16 @@ scenario for this translation:
 %\vspace{-3mm}
 \[
 \begin{array}{lcl}
-\hspace{-2mm}\mathsf{orGateCtrl}\,  a \, b \, c \, x &\hspace{-2mm}=&\hspace{-2mm}\mathsf{orGate}\, a\, b\, c <>\, \mathsf{control}
-<>\, \mathsf{inputs}\, [a,\, b,\, x] \\
+\hspace{-2mm}\mathsf{orGateCtrl}\,  a \, b \, c \, x &\hspace{-2mm}=
+	&\hspace{-2mm}\mathsf{orGate}\, a\, b\, c <>\, \mathsf{control}
+	<>\, \mathsf{inputs}\, [a,\, b,\, x] \\
 && <> \, \mathsf{outputs} \,  [c] <>\, \mathsf{initialise0}\, [a,\, b,\, c,\, x]
 \end{array}
 \]
 
-In this concept, we have reused the OR-gate concept, defined in Section~\ref{sub:or-gate}. 
-For reference, the fully translated STG can be found in Figure~\ref{fig:or-gate-ctrl}.
+In this concept, we have reused the OR-gate concept, defined in 
+Section~\ref{sub:or-gate}. For reference, the fully translated STG can be found 
+in Figure~\ref{fig:or-gate-ctrl}.
 
 %\vspace{-3mm}
 
@@ -873,13 +883,14 @@ For reference, the fully translated STG can be found in Figure~\ref{fig:or-gate-
 %\vspace{-3mm}
 \end{figure}
 
-This STG still contains the two $c^{+}$ transitions, allowing this transition when either 
-$a^{+}$ or $b^{+}$ has occured. However, with the inclusion of $x$, note that both
-of these transitions also require $x^{+}$ to have occured. This is the same for $c^{-}$. 
-Through the addition of the \emph{control} concept, we need to add AND-causality to
-each and every $c^{+}$ and $c^{-}$ transition with $x^{+}$. The combination of signals
-required for each possible transition in both high and low transitions are calculated in the
-algorithm, and we will detail this process in this section.
+This STG still contains the two $c^{+}$ transitions, allowing this transition 
+when either $a^{+}$ or $b^{+}$ has occured. However, with the inclusion of $x$,
+note that both of these transitions also require $x^{+}$ to have occured. This 
+is the same for $c^{-}$. Through the addition of the \emph{control} concept, we 
+need to add AND-causality to each and every $c^{+}$ and $c^{-}$ transition with 
+$x^{+}$. The combination of signals required for each possible transition in 
+both high and low transitions are calculated in the algorithm, and we will 
+detail this process in this section.
 
 As displayed in Section~\ref{sec:examples}, there are multiple ways of
 representing a specification using concepts. However, all levels of
@@ -888,39 +899,45 @@ signal concepts. Given a specification, we can therefore
 break down all gate- and protocol-level constructs into `atoms', which
 significantly simplifies the translation task.
 
-For this example, the specification is broken down into these signal-level concepts:
+For this example, the specification is broken down into these signal-level 
+concepts:
 
 %\vspace{-4mm}
 \[
 \begin{array}{lcl}
-\hspace{-2mm}\mathsf{orGateCtrl}\,a,\,b,\,c\,x&\hspace{-2mm}=&\hspace{-2mm}[a^{+}, b^{+}]\sim\hspace{-1.5mm}|\hspace{-1.5mm}\sim\hspace{-1.5mm}>c^{+} 
-<> a^{-}\rightsquigarrow c^{-} <> b^{-}\rightsquigarrow c^{-}\\
+\hspace{-2mm}\mathsf{orGateCtrl}\,a,\,b,\,c\,x&\hspace{-2mm}=
+	&\hspace{-2mm}[a^{+}, b^{+}]
+	\sim\hspace{-1.5mm}|\hspace{-1.5mm}\sim\hspace{-1.5mm}>c^{+} 
+	<> a^{-}\rightsquigarrow c^{-} <> b^{-}\rightsquigarrow c^{-}\\
 ~&\hspace{-2mm}<>&\hspace{-2mm}x^{+}\rightsquigarrow c^{+} <>
-x^{+}\rightsquigarrow c^{-} <> \mathsf{inputs} \, [a,\,b,\,x] \\
-~&\hspace{-2mm}<>&\hspace{-2mm}\mathsf{outputs}\,[c]<>\mathsf{initialise0}\,[a,\,b,\,c,\,x]
+	x^{+}\rightsquigarrow c^{-} <> \mathsf{inputs} \, [a,\,b,\,x] \\
+~&\hspace{-2mm}<>&\hspace{-2mm}\mathsf{outputs}\,[c]
+	<>\mathsf{initialise0}\,[a,\,b,\,c,\,x]
 \end{array}
 \]
 
 \noindent The first step is to prepare the read-arcs, and this is done by
 reformating these concepts into lists of causes for effects.
 Each list will be of possible causes for each OR- and AND-causality signal-level
-concept in the specification, meaning that for each OR-causality concept, there will
-be 2 or more signals in the list, and for each AND-causality concept there will be a single
-item list. 
+concept in the specification, meaning that for each OR-causality concept, 
+there will be 2 or more signals in the list, and for each AND-causality 
+concept there will be a single item list. 
 
-For example, using the concept $x^{+} \rightsquigarrow c^{+}$, for this $c^{+}$ transition,
-there is only one possible cause of it, $x^{+}$. Therefore, this forms a single item list, 
-containing only $x^{+}$.
+For example, using the concept $x^{+} \rightsquigarrow c^{+}$, for this $c^{+}$ 
+transition, there is only one possible cause of it, $x^{+}$. Therefore, this 
+forms a single item list, containing only $x^{+}$.
 
-For another example, taking the concept\\$[a^{+}, b^{+}]\sim\hspace{-1.5mm}|\hspace{-1.5mm}\sim\hspace{-1.5mm}>c^{+}$, there are
-two possible transitions for $c^{+}$ here, $a^{+}$ and $b^{+}$. These therefore form 
-a two item list. 
+For another example, taking the concept\\$[a^{+}, b^{+}]
+\sim\hspace{-1.5mm}|\hspace{-1.5mm}\sim\hspace{-1.5mm}>c^{+}$, there are
+two possible transitions for $c^{+}$ here, $a^{+}$ and $b^{+}$. These therefore 
+form a two item list. 
 
 This will mean there may be several different lists for each cause transition. 
 Table~\ref{tab:list-of-concepts} contains all of the lists described above.
 
 \begin{table}[h]
-\caption{Lists of possible cause transitions for effect transitions\label{tab:list-of-concepts}}
+\caption{Lists of possible cause transitions for effect transitions
+		\label{tab:list-of-concepts}}
 
   \centering
 \begin{tabular}[htb]{| m{2.6cm} | m{2.0cm} |}
@@ -935,11 +952,12 @@ $b^{-}$ & $c^{-}$ \\ \hline
   %\vspace{-3mm}
 \end{table}
 
-\noindent From this, we can then combine the lists by effect transition, to give us a list of lists.
-This can be viewed in Table~\ref{tab:list-of-lists}
+\noindent From this, we can then combine the lists by effect transition, to 
+give us a list of lists. This can be viewed in Table~\ref{tab:list-of-lists}.
 
 \begin{table}[h]
-\caption{Lists of lists of cause transitions for effect transitions\label{tab:list-of-lists}}
+\caption{Lists of lists of cause transitions for effect transitions
+		\label{tab:list-of-lists}}
 
   \centering
 \begin{tabular}[htb]{| m{2.6cm} | m{2.0cm} |}
@@ -958,10 +976,10 @@ will become apparent in the next step.
 
 This step is applying the \emph{Cartesian Product} to each the list of lists
 for each effect transition. This will "expand the brackets", combining each
-item of each list with every item of every other list, creating a single list which
-provides us with the number of this transition and  whicharcs to connect 
-for each transition of each type. 
-For example, using the list of lists for $c^{+}$:
+item of each list with every item of every other list, creating a single list 
+which provides us with the number of this transition and  whicharcs to connect 
+for each transition of each type. For example, using the list of lists for 
+$c^{+}$:
 
 %\vspace{-3mm}
 \[
@@ -990,15 +1008,15 @@ at once. This will be as follows:
 \end{array}
 \]
 
-\noindent There will therefore be only one $c^{-}$ transition, requiring all three
-of $a^{-}$, $b^{-}$ and $x^{-}$ to have occured before $c^{-}$
-can occur. 
+\noindent There will therefore be only one $c^{-}$ transition, requiring all 
+three of $a^{-}$, $b^{-}$ and $x^{-}$ to have occured before $c^{-}$ can occur. 
 
 Now, we can list the read-arcs to be connected for each transition of $c$.
 This can be viewed in Table~\ref{tab:list-by-transition}.
 
 \begin{table}[h]
-\caption{List of all effect transitions and their causes\label{tab:list-by-transition}}
+\caption{List of all effect transitions and their causes
+		\label{tab:list-by-transition}}
 
   \centering
 \begin{tabular}[htb]{| m{2.6cm} | m{2.0cm} |}
@@ -1029,18 +1047,19 @@ transitioned low. We add a $0$ and $1$ place for each signal,
 which for this example gives us $a0$, $a1$, $b0$, $b1$, $x0$, $x1$
 $c0$ and $c1$.
 
-The interface is defined at the start of the algorithm, by listing them as $inputs$,
-$outputs$ or $internals$, so now we need to include all the transitions, and
-connect these to the places to form consistency loops, to ensure that all signals 
-in this system can only transition in one way when this signals previous transition
-was in the opposite direction. 
+The interface is defined at the start of the algorithm, by listing them as 
+$inputs$, $outputs$ or $internals$, so now we need to include all the 
+transitions, and connect these to the places to form consistency loops, to 
+ensure that all signals in this system can only transition in one way when this 
+signals previous transition was in the opposite direction. 
 
-This is done by taking each transition, and if it is a $+$ transition, connecting 
-the $0$ place for this signal to the transition, then connecting this transition to 
-the $1$ place for this signal. Conversely, if it is a $-$ transition, we connect the
-$1$ place for this signal to the transition, and connect this transition to the $0$ 
-place. Including these will form an STG as shown in Figure~\ref{fig:loops}. Note
-that both $c^{+}$ transitions are included in these loops.
+This is done by taking each transition, and if it is a $+$ transition, 
+connecting the $0$ place for this signal to the transition, then connecting 
+this transition to the $1$ place for this signal. Conversely, if it is a $-$ 
+transition, we connect the $1$ place for this signal to the transition, and 
+connect this transition to the $0$ place. Including these will form an STG as 
+shown in Figure~\ref{fig:loops}. Note that both $c^{+}$ transitions are 
+included in these loops.
 
 \begin{figure}[h]
 \begin{centering}
@@ -1051,17 +1070,19 @@ that both $c^{+}$ transitions are included in these loops.
 %\vspace{-3mm}
 \end{figure}
 
-Now the algorithm introduces the initial states. All of the signals are specified
-to be initially 0, meaning that the first transition will be the $+$. From the
-consistency loops, to allow this to happen, we need to place a token in each 
-$0$ place for each signal. This will produce the STG displayed in Figure~\ref{fig:tokens}.
+Now the algorithm introduces the initial states. All of the signals are 
+specified to be initially 0, meaning that the first transition will be the $+$.
+From the consistency loops, to allow this to happen, we need to place a token 
+in each $0$ place for each signal. This will produce the STG displayed in 
+Figure~\ref{fig:tokens}.
 
 \begin{figure}[h]
 \begin{centering}
 \includegraphics[scale=0.25]{Images/or-gate-ctrl-inits-stg}
 \par\end{centering}
 %\vspace{-1mm}
-\protect\caption{\label{fig:tokens} STG containing consistency loops and initial states}
+\protect\caption{\label{fig:tokens} STG containing consistency loops and 
+			initial states}
 %\vspace{-3mm}
 \end{figure}
 
@@ -1074,9 +1095,8 @@ after $c^{+}$ has occured, and placed a token in $x1$, will $c^{+}$ be allowed
 to occur, but the read arc will not consume the token in $x1$ which would block
 $x^{-}$ from being able to occur. 
 
-Following this, the specification is fully translated, and the resulting STG will
-be the same as shown in Figure~\ref{fig:or-gate-ctrl}.
-
+Following this, the specification is fully translated, and the resulting STG 
+will be the same as shown in Figure~\ref{fig:or-gate-ctrl}.
 
 %\vspace{-1mm}
 
@@ -1089,7 +1109,8 @@ be the same as shown in Figure~\ref{fig:or-gate-ctrl}.
 
 \For {Each effect transition $e$}
   \State $allCauses$ $\leftarrow$ Concatinate lists of possible causes for $e$
-  \State $transitionList$ $\leftarrow$ \emph{Cartesian Product} \textbf{of} $allCauses$
+  \State $transitionList$ $\leftarrow$ \emph{Cartesian Product} \textbf{of} 
+	$allCauses$
   \For {$i = 0$ to Length of $transitionList$}
     \State \textbf{add} $e(i)$ to $transitions$
   \EndFor 
@@ -1136,9 +1157,9 @@ verify and synthesise them using other tools integrated in \noun{Workcraft},
 such as \noun{Petrify}~\cite{Cortadella} and
 \noun{Mpsat}~\cite{khomenko2004detecting}.
 If there are any corrections or additions to be made these can be done
-either directly in the STG or in the original concept specification, which can then
-be re-translated into an updated STG. These automated processes can allow for a
-streamlined design process of asynchronous circuits.
+either directly in the STG or in the original concept specification, which can 
+then be re-translated into an updated STG. These automated processes can allow 
+for a streamlined design process of asynchronous circuits.
 
 The translation tool itself produces a \emph{.g} document format, which is a
 graph format used to store STG information. This means that it is not
@@ -1184,17 +1205,17 @@ that an existing specification is realistic, or find less complex models.
 All of this can be performed automatically, by tools such as
 \noun{PGminer}~\cite{mokhov2016mining}, given
 an event log with observations of a real analogue or digital system, and aid a
-designer in reducing design time and errors. We aim to test the possibility of producing
-concepts directly from the mining of these event logs.
+designer in reducing design time and errors. We aim to test the possibility of 
+producing concepts directly from the mining of these event logs.
 
-The translations tool we have discussed is available from~\cite{2016_concepts_github},
-and as stated, is integrated into \noun{Workcraft}~\cite{Workcraft_website}. 
-A manual is included with the tool, which features descriptions of the features. 
-We host a regularly updated blog which discusses some interesting properties
-of concepts, and new ideas we find for concepts, and this is available 
-at~\cite{2016_blog_concepts}.
+The translations tool we have discussed is available 
+from~\cite{2016_concepts_github}, and as stated, is integrated into 
+\noun{Workcraft}~\cite{Workcraft_website}. A manual is included with the tool, 
+which features descriptions of the features. We host a regularly updated blog 
+which discusses some interesting properties of concepts, and new ideas we find 
+for concepts, and this is available  at~\cite{2016_blog_concepts}.
 
-%%\vspace{-2mm}
+%\vspace{-2mm}
 
 \bibliographystyle{unsrt}
 \bibliography{publications}
