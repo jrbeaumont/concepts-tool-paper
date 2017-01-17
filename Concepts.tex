@@ -827,77 +827,16 @@ In this section, we will display an example of how the translation algorithm
 operates, and present a pseudocode form of the algorithm in 
 Algorithm~\ref{alg:translation}. 
 
-%\vspace{-3mm}
+We will use the OR-gate example, the specification of which can be seen in 
+Section~\ref{sub:file_layout}. This is a rudimentary example, but is useful in 
+displaying how the algorithm handles a system featuring both OR- and 
+AND-causality.
 
-\subsection{A translation example}
-
-The example we will use for this is that of an OR-gate with control signal. 
-This is similar to the OR-gate as seen in Section~\ref{sub:or-gate}; inputs
-of $a$ and $b$, and an output of $c$. There will however be an extra 
-input signal, $x$. 
-
-This is the control signal, and interacts as follows:
-Only when $x$ is high can the output $c$ transition. This control signals
-allows a circuit to latch the output signal, by setting $x$ high to let
-the output change, and when ready to use this signal, setting $x$ low,
-so regardless of the inputs, it will remain in this state, and not change.
-
-This is a rudimentary example, but is useful in displaying how the algorithm
-handles a system featuring both OR- and AND-causality. The concept for 
-the interaction of the control signal is:
-
-%\vspace{-4mm}
-\[
-\begin{array}{lcl}
-\mathsf{control}&\hspace{-2mm}=&\hspace{-2mm}x^{+} \rightsquigarrow c^{+} 
-	<> x^{+} \rightsquigarrow c^{-} 
-\end{array}
-\]
-
-We know this signal is an input, and let's assume we would like to latch
-the initially low output signal, and we can include this concept in the 
-scenario for this translation:
-
-%\vspace{-3mm}
-\[
-\begin{array}{lcl}
-\hspace{-2mm}\mathsf{orGateCtrl}\,  a \, b \, c \, x &\hspace{-2mm}=
-	&\hspace{-2mm}\mathsf{orGate}\, a\, b\, c <>\, \mathsf{control}
-	<>\, \mathsf{inputs}\, [a,\, b,\, x] \\
-&& <> \, \mathsf{outputs} \,  [c] <>\, \mathsf{initialise0}\, [a,\, b,\, c,\, x]
-\end{array}
-\]
-
-In this concept, we have reused the OR-gate concept, defined in 
-Section~\ref{sub:or-gate}. For reference, the fully translated STG can be found 
-in Figure~\ref{fig:or-gate-ctrl}.
-
-%\vspace{-3mm}
-
-\begin{figure}[h]
-\begin{centering}
-\includegraphics[scale=0.25]{Images/or-gate-ctrl-stg}
-\par\end{centering}
-%\vspace{-1mm}
-\protect\caption{\label{fig:or-gate-ctrl} OR-gate with control signal STG}
-%\vspace{-3mm}
-\end{figure}
-
-This STG still contains the two $c^{+}$ transitions, allowing this transition 
-when either $a^{+}$ or $b^{+}$ has occured. However, with the inclusion of $x$,
-note that both of these transitions also require $x^{+}$ to have occured. This 
-is the same for $c^{-}$. Through the addition of the \emph{control} concept, we 
-need to add AND-causality to each and every $c^{+}$ and $c^{-}$ transition with 
-$x^{+}$. The combination of signals required for each possible transition in 
-both high and low transitions are calculated in the algorithm, and we will 
-detail this process in this section.
-
-As displayed in Section~\ref{sec:examples}, there are multiple ways of
-representing a specification using concepts. However, all levels of
-abstraction available to the designer are built out of primitive low-level
-signal concepts. Given a specification, we can therefore
-break down all gate- and protocol-level constructs into `atoms', which
-significantly simplifies the translation task.
+There are multiple ways of representing a specification using concepts. However,
+all levels of abstraction available to the designer are built out of primitive 
+low-level signal concepts. Given a specification, we can therefore break down 
+all gate- and protocol-level constructs into `atoms', which significantly 
+simplifies the translation task.
 
 For this example, the specification is broken down into these signal-level 
 concepts:
@@ -905,14 +844,12 @@ concepts:
 %\vspace{-4mm}
 \[
 \begin{array}{lcl}
-\hspace{-2mm}\mathsf{orGateCtrl}\,a,\,b,\,c\,x&\hspace{-2mm}=
+\hspace{-2mm}\mathsf{circuit}\,a,\,b,\,c&\hspace{-2mm}=
 	&\hspace{-2mm}[a^{+}, b^{+}]
-	\sim\hspace{-1.5mm}|\hspace{-1.5mm}\sim\hspace{-1.5mm}>c^{+} 
-	<> a^{-}\rightsquigarrow c^{-} <> b^{-}\rightsquigarrow c^{-}\\
-~&\hspace{-2mm}<>&\hspace{-2mm}x^{+}\rightsquigarrow c^{+} <>
-	x^{+}\rightsquigarrow c^{-} <> \mathsf{inputs} \, [a,\,b,\,x] \\
-~&\hspace{-2mm}<>&\hspace{-2mm}\mathsf{outputs}\,[c]
-	<>\mathsf{initialise0}\,[a,\,b,\,c,\,x]
+	\sim\hspace{-1.5mm}|\hspace{-1.5mm}\sim\hspace{-1.5mm}>c^{+}\\
+~&\hspace{-2mm}&<>a^{-}\rightsquigarrow c^{-} <> b^{-}\rightsquigarrow c^{-}\\
+~&\hspace{-2mm}&<> \mathsf{inputs} \, [a,\,b] <>\mathsf{outputs}\,[c] \\
+~&\hspace{-2mm}&<>\mathsf{initialise0}\,[a,\,b,\,c]
 \end{array}
 \]
 
@@ -921,16 +858,17 @@ reformating these concepts into lists of causes for effects.
 Each list will be of possible causes for each OR- and AND-causality signal-level
 concept in the specification, meaning that for each OR-causality concept, 
 there will be 2 or more signals in the list, and for each AND-causality 
-concept there will be a single item list. 
+concept there will be a single item list.
 
-For example, using the concept $x^{+} \rightsquigarrow c^{+}$, for this $c^{+}$ 
-transition, there is only one possible cause of it, $x^{+}$. Therefore, this 
-forms a single item list, containing only $x^{+}$.
-
-For another example, taking the concept\\$[a^{+}, b^{+}]
+For example, taking the concept\\$[a^{+}, b^{+}]
 \sim\hspace{-1.5mm}|\hspace{-1.5mm}\sim\hspace{-1.5mm}>c^{+}$, there are
 two possible transitions for $c^{+}$ here, $a^{+}$ and $b^{+}$. These therefore 
 form a two item list. 
+
+Another example, using 
+$a^{-}\rightsquigarrow c^{-} <> b^{-}\rightsquigarrow c^{-}$, there are two
+cause transitions for $c^{-}$, namely $a^{-}$ and $b^{-}$. Both of these 
+therefore form their own single item list. 
 
 This will mean there may be several different lists for each cause transition. 
 Table~\ref{tab:list-of-concepts} contains all of the lists described above.
@@ -938,14 +876,11 @@ Table~\ref{tab:list-of-concepts} contains all of the lists described above.
 \begin{table}[h]
 \caption{Lists of possible cause transitions for effect transitions
 		\label{tab:list-of-concepts}}
-
   \centering
 \begin{tabular}[htb]{| m{2.6cm} | m{2.0cm} |}
   \hline
 Causes & \, Effect \\ \hline \hline
-$x^{+}$ & $c^{+}$ \\ \hline
 $a^{+}$, $b^{+}$ & $c^{+}$ \\ \hline
-$x^{-}$ & $c^{-}$ \\ \hline
 $a^{-}$ & $c^{-}$ \\ \hline
 $b^{-}$ & $c^{-}$ \\ \hline
   \end{tabular}
@@ -963,53 +898,34 @@ give us a list of lists. This can be viewed in Table~\ref{tab:list-of-lists}.
 \begin{tabular}[htb]{| m{2.6cm} | m{2.0cm} |}
   \hline
 Causes & \, Effect \\ \hline \hline
-[$x^{+}$], [$a^{+}$, $b^{+}$] & $c^{+}$ \\ \hline
-[$a^{-}$], [$b^{-}$], [$x^{-}$] & $c^{-}$ \\ \hline
+[$a^{+}$, $b^{+}$] & $c^{+}$ \\ \hline
+[$a^{-}$], [$b^{-}$] & $c^{-}$ \\ \hline
 
   \end{tabular}
   %\vspace{-1mm}
 \end{table}
 
-\noindent Note how for the $c^{-}$ transition there is 3 different single item 
+\noindent Note how for the $c^{-}$ transition there is 2 different single item 
 lists. Each one is an AND-causality, and why they are each in a separate list
 will become apparent in the next step. 
 
-This step is applying the \emph{Cartesian Product} to each the list of lists
+This step is applying the \emph{Cartesian Product} to each of the list of lists
 for each effect transition. This will "expand the brackets", combining each
 item of each list with every item of every other list, creating a single list 
-which provides us with the number of this transition and  whicharcs to connect 
-for each transition of each type. For example, using the list of lists for 
-$c^{+}$:
+which provides us with the number of this transition and which arcs to connect
+for each transition of each type. For this example, it is fairly simple, $c^{+}$
+has one list, and therefore the result of the Cartesian Product is the same as 
+this list. $c^{-}$ has two single item lists, and performing the cartesian 
+product on this will give us $[a^{-}\,b^{-}]$. 
 
-%\vspace{-3mm}
-\[
-\begin{array}{lcl}
-~&[a^{+}, b^{+}]\, [x^{+}] = [a^{+} x^{+}, b^{+} x^{+}]
-\end{array}
-\]
+These newly formed lists provide us with the number of transitions for each 
+effect transition. This means there will be two $c^{+}$ transitions, as the list
+as the result of the Cartesian product is a list of two items. The first 
+$c^{+}$ transition will be caused by $a^{+}$, the second will be caused by 
+$b^{+}$. 
 
-\noindent In this example, we combine every item in the first list,
-$[a^{+}, b^{+}]$, with every item in the second list, which only 
-contains $x^{+}$. This will therefore give us a new 2 item list. 
-
-This list provides us with both the number of $c^{+}$ transitions,
-2, and which transitions are the causes of each of these transitions.
-The first $c^{+}$ transition will be caused by $a^{+}$ and $x^{+}$,
-the second will be caused by $b^{+}$ and $x^{+}$. 
-
-For $c^{-}$, the result of the cartesian product will be a single item,
-as combining each item in each list will combine all three of the items 
-at once. This will be as follows:
-
-%\vspace{-3mm}
-\[
-\begin{array}{lcl}
-~&[a^{-}], [b^{-}], [x^{-}]  = [a^{-} b^{-} x^{-}]
-\end{array}
-\]
-
-\noindent There will therefore be only one $c^{-}$ transition, requiring all 
-three of $a^{-}$, $b^{-}$ and $x^{-}$ to have occured before $c^{-}$ can occur. 
+For $c^{-}$, there will be only one transition requiring both $a^{-}$ and 
+$b^{-}$.
 
 Now, we can list the read-arcs to be connected for each transition of $c$.
 This can be viewed in Table~\ref{tab:list-by-transition}.
@@ -1022,9 +938,9 @@ This can be viewed in Table~\ref{tab:list-by-transition}.
 \begin{tabular}[htb]{| m{2.6cm} | m{2.0cm} |}
   \hline
 Causes & \, Effect \\ \hline \hline
-$a^{+}$, $x^{+}$ & $c^{+}(0)$ \\ \hline
-$b^{+}$, $x^{+}$ & $c^{+}(1)$ \\ \hline
-$a^{-}$, $b^{-}$, $x^{-}$ & $c^{-}$ \\ \hline
+$a^{+}$ & $c^{+}(0)$ \\ \hline
+$b^{+}$ & $c^{+}(1)$ \\ \hline
+$a^{-}$, $b^{-}$ & $c^{-}$ \\ \hline
   \end{tabular}
   %\vspace{-1mm}
 \end{table}
@@ -1044,14 +960,13 @@ First of all, we need to add places for each signal. These are used to
 show whether a signal has transitioned high or low at any point. 
 A token in a $0$ place for example shows that that signal has 
 transitioned low. We add a $0$ and $1$ place for each signal, 
-which for this example gives us $a0$, $a1$, $b0$, $b1$, $x0$, $x1$
-$c0$ and $c1$.
+which for this example gives us $a0$, $a1$, $b0$, $b1$, $c0$ and $c1$.
 
 The interface is defined at the start of the algorithm, by listing them as 
 $inputs$, $outputs$ or $internals$, so now we need to include all the 
 transitions, and connect these to the places to form consistency loops, to 
 ensure that all signals in this system can only transition in one way when this 
-signals previous transition was in the opposite direction. 
+signal's previous transition was in the opposite direction. 
 
 This is done by taking each transition, and if it is a $+$ transition, 
 connecting the $0$ place for this signal to the transition, then connecting 
@@ -1063,7 +978,7 @@ included in these loops.
 
 \begin{figure}[h]
 \begin{centering}
-\includegraphics[scale=0.25]{Images/or-gate-ctrl-loops-stg}
+\includegraphics[scale=0.3]{Images/or-gate-loops-stg}
 \par\end{centering}
 %\vspace{-1mm}
 \protect\caption{\label{fig:loops} STG containing only consistency loops}
@@ -1078,7 +993,7 @@ Figure~\ref{fig:tokens}.
 
 \begin{figure}[h]
 \begin{centering}
-\includegraphics[scale=0.25]{Images/or-gate-ctrl-inits-stg}
+\includegraphics[scale=0.3]{Images/or-gate-inits-stg}
 \par\end{centering}
 %\vspace{-1mm}
 \protect\caption{\label{fig:tokens} STG containing consistency loops and 
@@ -1089,14 +1004,23 @@ Figure~\ref{fig:tokens}.
 Finally, we can add the connections to the transitions, and cause the 
 expected interaction between signals. We use read-arcs to connect the effect
 transitions to the places after the transition of the cause. For example, for
-$x^{+} \rightsquigarrow c^{+}$, we will connect the $x1$ place to the 
+$a^{+} \rightsquigarrow c^{+}$, we will connect the $a1$ place to the 
 transition of $c^{+}$. We use read-arcs for these, as for this example, only
 after $c^{+}$ has occured, and placed a token in $x1$, will $c^{+}$ be allowed
 to occur, but the read arc will not consume the token in $x1$ which would block
 $x^{-}$ from being able to occur. 
 
 Following this, the specification is fully translated, and the resulting STG 
-will be the same as shown in Figure~\ref{fig:or-gate-ctrl}.
+will be the same as shown in Figure~\ref{fig:or-gate-stg}.
+
+\begin{figure}[h]
+\begin{centering}
+\includegraphics[scale=0.3]{Images/or-gate-stg}
+\par\end{centering}
+%\vspace{-1mm}
+\protect\caption{\label{fig:tokens} Fully translated OR-gate STG}
+%\vspace{-3mm}
+\end{figure}
 
 %\vspace{-1mm}
 
@@ -1148,55 +1072,38 @@ will be the same as shown in Figure~\ref{fig:or-gate-ctrl}.
 
 %\vspace{-2mm}
 
-\subsection{Interoperability with STG based tools \label{sub:interop-with-stg}}
-
-The concepts tool, which translates asynchronous concepts to STGs has been
-integrated into open-source toolsuite \noun{Workcraft}~\cite{Workcraft_website}.
-This allows a designer to visualise their concept designs as STGs, to simulate,
-verify and synthesise them using other tools integrated in \noun{Workcraft},
-such as \noun{Petrify}~\cite{Cortadella} and
-\noun{Mpsat}~\cite{khomenko2004detecting}.
-If there are any corrections or additions to be made these can be done
-either directly in the STG or in the original concept specification, which can 
-then be re-translated into an updated STG. These automated processes can allow 
-for a streamlined design process of asynchronous circuits.
-
-The translation tool itself produces a \emph{.g} document format, which is a
-graph format used to store STG information. This means that it is not
-necessary to view the STG after translation, and a concept specification
-can be used directly after translation with these tools. 
-
-%\vspace{-3mm}
-
 \section{Conclusions and future work\label{sec:conclusions}}
 
-In this work we show that it is possible to design asynchronous control
-circuits at the interface between analogue and digital worlds by
-splitting their specification into operational modes, scenarios, and
-describing signal interactions and requirements of each scenario using
-high-level asynchronous concepts. These can then be translated into STGs
-that represent these operational modes, which can be used with existing
-verification and synthesis tools. STGs can be further combined to
-produce a complete model for the system specification.
+In this work, we have displayed the process of specifying behavioural and 
+compositional concepts for asynchronous circuits, using an open-source
+tool~\cite{2016_concepts_github}. This tool implements a domain-specific 
+language, featuring some built-in concepts at varying levels, allowing users to
+specify behaviours in a preferred way. 
 
-In this work, we show some more possibilites available when desingning
-asynchronous control circuits using concepts. OR-causality can be a
-useful tool to include in a circuit, and providing a seemless method
-of translation of both this, and the more common AND-causality allows
-for concepts to be used in the design of a wider range of asynchronous 
-circuits.
+This tool also features translation, a method of converting concepts into Signal
+Transition Graphs, output in a format usable by other existing design, 
+verification and synthesis tools. 
+
+The tool itself can be used on it's own using a command-line interface, and is
+integrated into \noun{Workcraft}, which can visualise many graphical modelling
+methods, including STG which can be automatically imported from the concepts 
+tool, either from concept specifications written by a user from within 
+\noun{Workcraft}, or by importing a previously written concept file.
+\noun{Workcraft} also features several verification and synthesis tools 
+integrated, which can automatically use STGs translated from concepts. 
 
 Using concepts, a user can reduce the time of designing an asynchronous
 control circuit from the ground up, as well as allow reuse of components
 either as part of a scenario or entire scenarios to reduce the design-time
-of future projects. Composition of concepts and scenarios can help
+of future projects. Composition of concepts can help
 reduce errors and save time in comparison to performing these manually.
 This method can help to make asynchronous circuits more appealing
 to industrial designers.
 
 Currently, this method works with Signal Transition Graphs, however
 it can be applied to other modelling disciplines, such as Finite State
-Machines~(FSM).
+Machines~(FSM), and an automated concepts to FSM translation method
+is aimed to be implemented.
 
 \emph{Process mining} can also be used for various purposes in conjunction
 with designing asynchronous circuits. For example, process mining can discover
