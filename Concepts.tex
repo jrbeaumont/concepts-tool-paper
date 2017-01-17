@@ -65,6 +65,7 @@ open-source toolsuite \noun{Workcraft} in which the tool is integrated.
 \sloppy
 \thispagestyle{empty}
 
+\vspace{-3mm}
 
 \section{Introduction}
 
@@ -139,12 +140,16 @@ The paper is laid out as follows:
 
 \section{Features of the concepts tool\label{sec:tool-func}}
 
-%\vspace{-2mm}
+\vspace{-3mm}
 
 The abstract base of the concepts, on which these asynchronous specific circuits
 is discussed in~\cite{2015_Beaumont_MEMOCODE}.
 
+\vspace{-3mm}
+
 \subsection{Concept notation \label{sub:concept-notation}}
+
+\vspace{-3mm}
 
 Concepts can be composed of other concepts, and this applies to the behaviours 
 of signals, as well as the specifying of the initial states and the signal 
@@ -153,6 +158,8 @@ which will feature a composition of concepts from a lower level.
 
 In this section we will explain these levels, and the standard notations of 
 concepts for these. 
+
+\vspace{-2mm}
 
 \subsubsection{\label{signal-level}Signal-level concepts}Asynchronous circuit 
 specifications are mainly composed of signal transitions, and interactions 
@@ -181,9 +188,13 @@ A key concept in asynchronous circuits is \emph{causality}:
 one signal transition \emph{causes} another signal transition, a cause and an 
 effect. This is denoted in the form: 
 
+\vspace{-3mm}
+
 \[
 rise\,a\rightsquigarrow rise\,c
 \]
+
+\vspace{-1mm}
 
 This is read as $a^{+}$ causes $c^{+}$, meaning that for the $c^{+}$ transition 
 to occur, $a^{+}$ must have occurred previously. The $\rightsquigarrow$ 
@@ -198,9 +209,15 @@ list all possible $\mathit{cause}$ transitions which need to occur in order
 One can compose any concepts using the $<>$ (diamond) operator, and this applies
 to concepts of any level, whether predefined or user-defined. For example, 
 two causality concepts can be composed.
+
+\vspace{-3mm}
+
 \[
 rise\,a\rightsquigarrow rise\,c\ <> \ rise\,b\rightsquigarrow rise\,c
 \]
+
+\vspace{-1mm}
+
 In words, $a^{+}$ \emph{and} $b^{+}$ must occur before $c^{+}$ can occur. 
 This corresponds to so-called AND-causality in the fact that several cause 
 transitions \emph{must all} have occurred before an event can occur. 
@@ -211,11 +228,13 @@ The above notation can cause long-winded specifications when lots of
 AND-causality is involved. To solve this we provise a listing option. The 
 following will acheive the same results:
 
-%\vspace{-3mm}
+\vspace{-3mm}
 
 \[
 [rise\,a, rise\,b]\sim\hspace{-1.5mm}\&\hspace{-1.5mm}\sim\hspace{-1.5mm}>rise\,c
 \]
+
+\vspace{-1mm}
 
 This form of concept can be composed as usual with any other concepts.
 
@@ -227,11 +246,13 @@ occur.
 With OR-causality, the notation used lists all possible causes for the stated 
 effect:
 
-%\vspace{-3mm}
+\vspace{-2mm}
 
 \[
 [rise\,x, rise\,y]\sim\hspace{-1.5mm}|\hspace{-1.5mm}\sim\hspace{-1.5mm}>rise\,z
 \]
+
+\vspace{-1mm}
 
 This is, \emph{either} $x^{+}$ \emph{or} $y^{+}$ must occur in order for 
 $z^{+}$ to occur.
@@ -240,25 +261,40 @@ The interactions when an effect transition is included in both AND- and
 OR-causality are interesting, and an example of when this occurs can be found 
 in Section~\ref{sec:algorithm}.
 
+\vspace{-2mm}
+
 \subsubsection{Gate-level concepts} Using the causality concept we can express
 the behaviour of gates in asynchronous circuits. For example, a \emph{buffer}
 is a gate with one input signal and one output signal,
 whose output transitions causally depend on the input ones:
+
+\vspace{-4mm}
+
 \[
 \mathsf{buffer}\,a\,b=rise\,a\rightsquigarrow rise\,b\ <>\
 fall\,a\rightsquigarrow fall\,b
 \]
 
+\vspace{-1mm}
+
 \noindent An \emph{inverter} has a similar conceptual specification, but the
 output transition is inverted:
+
+\vspace{-4mm}
+
 \[
 \mathsf{inverter}\,a\,b=rise\,a\rightsquigarrow fall\,b\ <>\
 fall\,a\rightsquigarrow rise\,b
 \]
 
+\vspace{-1mm}
+
 \noindent A \emph{C-element} is a gate with two inputs, in this example $a$ and $b$, and one
 output~$c$, which synchronises both rising and falling input transitions
 via AND-causality:
+
+\vspace{-3mm}
+
 \[
 \begin{array}{lcl}
 \mathsf{cElement}\,a\, b\, c=&\hspace{-10mm}rise\,a\!\rightsquigarrow\! 
@@ -268,16 +304,24 @@ via AND-causality:
 \end{array}
 \]
 
+\vspace{-1mm}
+
 An alternative way to express the same concept is to reuse the buffer concept:
+
+\vspace{-3mm}
 
 \[
 \mathsf{cElement}\,a\, b\, c=\mathsf{buffer}\,a\, c <> \mathsf{buffer}\,b\, c
 \]
 
+\vspace{-1mm}
+
 A C-element combines the constraints imposed on the output
 transitions by two `virtual' buffers. Behaviour of other gates can be similarly
 defined in this way. An expanded example of a C-element and other examples can 
 be found in~\cite{2015_Beaumont_MEMOCODE}.
+
+\vspace{-2mm}
 
 \subsubsection{Protocol-level concepts} In addition to gate-level concepts
 described above it is often important to specify \emph{protocols}
@@ -304,16 +348,24 @@ party responds by corresponding $b^{+}$ and $b^{-}$ transitions.
 Note that the four causality concepts match those found
 in the buffer and inverter concepts, which leads to an alternative
 way to express a handshake between~$a$ and~$b$:
+
+\vspace{-3mm}
+
 \[
 \mathsf{handshake}\,a\, b=\mathsf{buffer}\,a\, b <>\mathsf{inverter}\,b\, a
 \]
+
+\vspace{-1mm}
+
 This conceptual understanding of a handshake as being composed
 from a buffer and an inverter is often used by circuit designers as
 a convenient way of reasoning.
 
-%\vspace{-8mm}
+\vspace{-2mm}
 
 \subsection{Concepts for translation\label{sub:trans-concepts}}
+
+\vspace{-2mm}
 
 The concepts we have discussed so far are aimed at specifying the behaviour of 
 signals in a circuit. When translating these to STGs however, these behaviours 
@@ -325,7 +377,7 @@ This is due to various parts of an STG that we have not yet discussed, which
 are important for specification, namely \emph{interface} and 
 \emph{initial states}.
 
-%\vspace{-5mm}
+\vspace{-3mm}
 
 \subsubsection{Interface concepts\label{sub:interface}} 
 
@@ -337,6 +389,8 @@ signal, which is used only within this scenario.
 To specify the type of a signal (\emph{input},
 \emph{output} or \emph{internal}) we introduce the \textsf{interface} concept.
 Signal types are composed according to the following rules:
+
+\vspace{-2mm}
 
 \[
 \begin{array}{|l||l|l|l|}
@@ -373,12 +427,14 @@ specifying types of sets of signals for convenience, and to be included inline
 with other concepts. For example, to specify that signals $a$ and $b$ are 
 inputs, $c$ is an output, and $t$ is internal, it is possible to write:
 
+\vspace{-4mm}
+
 \[
 \mathsf{inputs}\,[a, b] <> \mathsf{outputs}\,[c] <>
 \mathsf{internals}\,[t].
 \]
 
-%\vspace{-5mm}
+\vspace{-4mm}
 
 \subsubsection{Initial state concepts\label{sub:initState}}
 
@@ -391,9 +447,13 @@ and~$b$, we use the $\mathsf{initialise}$ concept.
 The possible initial states are \emph{high} or \emph{low}, referred to as 
 \emph{0} or \emph{1} respectively:
 
+\vspace{-2mm}
+
 \[
 \mathsf{initialise}\,a\,0 <> \mathsf{initialise}\,x\, 1
 \]
+
+\vspace{-1mm}
 
 \noindent A signal can only be declared as initially high or low. If the 
 initial state of a signal is not defined, an error will occur, and the 
@@ -404,16 +464,21 @@ specification then the translation will also fail.
 For the ease of use, and to speed up the process, initial states can also be 
 declared in lists by on state:
 
+\vspace{-2mm}
+
 \[
 \mathsf{initialise0}\, [a, b, c] <> \mathsf{initialise1}\, [x, y]
 \]
 
+\vspace{-1mm}
 
 \noindent As an example, we can include this in the specification of a 
 handshake, to create a handshake with built-in initial state.
 $\mathsf{initialise}\,a\, 0$ sets the state of the signal
 $a$ to $0$. We can compose an initial state concept with the handshake concept
 into a combined $\mathsf{handshake00}\,a\, b$ concept as
+
+\vspace{-3mm}
 
 \[
 \begin{array}{lcl}
@@ -423,12 +488,16 @@ into a combined $\mathsf{handshake00}\,a\, b$ concept as
 \end{array}
 \]
 
+\vspace{-1mm}
+
 The resulting concept corresponds to a handshake between signals~$a$
 and~$b$ that are both initially $0$.
 
-%\vspace{-3mm}
+\vspace{-2mm}
 
 \subsection{Built-in concepts \label{sub:built-in}}
+
+\vspace{-3mm}
 
 In our previous paper, \cite{2015_Beaumont_MEMOCODE}, we have displayed several
 examples of different concepts and how they can be described in terms of 
@@ -450,13 +519,13 @@ concept.
   The behaviours of the signals are the same as in the standard 
   \texttt{handshake} concepts, but this includes initial states for the 
    signals. For this concept, both signals will be initialised to 1, or high.
-  
+\vspace{-4mm}  
   \item []
   
   \item $\mathsf{me}\,a \,b$ is a protocol-level concept. This concept defines 
   \emph{Mutual Exclusion} between two signals. This means that when one 
   of these signals is high, the other cannot transition high.
-
+\vspace{-4mm}
   \item []
   
   \item $\mathsf{meElement}\,r1\,r2\,g1\,g2$ is a gate-level concept to 
@@ -468,7 +537,7 @@ concept.
   ensure that the request signals, $r1$ and $r2$, cause their respective
   grant signals, $g1$ and $g2$, to transition high but never at the same 
   time. 
-
+\vspace{-4mm}
   \item []
   
   \item $\mathsf{andGate}\,a\,b\,c$ is a gate-level concept, using 
@@ -477,7 +546,7 @@ concept.
   $rise a$ \emph{and} $rise b$ must occur for $rise c$ to occur. 
   Following this, \emph{either} $fall a$ \emph{or} $fall b$ must 
   occur for $fall c$ to occur.
-
+\vspace{-4mm}
   \item []  
 
   \item $\mathsf{orGate}\,a\,b\,c$ is a gate-level concept, also using 
@@ -496,13 +565,21 @@ These can also be used in order to define new protocols and gates for a designer
 to use in their own specifications, making the design process easier in future 
 systems. 
 
+\vspace{-3mm}
+
 \section{Usage of the tool\label{sec:tool-use}}
+
+\vspace{-2mm}
 
 In this section, we will cover how to install the tool, how to prepare a
 concepts file and  run the tool either through command line, or through 
 \noun{Workcraft}, and the output it produces for each of these cases.
 
+\vspace{-2mm}
+
 \subsection{Installing the tool \label{sub:installing}}
+
+\vspace{-2mm}
 
 The concepts tool can be downloaded from~\cite{2016_concepts_github} on it's
 own, or it is included in the download of Workcraft. It can be used on 
@@ -521,18 +598,28 @@ to use the concepts tool. First of all,  \noun{stack} needs to be installed
 (download and instructions available from~\cite{stack_website}. 
 To install stack and the concepts tool, run: 
 
+\vspace{-2mm}
+
 \begin{lstlisting}[language=bash]
   $ stack setup --no-system-ghc
 \end{lstlisting}
 
+\vspace{-1mm}
+
 This will prepare stack to install the concepts tool. Now, to build and install
 the concepts tool, simply run:
+
+\vspace{-1mm}
 
 \begin{lstlisting}[language=bash]
   $ stack build
 \end{lstlisting}
 
+\vspace{-5mm}
+
 \subsection{Concepts file layout \label{sub:file_layout}}
+
+\vspace{-5mm}
 
 \begin{figure}[H]
 \begin{centering}
@@ -565,10 +652,10 @@ $\,\,\,\,\,\,\mathsf{initialState}= \, \mathsf{initialise0}\,[a,\,b,\,c]$
 \par\end{flushleft}
 
 \par\end{centering}
-
+\vspace{-2mm}
 \begin{centering}
 \protect\caption{\label{fig:concepts_file}A concepts file}
-
+\vspace{-2mm}
 \par\end{centering}
 
 \end{figure}
@@ -602,6 +689,8 @@ The following describes important information about specific lines.
 
 \end{description}
 
+\vspace{-1mm}
+
 The lines discussed above are the basics of writing concepts. With this 
 information, a user can write concept files, but the following lines can be 
 used for ease-of-use, ease-of-understanding, and reuse. 
@@ -611,9 +700,15 @@ interface, initial state and the operation of this separatley, by defining
 these concepts following the ``'$\mathsf{where}$''. The full circuit 
 specification is then composed of all three of these defined concepts. 
 
+\vspace{-3mm}
+
 \subsection{Using the tool from command line}
 
+\vspace{-2mm}
+
 The standard command for the tool is as follows:
+
+\vspace{-2mm}
 
 \begin{lstlisting}[language=bash]
   $ stack runghc <path-to-translate> 
@@ -621,8 +716,11 @@ The standard command for the tool is as follows:
       [--stack-yaml <path-to-stack-file>]
 \end{lstlisting}
 
+\vspace{-1mm}
+
 The three parts of this are as follows:
 \begin{itemize}
+\vspace{-2mm}
   \item \texttt{stack} - This will ensure that the dependencies and compiler 
   	are installed when running.
   \item \texttt{runghc} - This runs the translation function.
@@ -635,6 +733,7 @@ The three parts of this are as follows:
   	running the tool from outside of the directory, the path to the stack file 
 	 needs to be given.
 \end{itemize}
+\vspace{-2mm}
 
 When running the concepts tool from command line, as long as the paths to the 
 translate code, the concepts file and the \texttt{stack.yaml} file are correct,
@@ -649,13 +748,17 @@ We will assume that we have alread navigated to the concepts tool
 directory. To translate this concepts file to an STG, the following command
 must be used:
 
+\vspace{-2mm}
+
 \begin{lstlisting}[language=bash]
   $ stack runghc translate/Main.hs 
   	or_gate.hs
 \end{lstlisting}
 
-When the translation is complete, the tool will output the following:
+\vspace{-1mm}
 
+When the translation is complete, the tool will output the following:
+\begin{figure}[h]
 \begin{lstlisting}[language=bash]
 	.model out
 	.inputs A B
@@ -687,6 +790,11 @@ When the translation is complete, the tool will output the following:
 	.marking {A0 B0 C0}
 	.end
 \end{lstlisting}
+\vspace{-3mm}
+\protect\caption{\label{fig:concepts_filed}An example concepts file.}
+
+\vspace{-5mm}
+\end{figure}
 
 This output is the STG representation in \emph{.g} format. \emph{.g} files are 
 a standard type used as input to tools, such as \noun{Petrify}, \noun{Mpsat}, 
@@ -697,13 +805,19 @@ tools.
 Any errors that occur during the translation process will produce errors 
 referring to the problematic lines of the concepts file that are problematic. 
 
+\vspace{-2mm}
+
 \subsection{Using the tool from \noun{Workcraft} \label{sec:workcraft_usage}}
+
+\vspace{-2mm}
 
 This section will discuss how to use the concepts tool from within
 \noun{Workcraft}. There are many other features of \noun{Workcraft}, both as 
 part of the STG plug in, some of which I will discuss in the context of 
 concepts here, and as part of other modelling formalisms. More information on 
 these can be found at~\cite{Workcraft_website}.
+
+\vspace{-2mm}
  
 \subsubsection{Translating and authoring concepts}
 
@@ -716,6 +830,8 @@ done from the menu bar, by selecting the ``\emph{Conversion}'' menu, and then
 the ``\emph{Translate concepts...}'' option. The concepts dialog will look as 
 shown in Figure~\ref{fig:concepts_dialog_screenshot}.
 
+\vspace{-3mm}
+
 \begin{figure}[h]
 \begin{centering}
 \includegraphics[scale=0.45]{Images/concepts_dialog_screenshot.png}
@@ -725,8 +841,10 @@ shown in Figure~\ref{fig:concepts_dialog_screenshot}.
 \protect\caption{\label{fig:concepts_dialog_screenshot}The concepts dialog.}
 
 \par\end{centering}
-
+\vspace{-4mm}
 \end{figure}
+
+\vspace{-3mm}
 
 From within this dialog, one can write their own concepts, from the default 
 template as shown in Figure~\ref{fig:concepts_dialog_screenshot}, or open an 
@@ -734,7 +852,7 @@ existing concepts file, with the \emph{.hs} extension. When satisfied with the
 concepts written, a user can choose to save the file, if not already saved, and
 then translate these concepts.
 
-\begin{figure}[H]
+\begin{figure}[h]
 \begin{centering}
 \includegraphics[scale=0.45]{Images/concepts_dialog_or_gate.png}
 \par\end{centering}
@@ -744,7 +862,6 @@ then translate these concepts.
 			specification typed in.}
 
 \par\end{centering}
-
 \end{figure}
 
 Figure~\ref{fig:concepts_dialog_or_gate} is the concepts dialog after we have 
@@ -752,7 +869,8 @@ opened the OR-gate example concept specification
 (Section~\ref{sub:file_layout}). Clicking translate at this point will produce 
 an STG representation of these concepts inthe workspace. 
 
-\begin{figure}[H]
+
+\begin{figure}[h]
 \begin{centering}
 \includegraphics[scale=0.2]{Images/concepts_translated.png}
 \par\end{centering}
@@ -762,20 +880,24 @@ an STG representation of these concepts inthe workspace.
 			translating the concepts.}
 
 \par\end{centering}
-
+\vspace{-4mm}
 \end{figure}
 
-The translated concepts will look as shown in 
-Figure~\ref{fig:concepts_translated}.
 
-Now, a user can choose to insert more concepts, make changes to this STG, and 
-once they are satisfied with it, can then perform various functions on this STG.
-One can perform transformations, verifications, simulations and synthesis on 
-this STG using the menus within this workspace. Any further changes to this 
-STG, based on the results of these operations can be made to this STG or to the
-concepts file. 
+
+The translated concepts will look as shown in 
+Figure~\ref{fig:concepts_translated}. Now, a user can choose to insert more 
+concepts, make changes to this STG, and once they are satisfied with it, can 
+then perform various functions on this STG. One can perform transformations, 
+verifications, simulations and synthesis on this STG using the menus within this 
+workspace. Any further changes to this STG, based on the results of these 
+operations can be made to this STG or to the concepts file. 
+
+\vspace{-3mm}
 
 \subsection{Importing concepts directly}
+
+\vspace{-2mm}
 
 In \noun{Workcraft} it is also possible to import concepts directly from a file,
 without having to view the concepts first. This can be done from the 
@@ -783,6 +905,7 @@ without having to view the concepts first. This can be done from the
 
 \begin{figure}[H]
 \begin{centering}
+\vspace{-3mm}
 \includegraphics[scale=0.4]{Images/import_menu_screenshot.png}
 \par\end{centering}
 
@@ -791,7 +914,7 @@ without having to view the concepts first. This can be done from the
 			option of \emph{.hs} files.}
 
 \par\end{centering}
-
+\vspace{-3mm}
 \end{figure}
 
 When importing concepts using this menu, ensure to set the 
@@ -799,7 +922,11 @@ When importing concepts using this menu, ensure to set the
 Figure~\ref{fig:import_menu_screenshot}. Any concept files imported will be
 automatically translated to an STG.
 
+\vspace{-3mm}
+
 \subsection{Errors}
+
+\vspace{-2mm}
 
 If any errors are encountered during the translation process, \noun{Workcraft} 
 will produce a helpful error message. This usually can tell you with more 
@@ -811,7 +938,11 @@ These errors will include whether a signal has not been declared as an input or
 output, a signal has not had it's initial state given, or even that the 
 concepts tool has not been installed correctly. 
 
+\vspace{-3mm}
+
 \section{Concepts to STG translation algorithm\label{sec:algorithm}}
+
+\vspace{-2mm}
 
 Concepts are a useful way of specifying asynchronous circuits, but
 specifications also need to be \emph{verified} against certain properties to
@@ -841,7 +972,7 @@ simplifies the translation task.
 For this example, the specification is broken down into these signal-level 
 concepts:
 
-%\vspace{-4mm}
+\vspace{-4mm}
 \[
 \begin{array}{lcl}
 \hspace{-2mm}\mathsf{circuit}\,a,\,b,\,c&\hspace{-2mm}=
@@ -852,6 +983,8 @@ concepts:
 ~&\hspace{-2mm}&<>\mathsf{initialise0}\,[a,\,b,\,c]
 \end{array}
 \]
+
+\vspace{-1mm}
 
 \noindent The first step is to prepare the read-arcs, and this is done by
 reformating these concepts into lists of causes for effects.
@@ -873,8 +1006,10 @@ therefore form their own single item list.
 This will mean there may be several different lists for each cause transition. 
 Table~\ref{tab:list-of-concepts} contains all of the lists described above.
 
+\vspace{-1mm}
+
 \begin{table}[h]
-\caption{Lists of possible cause transitions for effect transitions
+\caption{Lists of cause transitions by effect transitions
 		\label{tab:list-of-concepts}}
   \centering
 \begin{tabular}[htb]{| m{2.6cm} | m{2.0cm} |}
@@ -884,14 +1019,16 @@ $a^{+}$, $b^{+}$ & $c^{+}$ \\ \hline
 $a^{-}$ & $c^{-}$ \\ \hline
 $b^{-}$ & $c^{-}$ \\ \hline
   \end{tabular}
-  %\vspace{-3mm}
+  \vspace{-1mm}
 \end{table}
 
 \noindent From this, we can then combine the lists by effect transition, to 
 give us a list of lists. This can be viewed in Table~\ref{tab:list-of-lists}.
 
+\vspace{-1mm}
+
 \begin{table}[h]
-\caption{Lists of lists of cause transitions for effect transitions
+\caption{Lists of lists of cause transitions
 		\label{tab:list-of-lists}}
 
   \centering
@@ -902,7 +1039,7 @@ Causes & \, Effect \\ \hline \hline
 [$a^{-}$], [$b^{-}$] & $c^{-}$ \\ \hline
 
   \end{tabular}
-  %\vspace{-1mm}
+ \vspace{-3mm}
 \end{table}
 
 \noindent Note how for the $c^{-}$ transition there is 2 different single item 
@@ -942,7 +1079,7 @@ $a^{+}$ & $c^{+}(0)$ \\ \hline
 $b^{+}$ & $c^{+}(1)$ \\ \hline
 $a^{-}$, $b^{-}$ & $c^{-}$ \\ \hline
   \end{tabular}
-  %\vspace{-1mm}
+\vspace{-1mm}
 \end{table}
 
 The numbers of the $c^{+}$ transitions are necessary for reference
@@ -977,12 +1114,13 @@ shown in Figure~\ref{fig:loops}. Note that both $c^{+}$ transitions are
 included in these loops.
 
 \begin{figure}[h]
+\vspace{-4mm}
 \begin{centering}
 \includegraphics[scale=0.3]{Images/or-gate-loops-stg}
 \par\end{centering}
 %\vspace{-1mm}
 \protect\caption{\label{fig:loops} STG containing only consistency loops}
-%\vspace{-3mm}
+\vspace{-1mm}
 \end{figure}
 
 Now the algorithm introduces the initial states. All of the signals are 
@@ -992,13 +1130,14 @@ in each $0$ place for each signal. This will produce the STG displayed in
 Figure~\ref{fig:tokens}.
 
 \begin{figure}[h]
+\vspace{-4mm}
 \begin{centering}
 \includegraphics[scale=0.3]{Images/or-gate-inits-stg}
 \par\end{centering}
 %\vspace{-1mm}
-\protect\caption{\label{fig:tokens} STG containing consistency loops and 
+\protect\caption{\label{fig:tokens} STG with consistency loops and 
 			initial states}
-%\vspace{-3mm}
+\vspace{-1mm}
 \end{figure}
 
 Finally, we can add the connections to the transitions, and cause the 
@@ -1014,17 +1153,17 @@ Following this, the specification is fully translated, and the resulting STG
 will be the same as shown in Figure~\ref{fig:or-gate-stg}.
 
 \begin{figure}[h]
+\vspace{-4mm}
 \begin{centering}
 \includegraphics[scale=0.3]{Images/or-gate-stg}
 \par\end{centering}
 %\vspace{-1mm}
-\protect\caption{\label{fig:tokens} Fully translated OR-gate STG}
-%\vspace{-3mm}
+\protect\caption{\label{fig:or-gate-stg} Fully translated OR-gate STG}
+\vspace{-5mm}
 \end{figure}
 
-%\vspace{-1mm}
 
-\begin{algorithm}[H]
+\begin{algorithm}[t]
 \begin{algorithmic}
 \caption{Algorithm for translating concepts to STGs\label{alg:translation}}
 \For {Signal $s$ in \textbf{System}}
@@ -1070,9 +1209,11 @@ will be the same as shown in Figure~\ref{fig:or-gate-stg}.
 \end{algorithmic}
 \end{algorithm}
 
-%\vspace{-2mm}
+\vspace{-2mm}
 
 \section{Conclusions and future work\label{sec:conclusions}}
+
+\vspace{-3mm}
 
 In this work, we have displayed the process of specifying behavioural and 
 compositional concepts for asynchronous circuits, using an open-source
