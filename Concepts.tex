@@ -27,7 +27,7 @@
 
 \twocolumn
 
-\title{Plato - A tool for behavioural 
+\title{Plato: a tool for behavioural 
 \\ sepcification of asynchronous circuits}
 \author{Jonathan Beaumont\\
 \texttt{j.r.beaumont@ncl.ac.uk}\\
@@ -40,9 +40,7 @@ UK}}
 Asynchronous circuits are becoming increasingly important in
 system design, where they orchestrate
 the interface between synchronous computation components
-and the analogue environment, which is inherently asynchronous
-and has high uncertainty with respect to power supply,
-temperature and long-term ageing effects.
+and the analogue environment.
 However, wide adoption of asynchronous circuits by industrial users is
 hindered by a steep learning curve for asynchronous control models,
 such as Signal Transition Graphs, that are developed by the academic
@@ -52,15 +50,12 @@ asynchronous circuits.
 Previously, we have introduced a novel high-level description language
 for asynchronous circuits, which is based on behavioural
 \textit{concepts} -- high-level descriptions of asynchronous circuit
-requirements, that can be shared, reused and extended by users. 
-In this paper we will discuss our open-source Haskell based tool, \noun{Plato} 
+requirements.
+In this paper we will discuss our open-source tool, \noun{Plato} 
 which allows the specification of asynchronous circuits using concepts, and 
 features the ability to automatically translate these to Signal Transition 
-Graphs for further processing by conventional asynchronous and synchronous EDA 
-tools, such as \noun{Petrify} and \noun{Mpsat}. We will discuss the translation
-algorithm, and the design flow using both the stand-alone too and the design 
-flow using open-source toolsuite \noun{Workcraft} in which the tool is 
-integrated.
+Graphs for further processing by conventional asynchronous EDA 
+tools, such as \noun{Petrify} and \noun{Mpsat}.
 \end{abstract}
 
 \sloppy
