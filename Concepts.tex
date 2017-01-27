@@ -1,3 +1,19 @@
+% TO:DO
+% Add David cell example as motivational example to Introduction to help explain levels of concepts
+%
+% Use haskell syntax for haskell code examples
+%
+% Update examples (such as figure 1) to use David cell too
+% 
+% Create one big figure to show the design flow in Workcraft
+% 
+% In "Using Plato from Workcraft" section, remove things that could be outdated due to future implementations
+%
+% Remove some references, some are old, some have been updated
+% 
+% Generally ensure that the whole paper runs smoothly, everything is in order, and nothing referes to an old version of this paper
+%
+
 
 \documentclass[british,conference,compsoc]{IEEEtran}
 \usepackage[T1]{fontenc}
@@ -110,18 +126,23 @@ as well as synthesise an asynchronous circuit implementation that is \
 emph{speed-independent}, i.e. guaranteed to work correctly regardless of 
 component delays~\cite{Muller_1959_ts}.
 
-Concepts are not supported by these tools, and rather than reinvent the wheel by
-authoring tools to verify and synthesize concepts directly, we can 
-\emph{translate} concepts to STGs, for use with these existing tools.
+Concepts are not supported by these tools, and rather than
+authoring tools to verify and synthesize concepts directly, which is a time 
+consuming process, we can \emph{translate} concepts to STGs, for use with these
+existing tools.
 
 In this paper, we will discuss the implementation of the domain specific 
 language and translation tool for concepts, called 
-\noun{Plato}~\cite{2016_concepts_github} embedded in Haskell. \noun{Plato} is 
-also integrated into \noun{Workcraft}~\cite{Workcraft_website}, an open-source 
+\noun{Plato}~\cite{2016_concepts_github} embedded in Haskell. 
+If STGs are the assembly language of asynchronous circuits, \noun{Plato} is a 
+compiler from a higher-level language, concepts, to this assembler. 
+
+\noun{Plato} is 
+integrated into \noun{Workcraft}~\cite{Workcraft_website}, an open-source 
 EDA tool which also features some verification and synthesis tools for STGs, 
 and we will discuss the use of the tool from within \noun{Workcraft}.
 
-The paper is laid out as follows:
+The contributions of this paper are:
 \vspace{-1mm}
 \begin{itemize}
   \item We detail the notations of concepts within \noun{Plato} and the built in
@@ -489,450 +510,77 @@ and~$b$ that are both initially $0$.
 
 \vspace{-2mm}
 
-\subsection{Built-in concepts \label{sub:built-in}}
-
-\vspace{-3mm}
-
-In our previous paper, \cite{2015_Beaumont_MEMOCODE}, we have displayed several
-examples of different concepts and how they can be described in terms of 
-concepts in several ways, either from base level signal-level concepts, or 
-through reuse of pre-defined gate- and protocol-level concepts.
-
-In this section, we will detail further concepts included with the \noun{Plato}
-along with those already described in Sections~\ref{sub:concept-notation} 
-and~\ref{sub:trans-concepts}. All of these are often used in the specification 
-of asynchronous circuits and therefore it is useful to include them, to avoid a 
-user having to define these for each specification. For each of these we will 
-explain their use for asynchronous circuits, and give the standard usage of the 
-concept. 
-
-\begin{itemize}
-  
-  \item $\mathsf{handshake11}\,a \,b$ is a protocol-level concept, similar to 
-  $\mathsf{handshake00}\,a \,b$ as discussed in Section~\ref{sub:initState}. 
-  The behaviours of the signals are the same as in the standard 
-  \texttt{handshake} concepts, but this includes initial states for the 
-   signals. For this concept, both signals will be initialised to 1, or high.
-\vspace{-4mm}  
-  \item []
-  
-  \item $\mathsf{me}\,a \,b$ is a protocol-level concept. This concept defines 
-  \emph{Mutual Exclusion} between two signals. This means that when one 
-  of these signals is high, the other cannot transition high.
-\vspace{-4mm}
-  \item []
-  
-  \item $\mathsf{meElement}\,r1\,r2\,g1\,g2$ is a gate-level concept to 
-  apply the mutual exclusion protocol. In this case, there are four signals. 
-  Two are intputs ($r1$ and $r2$), the other two are 
-  outputs~($g1$ and $g2$). $r1$ transitioning high will cause $g1$ to go
-  transition high, and this is the same for $r2$ and $g2$, however,
-  $g1$ and $g2$ are mutually exclusive. The aim of this concept is to 
-  ensure that the request signals, $r1$ and $r2$, cause their respective
-  grant signals, $g1$ and $g2$, to transition high but never at the same 
-  time. 
-\vspace{-4mm}
-  \item []
-  
-  \item $\mathsf{andGate}\,a\,b\,c$ is a gate-level concept, using 
-  OR-causality to implement a standard AND gate. Signals $a$ and 
-  $b$ are inputs to the gate, and $c$ is the output. \emph{Both} 
-  $rise a$ \emph{and} $rise b$ must occur for $rise c$ to occur. 
-  Following this, \emph{either} $fall a$ \emph{or} $fall b$ must 
-  occur for $fall c$ to occur.
-\vspace{-4mm}
-  \item []  
-
-  \item $\mathsf{orGate}\,a\,b\,c$ is a gate-level concept, also using 
-  OR-causality. Signals $a$ and $b$ are inputs to the gate, and $c$ is the 
-  output. \emph{Either} $rise a$ \emph{or} $rise b$ must occur for $rise c$ to 
-  occur. Following this, \emph{both} $fall a$ and $fall b$ must occur for 
-  $fall c$ to occur. 
-  
-\end{itemize}
-
-\noindent All of the concepts described in this section are some of the most
-common behaviours found in asynchronous circuits, and these can be used
-to specify many different asynchronous circuits. 
-
-These can also be used in order to define new protocols and gates for a designer
-to use in their own specifications, making the design process easier in future 
-systems. 
-
-\vspace{-3mm}
-
-\section{Usage of the tool\label{sec:tool-use}}
-
-\vspace{-2mm}
-
-In this section, we will cover how to install the tool, how to prepare a
-concepts file and run \noun{Plato} either through command line, or through 
-\noun{Workcraft}, and the output it produces for each of these cases.
-
-\vspace{-2mm}
-
-\subsection{Installing the tool \label{sub:installing}}
-
-\vspace{-2mm}
-
-\noun{Plato} can be downloaded from~\cite{2016_concepts_github} on it's
-own, or it is included in the download of Workcraft. It can be used on 
-\emph{Windows}, \emph{Linux} or \emph{Mac OS X}.
-
-Download either\noun{Plato} or \noun{Workcraft}, extract it and move it to
-a known directory. Using a terminal, navigate to this directory,
-or if using \noun{Workcraft}, navigate to the \noun{Workcraft} directory, and
-then navigate to the \noun{Plato} directory, found in \texttt{tools/concepts} 
-(for \emph{OS X}, the \noun{Workcraft} directory is located within the 
-\texttt{Workcraft.app} contents folder. The concepts tool will be found at 
-\texttt{Contents/Resources/tools/concepts}.
-
-Now, the process of installing the tool is the same, regardless of how you aim 
-to use it. First of all, \noun{stack} needs to be installed 
-(download and instructions available from~\cite{stack_website}. 
-To install stack and \noun{Plato}, run: 
-
-\vspace{-2mm}
-
-\begin{lstlisting}[language=bash]
-  $ stack setup --no-system-ghc
-\end{lstlisting}
-
-\vspace{-1mm}
-
-This will prepare stack to install \noun{Plato}. Now, to build and install
-the tool, simply run:
-
-\vspace{-1mm}
-
-\begin{lstlisting}[language=bash]
-  $ stack build
-\end{lstlisting}
-
-\vspace{-5mm}
-
-\subsection{Concepts file layout \label{sub:file_layout}}
-
-\vspace{-5mm}
-
-\begin{figure}[H]
-\begin{centering}
-
-\begin{flushleft}
-$\,\mathsf{module}\, Concept \, \mathsf{where}$
-\par\end{flushleft}
-
-\begin{flushleft}
-$\,\mathsf{import}\, Tuura.Concept.STG$
-\par\end{flushleft}
-
-\begin{flushleft}
-$\,\mathsf{circuit}\,a \,b \,c=\mathsf{\,interface}\,<> \mathsf{\, operation}
-<>\,\mathsf{initialState}$
-
-$\,\,\,\mathsf{where}$
-\par\end{flushleft}
-
-\begin{flushleft}
-$\,\,\,\,\,\,\mathsf{interface}=\mathsf{inputs}\,[a,b]<>\mathsf{outputs}\,[c]$
-\par\end{flushleft}
-
-\begin{flushleft}
-$\,\,\,\,\,\,\mathsf{operation}= \mathsf{orGate}\,a\,b\,c$
-\par\end{flushleft}
-
-\begin{flushleft}
-$\,\,\,\,\,\,\mathsf{initialState}= \, \mathsf{initialise0}\,[a,\,b,\,c]$
-\par\end{flushleft}
-
-\par\end{centering}
-\vspace{-2mm}
-\begin{centering}
-\protect\caption{\label{fig:concepts_file}A concepts file}
-\vspace{-2mm}
-\par\end{centering}
-
-\end{figure}
-
-The concepts file we will discuss is found in Figure~\ref{fig:concepts_file}.
-All concept files must be edited in a plain-text editor, and saved with the 
-``.hs'' file extension, as the concepts are written in Haskell code. 
-
-The following describes important information about specific lines.
-
-\begin{description}
-  \item [Line 1]
-  This line must be included in all concept files, as the first line. This 
-  ensures that when translating, this is recognised as a concepts file.
-  
-  \item [Line 2] must also remain in all concept files, before any concepts 
-  begin to be defined. Importing this module means that the standard operators 
-  and existing gates/protocols can be used. 
-  
-  \item [Line 3] is where a user can begin to define their concepts. 
-  ``\texttt{circuit}'' must begin the line, but after this, a user can choose 
-  what characters they wish to represent their signals. In this case, we use 
-  \texttt{a}, \texttt{b} and \texttt{c}. Whatever number of signals appear in 
-  the system, each one must have a character representation. Following the 
-  equals sign, ``='', we now start defining concepts.
-  
-  \item [Line 4] is simply ``\texttt{where}''. This is used to separate the main
-  concept definition from the user-defined concepts. If a concept definition 
-  does not need any user defined concepts, this \texttt{where}, and all 
-  following lines can be omitted.
-
-\end{description}
-
-\vspace{-1mm}
-
-The lines discussed above are the basics of writing concepts. With this 
-information, a user can write concept files, but the following lines can be 
-used for ease-of-use, ease-of-understanding, and reuse. 
-
-The example we have used is of that of an OR-gate. We have defined the 
-interface, initial state and the operation of this separatley, by defining 
-these concepts following the ``'$\mathsf{where}$''. The full circuit 
-specification is then composed of all three of these defined concepts. 
-
-\vspace{-3mm}
-
-\subsection{Using \noun{Plato} from command line}
-
-\vspace{-2mm}
-
-The standard command for the tool is as follows:
-
-\vspace{-2mm}
-
-\begin{lstlisting}[language=bash]
-  $ stack runghc <path-to-translate> 
-      <path-to-concepts-file> 
-      [--stack-yaml <path-to-stack-file>]
-\end{lstlisting}
-
-\vspace{-1mm}
-
-The three parts of this are as follows:
-\begin{itemize}
-\vspace{-2mm}
-  \item \texttt{stack} - This will ensure that the dependencies and compiler 
-  	are installed when running.
-  \item \texttt{runghc} - This runs the translation function.
-  \item \texttt{<path-to-translate>} - This is file path pointing to the 
-  	translate code file, which performs the necessary operations to translate 
-	concepts to STGs.
-  \item \texttt{<path-to-concepts-file>} - This is the path pointing to the file
-  	containing the concepts to be translated.
-  \item \texttt{[-\,-stack-yaml <path-to-stack-file>]} - This is optional. If 
-  	running the tool from outside of the directory, the path to the stack file 
-	 needs to be given.
-\end{itemize}
-\vspace{-2mm}
-
-When running \noun{Plato} from command line, as long as the paths to the 
-translate code, the concepts file and the \texttt{stack.yaml} file are correct,
-it doesn't matter from which directory the tool is run.  The \texttt{stack.yaml}
-file is located in the base of the \noun{Plato} directory.
-
-As an example, we will use the example from Section~\ref{sub:file_layout}, an 
-OR-gate. Using a plain-text editor, type this concept specification and save it
-as "\texttt{or\_gate.hs}". For this example we will store it in the \noun{Plato}
-directory, but it can be saved anywhere, as long as you know the path.
-We will assume that we have alread navigated to the \noun{Plato}
-directory. To translate this concepts file to an STG, the following command
-must be used:
-
-\vspace{-2mm}
-
-\begin{lstlisting}[language=bash]
-  $ stack runghc translate/Main.hs 
-  	or_gate.hs
-\end{lstlisting}
-
-\vspace{-1mm}
-
-%\begin{figure}[h]
-%\begin{lstlisting}[language=bash]
-%	.model out
-%	.inputs A B
-%	.outputs C
-%	.internal
-%	.graph
-%	A0 A+
-%	A+ A1
-%	A1 A-
-%	A- A0
-%	B0 B+
-%	B+ B1
-%	B1 B-
-%	B- B0
-%	C0 C+
-%	C+ C1
-%	C1 C-
-%	C- C0
-%	A0 C-
-%	C- A0
-%	B0 C-
-%	C- B0
-%	C0 C+/1
-%	C+/1 C1
-%	A1 C+
-%	C+ A1
-%	B1 C+/1
-%	C+/1 B1
-%	.marking {A0 B0 C0}
-%	.end
-%\end{lstlisting}
+%\subsection{Built-in concepts\label{sub:built-in}}
+%
 %\vspace{-3mm}
-%\protect\caption{\label{fig:concepts_filed}An example concepts file.}
-%\vspace{-5mm}
-%\end{figure}
-
-When the translation is complete, the tool will output a set of strings, 
-referencing signal names, transitions and places.
-This output is the STG representation in a file format, \emph{.g}. \emph{.g} 
-files are a standard type used as input to tools, such as \noun{Petrify}, 
-\noun{Mpsat}, and \noun{Workcraft}. Therefore, this output can by 
-copy-and-pasted into a file, saved with the file etension \emph{.g}, and 
-then used as input to these tools. 
-
-Any errors that occur during the translation process will produce errors 
-referring to the problematic lines of the concepts file that are problematic. 
-
-\vspace{-2mm}
-
-\subsection{Using \noun{Plato} from \noun{Workcraft} \label{sec:workcraft_usage}}
-
-\vspace{-2mm}
-
-This section will discuss how to use \noun{Plato} from within
-\noun{Workcraft}. There are many other features of \noun{Workcraft}, both as 
-part of the STG plug in, some of which I will discuss in the context of 
-concepts here, and as part of other modelling formalisms. More information on 
-these can be found at~\cite{Workcraft_website}.
-
-\vspace{-2mm}
- 
-\subsubsection{Translating and authoring concepts}
-
-First of all, \noun{Plato} should be installed, as per the instructions in
-Section~\ref{sub:installing}. To start using \noun{Plato} from within Workcraft, 
-start Workcraft, and open a new Signal Transition Graph work. 
-
-To start specifying and translating concepts, open the concepts dialog.  This is
-done from the menu bar, by selecting the ``\emph{Conversion}'' menu, and then
-the ``\emph{Translate concepts...}'' option. The concepts dialog will look as 
-shown in Figure~\ref{fig:concepts_dialog_screenshot}.
-
+%
+%In our previous paper, \cite{2015_Beaumont_MEMOCODE}, we have displayed several
+%examples of different concepts and how they can be described in terms of 
+%concepts in several ways, either from base level signal-level concepts, or 
+%through reuse of pre-defined gate- and protocol-level concepts.
+%
+%In this section, we will detail further concepts included with the \noun{Plato}
+%along with those already described in Sections~\ref{sub:concept-notation} 
+%and~\ref{sub:trans-concepts}. All of these are often used in the specification 
+%of asynchronous circuits and therefore it is useful to include them, to avoid a 
+%user having to define these for each specification. For each of these we will 
+%explain their use for asynchronous circuits, and give the standard usage of the 
+%concept. 
+%
+%\begin{itemize}
+%  
+%  \item $\mathsf{handshake11}\,a \,b$ is a protocol-level concept, similar to 
+%  $\mathsf{handshake00}\,a \,b$ as discussed in Section~\ref{sub:initState}. 
+%  The behaviours of the signals are the same as in the standard 
+%  \texttt{handshake} concepts, but this includes initial states for the 
+%   signals. For this concept, both signals will be initialised to 1, or high.
+%\vspace{-4mm}  
+%  \item []
+%  
+%  \item $\mathsf{me}\,a \,b$ is a protocol-level concept. This concept defines 
+%  \emph{Mutual Exclusion} between two signals. This means that when one 
+%  of these signals is high, the other cannot transition high.
+%\vspace{-4mm}
+%  \item []
+%  
+%  \item $\mathsf{meElement}\,r1\,r2\,g1\,g2$ is a gate-level concept to 
+%  apply the mutual exclusion protocol. In this case, there are four signals. 
+%  Two are intputs ($r1$ and $r2$), the other two are 
+%  outputs~($g1$ and $g2$). $r1$ transitioning high will cause $g1$ to go
+%  transition high, and this is the same for $r2$ and $g2$, however,
+%  $g1$ and $g2$ are mutually exclusive. The aim of this concept is to 
+%  ensure that the request signals, $r1$ and $r2$, cause their respective
+%  grant signals, $g1$ and $g2$, to transition high but never at the same 
+%  time. 
+%\vspace{-4mm}
+%  \item []
+%  
+%  \item $\mathsf{andGate}\,a\,b\,c$ is a gate-level concept, using 
+%  OR-causality to implement a standard AND gate. Signals $a$ and 
+%  $b$ are inputs to the gate, and $c$ is the output. \emph{Both} 
+%  $rise a$ \emph{and} $rise b$ must occur for $rise c$ to occur. 
+%  Following this, \emph{either} $fall a$ \emph{or} $fall b$ must 
+%  occur for $fall c$ to occur.
+%\vspace{-4mm}
+%  \item []  
+%
+%  \item $\mathsf{orGate}\,a\,b\,c$ is a gate-level concept, also using 
+%  OR-causality. Signals $a$ and $b$ are inputs to the gate, and $c$ is the 
+%  output. \emph{Either} $rise a$ \emph{or} $rise b$ must occur for $rise c$ to 
+%  occur. Following this, \emph{both} $fall a$ and $fall b$ must occur for 
+%  $fall c$ to occur. 
+%  
+%\end{itemize}
+%
+%\noindent All of the concepts described in this section are some of the most
+%common behaviours found in asynchronous circuits, and these can be used
+%to specify many different asynchronous circuits. 
+%
+%These can also be used in order to define new protocols and gates for a designer
+%to use in their own specifications, making the design process easier in future 
+%systems. 
+%
 %\vspace{-3mm}
-
-\begin{figure}[h]
-\begin{centering}
-\includegraphics[scale=0.45]{Images/concepts_dialog_screenshot.png}
-\par\end{centering}
-
-\begin{centering}
-\protect\caption{\label{fig:concepts_dialog_screenshot}The concepts dialog.}
-
-\par\end{centering}
-\vspace{-4mm}
-\end{figure}
-
-%\vspace{-3mm}
-
-From within this dialog, one can write their own concepts, from the default 
-template as shown in Figure~\ref{fig:concepts_dialog_screenshot}, or open an 
-existing concepts file, with the \emph{.hs} extension. When satisfied with the 
-concepts written, a user can choose to save the file, if not already saved, and
-then translate these concepts.
-
-\begin{figure}[h]
-\begin{centering}
-\includegraphics[scale=0.45]{Images/concepts_dialog_or_gate.png}
-\par\end{centering}
-
-\begin{centering}
-\protect\caption{\label{fig:concepts_dialog_or_gate}The concepts dialog with a 
-			specification typed in.}
-
-\par\end{centering}
-\end{figure}
-
-Figure~\ref{fig:concepts_dialog_or_gate} is the concepts dialog after we have 
-opened the OR-gate example concept specification 
-(Section~\ref{sub:file_layout}). Clicking translate at this point will produce 
-an STG representation of these concepts inthe workspace. 
-
-
-\begin{figure}[h]
-\begin{centering}
-\includegraphics[scale=0.2]{Images/concepts_translated.png}
-\par\end{centering}
-
-\begin{centering}
-\protect\caption{\label{fig:concepts_translated}The STG produced from 
-			translating the concepts.}
-
-\par\end{centering}
-\vspace{-4mm}
-\end{figure}
-
-
-
-The translated concepts will look as shown in 
-Figure~\ref{fig:concepts_translated}. Now, a user can choose to insert more 
-concepts, make changes to this STG, and once they are satisfied with it, can 
-then perform various functions on this STG. One can perform transformations, 
-verifications, simulations and synthesis on this STG using the menus within this 
-workspace. Any further changes to this STG, based on the results of these 
-operations can be made to this STG or to the concepts file. 
-
-\vspace{-3mm}
-
-\subsection{Importing concepts directly}
-
-\vspace{-2mm}
-
-In \noun{Workcraft} it is also possible to import concepts directly from a file,
-without having to view the concepts first. This can be done from the 
-``\emph{File}'' menu, by selecting the ``\emph{Import...}'' option. 
-
-\begin{figure}[H]
-\begin{centering}
-\vspace{-3mm}
-\includegraphics[scale=0.4]{Images/import_menu_screenshot.png}
-\par\end{centering}
-
-\begin{centering}
-\protect\caption{\label{fig:import_menu_screenshot}The import menu and the 
-			option of \emph{.hs} files.}
-
-\par\end{centering}
-\vspace{-3mm}
-\end{figure}
-
-When importing concepts using this menu, ensure to set the 
-``\emph{Files of Type}'' option to ``\emph{Concepts file (.hs)}'', as shown in 
-Figure~\ref{fig:import_menu_screenshot}. Any concept files imported will be
-automatically translated to an STG.
-
-\vspace{-3mm}
-
-\subsection{Errors}
-
-\vspace{-2mm}
-
-If any errors are encountered during the translation process, \noun{Workcraft} 
-will produce a helpful error message. This usually can tell you with more 
-detail what the issue that is causing the error is, but will ask you to refer 
-to \noun{Workcraft}'s console window for specific line numbers or signals which
-need to be corrected. 
-
-These errors will include whether a signal has not been declared as an input or
-output, a signal has not had it's initial state given, or even that \noun{Plato}
-has not been installed correctly. 
-
-\vspace{-3mm}
 
 \section{Concepts to STG translation algorithm\label{sec:algorithm}}
 
@@ -1156,7 +804,7 @@ will be the same as shown in Figure~\ref{fig:or-gate-stg}.
 \end{figure}
 
 
-\begin{algorithm}[t]
+\begin{algorithm}[h]
 \begin{algorithmic}
 \caption{Algorithm for translating concepts to STGs\label{alg:translation}}
 \For {Signal $s$ in \textbf{System}}
@@ -1164,7 +812,7 @@ will be the same as shown in Figure~\ref{fig:or-gate-stg}.
 \EndFor
 
 \For {Each effect transition $e$}
-  \State $allCauses$ $\leftarrow$ Concatinate lists of possible causes for $e$
+  \State $allCauses$ $\leftarrow$ Concatinate lists  possible causes for $e$
   \State $transitionList$ $\leftarrow$ \emph{Cartesian Product} \textbf{of} 
 	$allCauses$
   \For {$i = 0$ to Length of $transitionList$}
@@ -1201,6 +849,380 @@ will be the same as shown in Figure~\ref{fig:or-gate-stg}.
 \EndFor
 \end{algorithmic}
 \end{algorithm}
+
+
+\section{Usage of the tool\label{sec:tool-use}}
+
+\vspace{-2mm}
+
+%In this section, we will cover how to install the tool, how to prepare a
+%concepts file and run \noun{Plato} either through command line, or through 
+%\noun{Workcraft}, and the output it produces for each of these cases.
+
+In this section, we will discuss the design flow, including the preparation of 
+a concepts file, the translation methods from within \noun{Workcraft}, and 
+the uses from the translated STGs. This tool can also be used from command line,
+however, the design flow can include a GUI from authoring concepts to synthesis
+from within \noun{Workcraft}. 
+
+%\vspace{-2mm}
+%
+%\subsection{Installing the tool \label{sub:installing}}
+%
+%\vspace{-2mm}
+%
+%\noun{Plato} can be downloaded from~\cite{2016_concepts_github} on it's
+%own, or it is included in the download of Workcraft. It can be used on 
+%\emph{Windows}, \emph{Linux} or \emph{Mac OS X}.
+%
+%Download either\noun{Plato} or \noun{Workcraft}, extract it and move it to
+%a known directory. Using a terminal, navigate to this directory,
+%or if using \noun{Workcraft}, navigate to the \noun{Workcraft} directory, and
+%then navigate to the \noun{Plato} directory, found in \texttt{tools/concepts} 
+%(for \emph{OS X}, the \noun{Workcraft} directory is located within the 
+%\texttt{Workcraft.app} contents folder. The concepts tool will be found at 
+%\texttt{Contents/Resources/tools/concepts}.
+%
+%Now, the process of installing the tool is the same, regardless of how you aim 
+%to use it. First of all, \noun{stack} needs to be installed 
+%(download and instructions available from~\cite{stack_website}. 
+%To install stack and \noun{Plato}, run: 
+%
+%\vspace{-2mm}
+%
+%\begin{lstlisting}[language=bash]
+%  $ stack setup --no-system-ghc
+%\end{lstlisting}
+%
+%\vspace{-1mm}
+%
+%This will prepare stack to install \noun{Plato}. Now, to build and install
+%the tool, simply run:
+%
+%\vspace{-1mm}
+%
+%\begin{lstlisting}[language=bash]
+%  $ stack build
+%\end{lstlisting}
+%
+%\vspace{-5mm}
+
+\subsection{Concepts file layout \label{sub:file_layout}}
+
+\vspace{-5mm}
+
+\begin{figure}[H]
+\begin{centering}
+
+\begin{flushleft}
+$\,\mathsf{module}\, Concept \, \mathsf{where}$
+\par\end{flushleft}
+
+\begin{flushleft}
+$\,\mathsf{import}\, Tuura.Concept.STG$
+\par\end{flushleft}
+
+\begin{flushleft}
+$\,\mathsf{circuit}\,a \,b \,c=\mathsf{\,interface}\,<> \mathsf{\, operation}
+<>\,\mathsf{initialState}$
+
+$\,\,\,\mathsf{where}$
+\par\end{flushleft}
+
+\begin{flushleft}
+$\,\,\,\,\,\,\mathsf{interface}=\mathsf{inputs}\,[a,b]<>\mathsf{outputs}\,[c]$
+\par\end{flushleft}
+
+\begin{flushleft}
+$\,\,\,\,\,\,\mathsf{operation}= \mathsf{orGate}\,a\,b\,c$
+\par\end{flushleft}
+
+\begin{flushleft}
+$\,\,\,\,\,\,\mathsf{initialState}= \, \mathsf{initialise0}\,[a,\,b,\,c]$
+\par\end{flushleft}
+
+\par\end{centering}
+\vspace{-2mm}
+\begin{centering}
+\protect\caption{\label{fig:concepts_file}A concepts file}
+\vspace{-2mm}
+\par\end{centering}
+
+\end{figure}
+
+The concepts file we will discuss is found in Figure~\ref{fig:concepts_file}.
+All concept files must be edited in a plain-text editor, and saved with the 
+``.hs'' file extension, as the concepts are written in Haskell code. 
+
+The following describes important information about specific lines.
+
+\begin{description}
+  \item [Line 1]
+  This line must be included in all concept files, as the first line, to 
+  identify it as a concepts file.
+  
+  \item [Line 2] must also remain in all concept files, so that the built-in
+  operators and existing gates/protocols can be used. 
+  
+  \item [Line 3] is where a user can begin to define their concepts. 
+  ``\texttt{circuit}'' must begin the line, but after this, a user can choose 
+  what characters they wish to represent their signals.
+  
+  \item [Line 4] is simply ``\texttt{where}''. This is used to separate the main
+  concept definition from the user-defined concepts.
+
+\end{description}
+
+\vspace{-1mm}
+
+The lines discussed above are the basics of writing concepts. With this 
+information, a user can write concept files, but the following lines can be 
+used for ease-of-use, ease-of-understanding, and reuse. 
+
+The example we have used is of that of an OR-gate. We have defined the 
+interface, initial state and the operation of this separatley, by defining 
+these concepts following the ``'$\mathsf{where}$''. The full circuit 
+specification is then composed of all three of these defined concepts. 
+
+%\vspace{-3mm}
+%
+%\subsection{Using \noun{Plato} from command line}
+%
+%\vspace{-2mm}
+%
+%The standard command for the tool is as follows:
+%
+%\vspace{-2mm}
+%
+%\begin{lstlisting}[language=bash]
+%  $ stack runghc <path-to-translate> 
+%      <path-to-concepts-file> 
+%      [--stack-yaml <path-to-stack-file>]
+%\end{lstlisting}
+%
+%\vspace{-1mm}
+%
+%The three parts of this are as follows:
+%\begin{itemize}
+%\vspace{-2mm}
+%  \item \texttt{stack} - This will ensure that the dependencies and compiler 
+%  	are installed when running.
+%  \item \texttt{runghc} - This runs the translation function.
+%  \item \texttt{<path-to-translate>} - This is file path pointing to the 
+%  	translate code file, which performs the necessary operations to translate 
+%	concepts to STGs.
+%  \item \texttt{<path-to-concepts-file>} - This is the path pointing to the file
+%  	containing the concepts to be translated.
+%  \item \texttt{[-\,-stack-yaml <path-to-stack-file>]} - This is optional. If 
+%  	running the tool from outside of the directory, the path to the stack file 
+%	 needs to be given.
+%\end{itemize}
+%\vspace{-2mm}
+%
+%When running \noun{Plato} from command line, as long as the paths to the 
+%translate code, the concepts file and the \texttt{stack.yaml} file are correct,
+%it doesn't matter from which directory the tool is run.  The \texttt{stack.yaml}
+%file is located in the base of the \noun{Plato} directory.
+%
+%As an example, we will use the example from Section~\ref{sub:file_layout}, an 
+%OR-gate. Using a plain-text editor, type this concept specification and save it
+%as "\texttt{or\_gate.hs}". For this example we will store it in the \noun{Plato}
+%directory, but it can be saved anywhere, as long as you know the path.
+%We will assume that we have alread navigated to the \noun{Plato}
+%directory. To translate this concepts file to an STG, the following command
+%must be used:
+%
+%\vspace{-2mm}
+%
+%\begin{lstlisting}[language=bash]
+%  $ stack runghc translate/Main.hs 
+%  	or_gate.hs
+%\end{lstlisting}
+%
+%\vspace{-1mm}
+
+%\begin{figure}[h]
+%\begin{lstlisting}[language=bash]
+%	.model out
+%	.inputs A B
+%	.outputs C
+%	.internal
+%	.graph
+%	A0 A+
+%	A+ A1
+%	A1 A-
+%	A- A0
+%	B0 B+
+%	B+ B1
+%	B1 B-
+%	B- B0
+%	C0 C+
+%	C+ C1
+%	C1 C-
+%	C- C0
+%	A0 C-
+%	C- A0
+%	B0 C-
+%	C- B0
+%	C0 C+/1
+%	C+/1 C1
+%	A1 C+
+%	C+ A1
+%	B1 C+/1
+%	C+/1 B1
+%	.marking {A0 B0 C0}
+%	.end
+%\end{lstlisting}
+%\vspace{-3mm}
+%\protect\caption{\label{fig:concepts_filed}An example concepts file.}
+%\vspace{-5mm}
+%\end{figure}
+
+%When the translation is complete, the tool will output a set of strings, 
+%referencing signal names, transitions and places.
+%This output is the STG representation in a file format, \emph{.g}. \emph{.g} 
+%files are a standard type used as input to tools, such as \noun{Petrify}, 
+%\noun{Mpsat}, and \noun{Workcraft}. Therefore, this output can by 
+%copy-and-pasted into a file, saved with the file etension \emph{.g}, and 
+%then used as input to these tools. 
+%
+%Any errors that occur during the translation process will produce errors 
+%referring to the problematic lines of the concepts file that are problematic. 
+
+%\vspace{-2mm}
+
+\subsection{Using \noun{Plato} from \noun{Workcraft} \label{sec:workcraft_usage}}
+
+\vspace{-2mm}
+
+This section will discuss how to use \noun{Plato} from within
+\noun{Workcraft}. There are many other features of \noun{Workcraft}, both as 
+part of the STG plug in, some of which I will discuss in the context of 
+concepts here, and as part of other modelling formalisms. More information on 
+these can be found at~\cite{Workcraft_website}.
+
+\vspace{-2mm}
+ 
+\subsubsection{Translating and authoring concepts}
+
+First of all, \noun{Plato} should be installed, as per the instructions in
+Section~\ref{sub:installing}. To start using \noun{Plato} from within Workcraft, 
+start Workcraft, and open a new Signal Transition Graph work. 
+
+To start specifying and translating concepts, open the concepts dialog.  This is
+done from the menu bar, by selecting the ``\emph{Conversion}'' menu, and then
+the ``\emph{Translate concepts...}'' option. The concepts dialog will look as 
+shown in Figure~\ref{fig:concepts_dialog_screenshot}.
+
+%\vspace{-3mm}
+
+\begin{figure}[h]
+\begin{centering}
+\includegraphics[scale=0.45]{Images/concepts_dialog_screenshot.png}
+\par\end{centering}
+
+\begin{centering}
+\protect\caption{\label{fig:concepts_dialog_screenshot}The concepts dialog.}
+
+\par\end{centering}
+\vspace{-4mm}
+\end{figure}
+
+%\vspace{-3mm}
+
+From within this dialog, one can write their own concepts, from the default 
+template as shown in Figure~\ref{fig:concepts_dialog_screenshot}, or open an 
+existing concepts file, with the \emph{.hs} extension. When satisfied with the 
+concepts written, a user can choose to save the file, if not already saved, and
+then translate these concepts.
+
+\begin{figure}[h]
+\begin{centering}
+\includegraphics[scale=0.45]{Images/concepts_dialog_or_gate.png}
+\par\end{centering}
+
+\begin{centering}
+\protect\caption{\label{fig:concepts_dialog_or_gate}The concepts dialog with a 
+			specification typed in.}
+
+\par\end{centering}
+\end{figure}
+
+Figure~\ref{fig:concepts_dialog_or_gate} is the concepts dialog after we have 
+opened the OR-gate example concept specification 
+(Section~\ref{sub:file_layout}). Clicking translate at this point will produce 
+an STG representation of these concepts inthe workspace. 
+
+
+\begin{figure}[h]
+\begin{centering}
+\includegraphics[scale=0.2]{Images/concepts_translated.png}
+\par\end{centering}
+
+\begin{centering}
+\protect\caption{\label{fig:concepts_translated}The STG produced from 
+			translating the concepts.}
+
+\par\end{centering}
+\vspace{-4mm}
+\end{figure}
+
+
+
+The translated concepts will look as shown in 
+Figure~\ref{fig:concepts_translated}. Now, a user can choose to insert more 
+concepts, make changes to this STG, and once they are satisfied with it, can 
+then perform various functions on this STG. One can perform transformations, 
+verifications, simulations and synthesis on this STG using the menus within this 
+workspace. Any further changes to this STG, based on the results of these 
+operations can be made to this STG or to the concepts file. 
+
+\vspace{-3mm}
+
+\subsection{Importing concepts directly}
+
+\vspace{-2mm}
+
+In \noun{Workcraft} it is also possible to import concepts directly from a file,
+without having to view the concepts first. This can be done from the 
+``\emph{File}'' menu, by selecting the ``\emph{Import...}'' option. 
+
+\begin{figure}[H]
+\begin{centering}
+\vspace{-3mm}
+\includegraphics[scale=0.4]{Images/import_menu_screenshot.png}
+\par\end{centering}
+
+\begin{centering}
+\protect\caption{\label{fig:import_menu_screenshot}The import menu and the 
+			option of \emph{.hs} files.}
+
+\par\end{centering}
+\vspace{-3mm}
+\end{figure}
+
+When importing concepts using this menu, ensure to set the 
+``\emph{Files of Type}'' option to ``\emph{Concepts file (.hs)}'', as shown in 
+Figure~\ref{fig:import_menu_screenshot}. Any concept files imported will be
+automatically translated to an STG.
+
+\vspace{-3mm}
+
+\subsection{Errors}
+
+\vspace{-2mm}
+
+If any errors are encountered during the translation process, \noun{Workcraft} 
+will produce a helpful error message. This usually can tell you with more 
+detail what the issue that is causing the error is, but will ask you to refer 
+to \noun{Workcraft}'s console window for specific line numbers or signals which
+need to be corrected. 
+
+These errors will include whether a signal has not been declared as an input or
+output, a signal has not had it's initial state given, or even that \noun{Plato}
+has not been installed correctly. 
+
+\vspace{-3mm}
 
 \vspace{-2mm}
 
