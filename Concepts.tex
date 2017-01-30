@@ -1,13 +1,6 @@
 % TO:DO
-% Add David cell example as motivational example to Introduction to help explain levels of concepts
-%
-% Use haskell syntax for haskell code examples
 %
 % Update examples (such as figure 1) to use David cell too
-% 
-% Create one big figure to show the design flow in Workcraft
-% 
-% In "Using Plato from Workcraft" section, remove things that could be outdated due to future implementations
 %
 % Remove some references, some are old, some have been updated
 % 
@@ -24,7 +17,7 @@
 \usepackage{array}
 \usepackage{blindtext}
 \usepackage{listings}
-\lstset{basicstyle=\footnotesize, language=haskell}
+\lstset{basicstyle=\footnotesize, language=Haskell}
 
 \makeatletter
 
@@ -104,13 +97,32 @@ With concepts, we aim to solve the problems that can arise from the more
 commonly used monolithic approach, where a user must design each system in the 
 form of an STG from a blank page. The scalability of this is poor: as the 
 system grows in complexity its monolithic specification becomes challenging to 
-comprehend and debug. The problem becomes particularly severe when designing 
-multi-mode systems, such as power regulators, where capturing all aspects of 
-system behaviour in a consistent specification is a major design 
-challenge~\cite{2014_sokolov_ftfc}\cite{sokolov2015design}. 
-Moreover, the STG models of components and operating modes are difficult to 
-reuse when designing other specifications, and thus each new design must be 
-built from the ground up. This is particularly undesirable for industry, as 
+comprehend and debug. When the number of signals increases, the gates and 
+protocols describing the interactions between some signals become difficult to
+include with each occurance of these signals. 
+
+\begin{figure}[h]
+\vspace{-3mm}
+\begin{centering}
+\includegraphics[scale=0.25]{Images/DC-stg.pdf}
+\par\end{centering}
+\protect\caption{\label{fig:DC-stg} STG containing only consistency loops}
+\vspace{-1mm}
+\end{figure}
+
+For example, Figure~\ref{fig:DC-stg} contains the Signal Transition Graph of a
+David cell. While this STG is in a loop, it is useful to know that signals $r1$ 
+and $a1$ form a hanshake, as do $r2$ and $a2$. Signals $r1$ and $r2$ are in a
+mutual exclusion relationship. These are among other protocols which can make
+the specification for a David cell particularly tricky. 
+
+%The problem becomes particularly severe when designing 
+%multi-mode systems, such as power regulators, where capturing all aspects of 
+%system behaviour in a consistent specification is a major design 
+%challenge~\cite{2014_sokolov_ftfc}\cite{sokolov2015design}. 
+
+The issues that can arise from this can therefore cause a long design, full of 
+testing and debugging, this is particularly undesirable for industry, as 
 this increases the design time of each design greatly. 
 
 STGs~\cite{Chu_1987_phd}\cite{Rosenblum_1985_tpn} are commonly used for the 
@@ -258,9 +270,7 @@ effect:
 \end{lstlisting}
 
 This is, \emph{either} $x^{+}$ \emph{or} $y^{+}$ must occur in order for 
-$z^{+}$ to occur.
-
-The interactions when an effect transition is included in both AND- and 
+$z^{+}$ to occur. The interactions when an effect transition is included in both AND- and 
 OR-causality are interesting, and an example of when this occurs can be found 
 in Section~\ref{sec:algorithm}.
 
@@ -523,14 +533,14 @@ and~$b$ that are both initially $0$.
 \section{Concepts to STG translation algorithm\label{sec:algorithm}}
 
 \vspace{-2mm}
-
-Concepts are a useful way of specifying asynchronous circuits, but
-specifications also need to be \emph{verified} against certain properties to
-ensure their correctness, and once they are deemed to be correct, they need to
-be \emph{synthesised} into efficient circuit implementations. Many software
-tools exist which automatically verify and synthesise STG specifications,
-such as \noun{Petrify}~\cite{Cortadella} and
-\noun{Mpsat}~\cite{khomenko2004detecting}.
+%
+%Concepts are a useful way of specifying asynchronous circuits, but
+%specifications also need to be \emph{verified} against certain properties to
+%ensure their correctness, and once they are deemed to be correct, they need to
+%be \emph{synthesised} into efficient circuit implementations. Many software
+%tools exist which automatically verify and synthesise STG specifications,
+%such as \noun{Petrify}~\cite{Cortadella} and
+%\noun{Mpsat}~\cite{khomenko2004detecting}.
 
 In order to reuse the tools developed by the community, it is
 necessary to be able to automatically translate concept specifications to STGs.
@@ -538,46 +548,62 @@ In this section, we will display an example of how the translation algorithm
 operates, and present a pseudocode form of the algorithm in 
 Algorithm~\ref{alg:translation}. 
 
-We will use the OR-gate example, the specification of which can be seen in 
-Section~\ref{sub:file_layout}. This is a rudimentary example, but is useful in 
-displaying how the algorithm handles a system featuring both OR- and 
+We will use the David cell example, the concept specification file of which can 
+be seen in Section~\ref{sub:file_layout}. This is a rudimentary example, but is 
+useful in displaying how the algorithm handles a system featuring both OR- and 
 AND-causality.
 
 There are multiple ways of representing a specification using concepts. However,
 all levels of abstraction available to the designer are built out of primitive 
 low-level signal concepts. Given a specification, we can therefore break down 
 all gate- and protocol-level constructs into `atoms', which significantly 
-simplifies the translation task.
+simplifies the translation task. For now, we will ignore initial states and interface
+concepts, and focus on the arcs only.
 
-For this example, the specification is broken down into these signal-level 
-concepts:
+%For this example, the causalities are broken down into these signal-level 
+%concepts:
+%
+%\begin{lstlisting}
+%module DC where
+%
+%import Tuura.Concept.STG
+%
+%circuit r1 a1 r2 a2 e = handshakeLeft 
+%                      <> handshakeRight 
+%                      <> outputHandshake <> interface 
+%	              <> initialState <> internal 
+%		      <> mutex <> ackHandshake 
+%                      <> reset
+%  where
+%  	handshakeLeft = handshake r1 a1
+%  	handshakeRight = handshake r2 a2
+%  	outputHandshake = handshake a1 r2
+%  	mutex = me r1 r2 
+%  	ackHandshake = handshake a1 a2
+%	reset = fall a2 ~> rise r1
+%  	internal = rise r1 ~> fall e 
+%                 <> fall e ~> rise a1 
+%                 <> fall a1 ~> rise e
+%		 <> rise e ~> fall r2
+%	interface = inputs[r1, a2] <> outputs[a1, r2] 
+%                  <> internals[e]
+%	initialState = initialise0 [r1, a1, r2, a2] 
+%                     <> initialise1 [e]
+%\end{lstlisting}
 
-\begin{lstlisting}
-circuit a b c = [rise a, rise b] ~|~> rise c 
-              <> fall a ~> fall c <> fall b ~> fall c
-              <> inputs [a, b] <> outputs [c] 
-              <> initialise0 [a, b, c]
-\end{lstlisting}
+%\noindent The first step is to prepare the read-arcs, and this is done by
+%reformating these concepts into lists of causes for effects.
+%Each list will be of possible causes for each OR- and AND-causality signal-level
+%concept in the specification, meaning that for each OR-causality concept, 
+%there will be 2 or more signals in the list, and for each AND-causality 
+%concept there will be a single item list.
+%
+%For example, taking the concept\\
+%\lstinline[language=haskell]{[rise a, rise b] ~|~> rise c}, there are
+%two possible transitions for $c^{+}$ here, $a^{+}$ and $b^{+}$. These therefore 
+%form a two item list. 
 
-\noindent The first step is to prepare the read-arcs, and this is done by
-reformating these concepts into lists of causes for effects.
-Each list will be of possible causes for each OR- and AND-causality signal-level
-concept in the specification, meaning that for each OR-causality concept, 
-there will be 2 or more signals in the list, and for each AND-causality 
-concept there will be a single item list.
-
-For example, taking the concept\\
-\lstinline[language=haskell]{[rise a, rise b] ~|~> rise c}, there are
-two possible transitions for $c^{+}$ here, $a^{+}$ and $b^{+}$. These therefore 
-form a two item list. 
-
-Another example, using 
-\lstinline[language=haskell]{fall a ~> fall c <> fall b ~> fall c}, there are 
-two cause transitions for $c^{-}$, namely $a^{-}$ and $b^{-}$. Both of these 
-therefore form their own single item list. 
-
-This will mean there may be several different lists for each cause transition. 
-Table~\ref{tab:list-of-concepts} contains all of the lists described above.
+To start with this, we list all causes for each effect.
 
 \vspace{-1mm}
 
@@ -588,32 +614,37 @@ Table~\ref{tab:list-of-concepts} contains all of the lists described above.
 \begin{tabular}[htb]{| m{2.6cm} | m{2.0cm} |}
   \hline
 Causes & \, Effect \\ \hline \hline
-$a^{+}$, $b^{+}$ & $c^{+}$ \\ \hline
-$a^{-}$ & $c^{-}$ \\ \hline
-$b^{-}$ & $c^{-}$ \\ \hline
+$a1^{-}$ & $r1^{+}$ \\ \hline
+$a1^{+}$ & $r1^{-}$ \\ \hline
+$r1^{+}$ & $a1^{+}$ \\ \hline
+$r1^{-}$, $r2^{+}$ & $a1^{-}$ \\ \hline
+$a2^{-}$, $a1^{+}$ & $r2^{+}$ \\ \hline
+$a2^{+}$,$a1^{+}$ & $r2^{-}$ \\ \hline
+$r2^{+}$ & $a2^{+}$ \\ \hline
+$r2^{-}$ & $a2^{-}$ \\ \hline
   \end{tabular}
   \vspace{-1mm}
 \end{table}
 
-\noindent From this, we can then combine the lists by effect transition, to 
-give us a list of lists. This can be viewed in Table~\ref{tab:list-of-lists}.
+%\noindent From this, we can then combine the lists by effect transition, to 
+%give us a list of lists. This can be viewed in Table~\ref{tab:list-of-lists}.
+%
+%\vspace{-1mm}
 
-\vspace{-1mm}
-
-\begin{table}[h]
-\caption{Lists of lists of cause transitions
-		\label{tab:list-of-lists}}
-
-  \centering
-\begin{tabular}[htb]{| m{2.6cm} | m{2.0cm} |}
-  \hline
-Causes & \, Effect \\ \hline \hline
-[$a^{+}$, $b^{+}$] & $c^{+}$ \\ \hline
-[$a^{-}$], [$b^{-}$] & $c^{-}$ \\ \hline
-
-  \end{tabular}
- \vspace{-3mm}
-\end{table}
+%\begin{table}[h]
+%\caption{Lists of lists of cause transitions
+%		\label{tab:list-of-lists}}
+%
+%  \centering
+%\begin{tabular}[htb]{| m{2.6cm} | m{2.0cm} |}
+%  \hline
+%Causes & \, Effect \\ \hline \hline
+%[$a^{+}$, $b^{+}$] & $c^{+}$ \\ \hline
+%[$a^{-}$], [$b^{-}$] & $c^{-}$ \\ \hline
+%
+%  \end{tabular}
+% \vspace{-3mm}
+%\end{table}
 
 \noindent Note how for the $c^{-}$ transition there is 2 different single item 
 lists. Each one is an AND-causality, and why they are each in a separate list
@@ -840,23 +871,35 @@ from within \noun{Workcraft}.
 
 \subsection{Concepts file layout \label{sub:file_layout}}
 
-\vspace{-6mm}
-
-\begin{figure}[H]
+\begin{figure}[h]
 \begin{centering}
 
 \begin{lstlisting}
-module OrGate where
+module DC where
 
 import Tuura.Concept.STG
 
-circuit a b c = interface <> operation <> initialState
+circuit r1 a1 r2 a2 e = handshakeLeft 
+                      <> handshakeRight 
+                      <> outputHandshake <> interface 
+	              <> initialState <> internal 
+		      <> mutex <> ackHandshake 
+                      <> reset
   where
-    interface = inputs[a, b] <> outputs[c]
-
-    operation = orGate a b c
-
-    initialState = initialise0 [a, b, c]
+  	handshakeLeft = handshake r1 a1
+  	handshakeRight = handshake r2 a2
+  	outputHandshake = handshake a1 r2
+  	mutex = me r1 r2 
+  	ackHandshake = handshake a1 a2
+	reset = fall a2 ~> rise r1
+  	internal = rise r1 ~> fall e 
+                 <> fall e ~> rise a1 
+                 <> fall a1 ~> rise e
+		 <> rise e ~> fall r2
+	interface = inputs[r1, a2] <> outputs[a1, r2] 
+                  <> internals[e]
+	initialState = initialise0 [r1, a1, r2, a2] 
+                     <> initialise1 [e]
 \end{lstlisting}
 
 \par\end{centering}
@@ -876,8 +919,7 @@ The following describes important information about specific lines.
 
 \begin{description}
   \item [Line 1]
-  This line must be included in all concept files, as the first line, to 
-  identify it as a concepts file.
+  This line must be included in all concept files, with the module name
   
   \item [Line 2] must also remain in all concept files, so that the built-in
   operators and existing gates/protocols can be used. 
@@ -902,116 +944,24 @@ interface, initial state and the operation of this separatley, by defining
 these concepts following the ``'$\mathsf{where}$''. The full circuit 
 specification is then composed of all three of these defined concepts. 
 
-%\vspace{-3mm}
-%
-%\subsection{Using \noun{Plato} from command line}
-%
-%\vspace{-2mm}
-%
-%The standard command for the tool is as follows:
-%
-%\vspace{-2mm}
-%
-%\begin{lstlisting}[language=bash]
-%  $ stack runghc <path-to-translate> 
-%      <path-to-concepts-file> 
-%      [--stack-yaml <path-to-stack-file>]
-%\end{lstlisting}
-%
-%\vspace{-1mm}
-%
-%The three parts of this are as follows:
-%\begin{itemize}
-%\vspace{-2mm}
-%  \item \texttt{stack} - This will ensure that the dependencies and compiler 
-%  	are installed when running.
-%  \item \texttt{runghc} - This runs the translation function.
-%  \item \texttt{<path-to-translate>} - This is file path pointing to the 
-%  	translate code file, which performs the necessary operations to translate 
-%	concepts to STGs.
-%  \item \texttt{<path-to-concepts-file>} - This is the path pointing to the file
-%  	containing the concepts to be translated.
-%  \item \texttt{[-\,-stack-yaml <path-to-stack-file>]} - This is optional. If 
-%  	running the tool from outside of the directory, the path to the stack file 
-%	 needs to be given.
-%\end{itemize}
-%\vspace{-2mm}
-%
-%When running \noun{Plato} from command line, as long as the paths to the 
-%translate code, the concepts file and the \texttt{stack.yaml} file are correct,
-%it doesn't matter from which directory the tool is run.  The \texttt{stack.yaml}
-%file is located in the base of the \noun{Plato} directory.
-%
-%As an example, we will use the example from Section~\ref{sub:file_layout}, an 
-%OR-gate. Using a plain-text editor, type this concept specification and save it
-%as "\texttt{or\_gate.hs}". For this example we will store it in the \noun{Plato}
-%directory, but it can be saved anywhere, as long as you know the path.
-%We will assume that we have alread navigated to the \noun{Plato}
-%directory. To translate this concepts file to an STG, the following command
-%must be used:
-%
-%\vspace{-2mm}
-%
-%\begin{lstlisting}[language=bash]
-%  $ stack runghc translate/Main.hs 
-%  	or_gate.hs
-%\end{lstlisting}
-%
-%\vspace{-1mm}
-
-%\begin{figure}[h]
-%\begin{lstlisting}[language=bash]
-%	.model out
-%	.inputs A B
-%	.outputs C
-%	.internal
-%	.graph
-%	A0 A+
-%	A+ A1
-%	A1 A-
-%	A- A0
-%	B0 B+
-%	B+ B1
-%	B1 B-
-%	B- B0
-%	C0 C+
-%	C+ C1
-%	C1 C-
-%	C- C0
-%	A0 C-
-%	C- A0
-%	B0 C-
-%	C- B0
-%	C0 C+/1
-%	C+/1 C1
-%	A1 C+
-%	C+ A1
-%	B1 C+/1
-%	C+/1 B1
-%	.marking {A0 B0 C0}
-%	.end
-%\end{lstlisting}
-%\vspace{-3mm}
-%\protect\caption{\label{fig:concepts_filed}An example concepts file.}
-%\vspace{-5mm}
-%\end{figure}
-
-%When the translation is complete, the tool will output a set of strings, 
-%referencing signal names, transitions and places.
-%This output is the STG representation in a file format, \emph{.g}. \emph{.g} 
-%files are a standard type used as input to tools, such as \noun{Petrify}, 
-%\noun{Mpsat}, and \noun{Workcraft}. Therefore, this output can by 
-%copy-and-pasted into a file, saved with the file etension \emph{.g}, and 
-%then used as input to these tools. 
-%
-%Any errors that occur during the translation process will produce errors 
-%referring to the problematic lines of the concepts file that are problematic. 
-
-%\vspace{-2mm}
-
-\subsection{Using \noun{Plato} from \noun{Workcraft} \label{sec:workcraft_usage}}
+\subsection{Using \noun{Plato} from within \noun{Workcraft} \label{sec:workcraft_usage}}
 
 \vspace{-2mm}
+
+\begin{figure}[H]
+\begin{centering}
+\vspace{-3mm}
+\includegraphics[scale=0.25]{Images/workcraft_design_flow.jpg}
+\par\end{centering}
+
+\begin{centering}
+\protect\caption{\label{fig:design_flow_screenshot}\noun{Workcraft} and 
+			\noun{plato} usage.}
+
+\par\end{centering}
+\vspace{-3mm}
+\end{figure}
+
 
 This section will discuss how to use \noun{Plato} from within
 \noun{Workcraft}. There are many other features of \noun{Workcraft}, both as 
@@ -1023,81 +973,26 @@ these can be found at~\cite{Workcraft_website}.
  
 \subsubsection{Translating and authoring concepts}
 
-First of all, \noun{Plato} should be installed, as per the instructions in
-Section~\ref{sub:installing}. To start using \noun{Plato} from within Workcraft, 
-start Workcraft, and open a new Signal Transition Graph work. 
-
 To start specifying and translating concepts, open the concepts dialog.  This is
 done from the menu bar, by selecting the ``\emph{Conversion}'' menu, and then
-the ``\emph{Translate concepts...}'' option. The concepts dialog will look as 
-shown in Figure~\ref{fig:concepts_dialog_screenshot}.
-
-%\vspace{-3mm}
-
-\begin{figure}[h]
-\begin{centering}
-\includegraphics[scale=0.45]{Images/concepts_dialog_screenshot.png}
-\par\end{centering}
-
-\begin{centering}
-\protect\caption{\label{fig:concepts_dialog_screenshot}The concepts dialog.}
-
-\par\end{centering}
-\vspace{-4mm}
-\end{figure}
-
-%\vspace{-3mm}
+the ``\emph{Translate concepts...}'' option. It will look similar to the dialog 
+on the left in Figure~\ref{fig:design_flow_screenshot}.
 
 From within this dialog, one can write their own concepts, from the default 
-template as shown in Figure~\ref{fig:concepts_dialog_screenshot}, or open an 
+template provided. One can open an 
 existing concepts file, with the \emph{.hs} extension. When satisfied with the 
 concepts written, a user can choose to save the file, if not already saved, and
-then translate these concepts.
+then translate these concepts. Translated concepts will produce an STG in a 
+form similar to that on the right in Figure~\ref{fig:design_flow_screenshot}.
 
-\begin{figure}[h]
-\begin{centering}
-\includegraphics[scale=0.45]{Images/concepts_dialog_or_gate.png}
-\par\end{centering}
-
-\begin{centering}
-\protect\caption{\label{fig:concepts_dialog_or_gate}The concepts dialog with a 
-			specification typed in.}
-
-\par\end{centering}
-\end{figure}
-
-Figure~\ref{fig:concepts_dialog_or_gate} is the concepts dialog after we have 
-opened the OR-gate example concept specification 
-(Section~\ref{sub:file_layout}). Clicking translate at this point will produce 
-an STG representation of these concepts inthe workspace. 
-
-
-\begin{figure}[h]
-\begin{centering}
-\includegraphics[scale=0.2]{Images/concepts_translated.png}
-\par\end{centering}
-
-\begin{centering}
-\protect\caption{\label{fig:concepts_translated}The STG produced from 
-			translating the concepts.}
-
-\par\end{centering}
-\vspace{-4mm}
-\end{figure}
-
-
-
-The translated concepts will look as shown in 
-Figure~\ref{fig:concepts_translated}. Now, a user can choose to insert more 
+Now, a user can choose to insert more 
 concepts, make changes to this STG, and once they are satisfied with it, can 
 then perform various functions on this STG. One can perform transformations, 
 verifications, simulations and synthesis on this STG using the menus within this 
 workspace. Any further changes to this STG, based on the results of these 
 operations can be made to this STG or to the concepts file. 
 
-\vspace{-3mm}
-
-\subsection{Importing concepts directly}
+\subsubsection{Importing concepts directly}
 
 \vspace{-2mm}
 
@@ -1119,10 +1014,7 @@ without having to view the concepts first. This can be done from the
 \vspace{-3mm}
 \end{figure}
 
-When importing concepts using this menu, ensure to set the 
-``\emph{Files of Type}'' option to ``\emph{Concepts file (.hs)}'', as shown in 
-Figure~\ref{fig:import_menu_screenshot}. Any concept files imported will be
-automatically translated to an STG.
+Any concept files imported will be automatically translated to an STG.
 
 \vspace{-3mm}
 
@@ -1139,10 +1031,6 @@ need to be corrected.
 These errors will include whether a signal has not been declared as an input or
 output, a signal has not had it's initial state given, or even that \noun{Plato}
 has not been installed correctly. 
-
-\vspace{-3mm}
-
-\vspace{-2mm}
 
 \section{Conclusions and future work\label{sec:conclusions}}
 
