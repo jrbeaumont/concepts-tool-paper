@@ -14,7 +14,6 @@
 % Generally ensure that the whole paper runs smoothly, everything is in order, and nothing referes to an old version of this paper
 %
 
-
 \documentclass[british,conference,compsoc]{IEEEtran}
 \usepackage[T1]{fontenc}
 \usepackage{float}
@@ -25,6 +24,7 @@
 \usepackage{array}
 \usepackage{blindtext}
 \usepackage{listings}
+\lstset{basicstyle=\footnotesize, language=haskell}
 
 \makeatletter
 
@@ -203,16 +203,15 @@ A key concept in asynchronous circuits is \emph{causality}:
 one signal transition \emph{causes} another signal transition, a cause and an 
 effect. This is denoted in the form: 
 
-\vspace{-3mm}
-
-\[
-rise\,a \sim> rise\,c
-\]
+\begin{lstlisting}[language=haskell]
+	         rise a ~> rise c
+\end{lstlisting}
 
 \vspace{-1mm}
 
 This is read as $a^{+}$ causes $c^{+}$, meaning that for the $c^{+}$ transition 
-to occur, $a^{+}$ must have occurred previously. The $\sim>$ 
+to occur, $a^{+}$ must have occurred previously. The 
+\lstinline[language=haskell]{~>}
 operator is used to show causal relationships between signals.
  
 While this concept is called \emph{causality}, this doesn't necessarily imply
@@ -221,17 +220,14 @@ timings, such as any $\mathit{cause}$ transition immediately forcing the
 list all possible $\mathit{cause}$ transitions which need to occur in order
  for an $\mathit{effect}$ transition.
 
-One can compose any concepts using the $<>$ (diamond) operator, and this applies
+One can compose any concepts using the \lstinline[language=haskell]{<>} 
+(diamond) operator, and this applies
 to concepts of any level, whether predefined or user-defined. For example, 
 two causality concepts can be composed.
 
-\vspace{-3mm}
-
-\[
-rise\,a\sim> rise\,c\ <> \ rise\,b\sim> rise\,c
-\]
-
-\vspace{-1mm}
+\begin{lstlisting}[language=haskell]
+       rise a ~> rise c <> rise b ~> rise c
+\end{lstlisting}
 
 In words, $a^{+}$ \emph{and} $b^{+}$ must occur before $c^{+}$ can occur. 
 This corresponds to so-called AND-causality in the fact that several cause 
@@ -243,13 +239,9 @@ The above notation can cause long-winded specifications when lots of
 AND-causality is involved. To solve this we provise a listing option. The 
 following will acheive the same results:
 
-\vspace{-3mm}
-
-\[
-[rise\,a, rise\,b]\sim\hspace{-1.5mm}\&\hspace{-1.5mm}\sim\hspace{-1.5mm}>rise\,c
-\]
-
-\vspace{-1mm}
+\begin{lstlisting}[language=haskell]
+            [rise a, rise b] ~&~> rise c
+\end{lstlisting}
 
 This form of concept can be composed as usual with any other concepts.
 
@@ -261,13 +253,9 @@ occur.
 With OR-causality, the notation used lists all possible causes for the stated 
 effect:
 
-\vspace{-2mm}
-
-\[
-[rise\,x, rise\,y]\sim\hspace{-1.5mm}|\hspace{-1.5mm}\sim\hspace{-1.5mm}>rise\,z
-\]
-
-\vspace{-1mm}
+\begin{lstlisting}[language=haskell]
+            [rise x, rise y] ~|~> rise z
+\end{lstlisting}
 
 This is, \emph{either} $x^{+}$ \emph{or} $y^{+}$ must occur in order for 
 $z^{+}$ to occur.
@@ -283,53 +271,31 @@ the behaviour of gates in asynchronous circuits. For example, a \emph{buffer}
 is a gate with one input signal and one output signal,
 whose output transitions causally depend on the input ones:
 
-\vspace{-4mm}
-
-\[
-\mathsf{buffer}\,a\,b=rise\,a \sim> rise\,b\ <>\
-fall\,a\sim> fall\,b
-\]
-
-\vspace{-1mm}
+\begin{lstlisting}[language=haskell]
+buffer a b = rise a ~> rise b <> fall a ~> fall b
+\end{lstlisting}
 
 \noindent An \emph{inverter} has a similar conceptual specification, but the
 output transition is inverted:
 
-\vspace{-4mm}
-
-\[
-\mathsf{inverter}\,a\,b=rise\,a\sim> fall\,b\ <>\
-fall\,a\sim> rise\,b
-\]
-
-\vspace{-1mm}
+\begin{lstlisting}[language=haskell]
+inverter a b = rise a ~> fall b <> fall a ~> rise b
+\end{lstlisting}
 
 \noindent A \emph{C-element} is a gate with two inputs, in this example $a$ and $b$, and one
 output~$c$, which synchronises both rising and falling input transitions
 via AND-causality:
 
-\vspace{-3mm}
-
-\[
-\begin{array}{lcl}
-\mathsf{cElement}\,a\, b\, c=&\hspace{-9mm}rise\,a\!\sim>\! 
-	rise\,c\ <> rise\,b\!\sim>\! rise\,c\ \\
-&\hspace{-5mm}<>\hspace{-1mm} fall\,a\!\sim>\! fall\,c\ \,
-	<>\ fall\,b\!\sim>\! fall\,c
-\end{array}
-\]
-
-\vspace{-1mm}
+\begin{lstlisting}[language=haskell]
+cElement a b c = rise a ~> rise c <> rise b ~> rise c
+              <> fall a ~> fall c <> fall b ~> fall c
+\end{lstlisting}
 
 An alternative way to express the same concept is to reuse the buffer concept:
 
-\vspace{-3mm}
-
-\[
-\mathsf{cElement}\,a\, b\, c=\mathsf{buffer}\,a\, c <> \mathsf{buffer}\,b\, c
-\]
-
-\vspace{-1mm}
+\begin{lstlisting}[language=haskell]
+    cElement a b c = buffer a c <> buffer b c
+\end{lstlisting}
 
 A C-element combines the constraints imposed on the output
 transitions by two `virtual' buffers. Behaviour of other gates can be similarly
@@ -348,14 +314,10 @@ and mutual exclusion mechanisms.
 Given two signals $a$ and $b$, a \emph{handshake} between them is
 the following composition of causality concepts:
 
-\[
-\begin{array}{lcl}
-\mathsf{handshake}\,a\, b=&\hspace{-7mm}rise\,a\!\sim>\! rise\,b\ 
-	<>\ rise\,b\!\sim>\! fall\,a \\
-&\hspace{-5mm}<>\hspace{-1mm} fall\,a\!\sim>\! fall\,b \, 
-	<>\ fall\,b \sim>\! rise\,a
-\end{array}
-\]
+\begin{lstlisting}[language=haskell]
+handshake a b = rise a ~> rise b <> rise b ~> fall a 
+             <> fall a ~> fall b <> fall b ~> rise a
+\end{lstlisting}
 
 Intuitively, we have a two-way asynchronous communication channel,
 where one party sends transitions $a^{+}$ and $a^{-}$ and the other
@@ -364,13 +326,9 @@ Note that the four causality concepts match those found
 in the buffer and inverter concepts, which leads to an alternative
 way to express a handshake between~$a$ and~$b$:
 
-\vspace{-3mm}
-
-\[
-\mathsf{handshake}\,a\, b=\mathsf{buffer}\,a\, b <>\mathsf{inverter}\,b\, a
-\]
-
-\vspace{-1mm}
+\begin{lstlisting}
+    handshake a b = buffer a b <> inverter b a
+\end{lstlisting}
 
 This conceptual understanding of a handshake as being composed
 from a buffer and an inverter is often used by circuit designers as
@@ -442,14 +400,9 @@ specifying types of sets of signals for convenience, and to be included inline
 with other concepts. For example, to specify that signals $a$ and $b$ are 
 inputs, $c$ is an output, and $t$ is internal, it is possible to write:
 
-\vspace{-4mm}
-
-\[
-\mathsf{inputs}\,[a, b] <> \mathsf{outputs}\,[c] <>
-\mathsf{internals}\,[t].
-\]
-
-\vspace{-4mm}
+\begin{lstlisting}
+   inputs[a, b] <> outputs [c] <> internals [t]
+\end{lstlisting}
 
 \subsubsection{Initial state concepts\label{sub:initState}}
 
@@ -462,13 +415,9 @@ and~$b$, we use the $\mathsf{initialise}$ concept.
 The possible initial states are \emph{high} or \emph{low}, referred to as 
 \emph{0} or \emph{1} respectively:
 
-\vspace{-2mm}
-
-\[
-\mathsf{initialise}\,a\,0 <> \mathsf{initialise}\,x\, 1
-\]
-
-\vspace{-1mm}
+\begin{lstlisting}
+        initialise a 0 <> initialise x 1
+\end{lstlisting}
 
 \noindent A signal can only be declared as initially high or low. If the 
 initial state of a signal is not defined, an error will occur, and the 
@@ -479,13 +428,9 @@ specification then the translation will also fail.
 For the ease of use, and to speed up the process, initial states can also be 
 declared in lists by on state:
 
-\vspace{-2mm}
-
-\[
-\mathsf{initialise0}\, [a, b, c] <> \mathsf{initialise1}\, [x, y]
-\]
-
-\vspace{-1mm}
+\begin{lstlisting}
+    initialise0[a, b, c] <> initialise1[x,y]
+\end{lstlisting}
 
 \noindent As an example, we can include this in the specification of a 
 handshake, to create a handshake with built-in initial state.
@@ -493,17 +438,10 @@ $\mathsf{initialise}\,a\, 0$ sets the state of the signal
 $a$ to $0$. We can compose an initial state concept with the handshake concept
 into a combined $\mathsf{handshake00}\,a\, b$ concept as
 
-\vspace{-3mm}
-
-\[
-\begin{array}{lcl}
-\mathsf{handshake00}\, a\, b =&\hspace{-2mm}\mathsf{handshake}\,a\, b 
-	<> \mathsf{initialise}\,a\, 0 \\
-&\hspace{-6mm}<> \mathsf{initialise}\,b\, 0
-\end{array}
-\]
-
-\vspace{-1mm}
+\begin{lstlisting}
+handshake00 a b = handshake a b <> initialise a 0 
+                  <> initialise b 0
+\end{lstlisting}
 
 The resulting concept corresponds to a handshake between signals~$a$
 and~$b$ that are both initially $0$.
@@ -614,19 +552,12 @@ simplifies the translation task.
 For this example, the specification is broken down into these signal-level 
 concepts:
 
-\vspace{-4mm}
-\[
-\begin{array}{lcl}
-\hspace{-2mm}\mathsf{circuit}\,a,\,b,\,c&\hspace{-2mm}=
-	&\hspace{-2mm}[a^{+}, b^{+}]
-	\sim\hspace{-1.5mm}|\hspace{-1.5mm}\sim\hspace{-1.5mm}>c^{+}\\
-~&\hspace{-2mm}&<>a^{-}\sim> c^{-} <> b^{-}\sim> c^{-}\\
-~&\hspace{-2mm}&<> \mathsf{inputs} \, [a,\,b] <>\mathsf{outputs}\,[c] \\
-~&\hspace{-2mm}&<>\mathsf{initialise0}\,[a,\,b,\,c]
-\end{array}
-\]
-
-\vspace{-1mm}
+\begin{lstlisting}
+circuit a b c = [rise a, rise b] ~|~> rise c 
+              <> fall a ~> fall c <> fall b ~> fall c
+              <> inputs [a, b] <> outputs [c] 
+              <> initialise0 [a, b, c]
+\end{lstlisting}
 
 \noindent The first step is to prepare the read-arcs, and this is done by
 reformating these concepts into lists of causes for effects.
@@ -635,14 +566,14 @@ concept in the specification, meaning that for each OR-causality concept,
 there will be 2 or more signals in the list, and for each AND-causality 
 concept there will be a single item list.
 
-For example, taking the concept\\$[a^{+}, b^{+}]
-\sim\hspace{-1.5mm}|\hspace{-1.5mm}\sim\hspace{-1.5mm}>c^{+}$, there are
+For example, taking the concept\\
+\lstinline[language=haskell]{[rise a, rise b] ~|~> rise c}, there are
 two possible transitions for $c^{+}$ here, $a^{+}$ and $b^{+}$. These therefore 
 form a two item list. 
 
 Another example, using 
-$a^{-}\sim> c^{-} <> b^{-}\sim> c^{-}$, there are two
-cause transitions for $c^{-}$, namely $a^{-}$ and $b^{-}$. Both of these 
+\lstinline[language=haskell]{fall a ~> fall c <> fall b ~> fall c}, there are 
+two cause transitions for $c^{-}$, namely $a^{-}$ and $b^{-}$. Both of these 
 therefore form their own single item list. 
 
 This will mean there may be several different lists for each cause transition. 
@@ -784,7 +715,7 @@ included in the consistency loops.
 Finally, we can add the connections to the transitions, and cause the 
 expected interaction between signals. We use read-arcs to connect the effect
 transitions to the places after the transition of the cause. For example, for
-$a^{+} \sim> c^{+}$, we will connect the $a1$ place to the 
+\lstinline{rise a ~> rise b}, we will connect the $a1$ place to the 
 transition of $c^{+}$. We use read-arcs for these, as for this example, only
 after $c^{+}$ has occured, and placed a token in $x1$, will $c^{+}$ be allowed
 to occur, but the read arc will not consume the token in $x1$ which would block
@@ -909,37 +840,24 @@ from within \noun{Workcraft}.
 
 \subsection{Concepts file layout \label{sub:file_layout}}
 
-\vspace{-5mm}
+\vspace{-6mm}
 
 \begin{figure}[H]
 \begin{centering}
 
-\begin{flushleft}
-$\,\mathsf{module}\, Concept \, \mathsf{where}$
-\par\end{flushleft}
+\begin{lstlisting}
+module OrGate where
 
-\begin{flushleft}
-$\,\mathsf{import}\, Tuura.Concept.STG$
-\par\end{flushleft}
+import Tuura.Concept.STG
 
-\begin{flushleft}
-$\,\mathsf{circuit}\,a \,b \,c=\mathsf{\,interface}\,<> \mathsf{\, operation}
-<>\,\mathsf{initialState}$
+circuit a b c = interface <> operation <> initialState
+  where
+    interface = inputs[a, b] <> outputs[c]
 
-$\,\,\,\mathsf{where}$
-\par\end{flushleft}
+    operation = orGate a b c
 
-\begin{flushleft}
-$\,\,\,\,\,\,\mathsf{interface}=\mathsf{inputs}\,[a,b]<>\mathsf{outputs}\,[c]$
-\par\end{flushleft}
-
-\begin{flushleft}
-$\,\,\,\,\,\,\mathsf{operation}= \mathsf{orGate}\,a\,b\,c$
-\par\end{flushleft}
-
-\begin{flushleft}
-$\,\,\,\,\,\,\mathsf{initialState}= \, \mathsf{initialise0}\,[a,\,b,\,c]$
-\par\end{flushleft}
+    initialState = initialise0 [a, b, c]
+\end{lstlisting}
 
 \par\end{centering}
 \vspace{-2mm}
