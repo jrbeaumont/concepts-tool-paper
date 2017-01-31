@@ -104,7 +104,7 @@ include with each occurance of these signals.
 \includegraphics[scale=0.25]{Images/DC-stg.pdf}
 \par\end{centering}
 \protect\caption{\label{fig:DC-stg} STG containing only consistency loops}
-\vspace{-1mm}
+\vspace{-6mm}
 \end{figure}
 
 For example, Figure~\ref{fig:DC-stg} contains the Signal Transition Graph of a
@@ -148,18 +148,17 @@ compiler from a higher-level language, concepts, to this assembler.
 
 \noun{Plato} is 
 integrated into \noun{Workcraft}~\cite{Workcraft_website}, an open-source 
-EDA tool which also features some verification and synthesis tools for STGs, 
-and we will discuss the use of the tool from within \noun{Workcraft}.
+EDA tool which also features some verification and synthesis tools for STGs.
 
 The contributions of this paper are:
 \vspace{-1mm}
 \begin{itemize}
   \item We detail the notations of concepts within \noun{Plato} and the built in
   concepts and their uses in Section~\ref{sec:tool-func}
-  \item We explain how to use the tool both stand-alone and within
-  \noun{Workcraft} to translate concepts in Section~\ref{sec:tool-use}.
   \item We present the implemented algorithm for translating concepts to STGs
   in Section~\ref{sec:algorithm}.
+  \item We explain how to use the tool both stand-alone and within
+  \noun{Workcraft} to translate concepts in Section~\ref{sec:tool-use}.
 \end{itemize}
 
 \vspace{-5mm}
@@ -889,17 +888,17 @@ specification is then composed of all of these defined concepts.
 
 \vspace{-2mm}
 
-\begin{figure}[H]
+\begin{figure*}[t]
 \begin{centering}
 \vspace{-3mm}
-\includegraphics[scale=0.25]{Images/workcraft_design_flow.JPG}
+\includegraphics[scale=0.3]{Images/workcraft_design_flow.JPG}
 \par\end{centering}
 \begin{centering}
 \protect\caption{\label{fig:design_flow_screenshot}\noun{Workcraft} and 
 			\noun{plato} usage.}
 \par\end{centering}
 \vspace{-3mm}
-\end{figure}
+\end{figure*}
 
 This section will discuss how to use \noun{Plato} from within
 \noun{Workcraft}. There are many other features of \noun{Workcraft}, both as 
