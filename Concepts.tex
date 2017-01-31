@@ -78,10 +78,7 @@ tools, such as \noun{Petrify} and \noun{Mpsat}.
 
 \emph{Concepts} have been presented in order to provide a more compact, 
 adaptive and intuitive method of designing asynchronous circuits, using a fully
-compositional description method. This was born out of the use of algebra for 
-designing systems, such as the model Conditional Partial Order
-Graphs~\cite{CPOG1}\cite{CPOG2}\cite{2014_mokhov_pg} and
-the algebra of switching networks~\cite{mokhov2015algebra}. Composition is an 
+compositional description method. Composition is an 
 important part of concepts and the use of composition in some algebraic 
 representations, such as with DI algebra~\cite{270632} and Conditional Signal 
 Graphs~\cite{6243877} helped to inspire this. 
@@ -164,6 +161,8 @@ The contributions of this paper are:
   \item We present the implemented algorithm for translating concepts to STGs
   in Section~\ref{sec:algorithm}.
 \end{itemize}
+
+\vspace{-5mm}
 
 \section{Features of \noun{Plato}\label{sec:tool-func}}
 
@@ -414,6 +413,8 @@ inputs, $c$ is an output, and $t$ is internal, it is possible to write:
    inputs[a, b] <> outputs [c] <> internals [t]
 \end{lstlisting}
 
+\vspace{-4mm}
+
 \subsubsection{Initial state concepts\label{sub:initState}}
 
 Specifying the initial state is important, as it determines what the first 
@@ -530,6 +531,8 @@ and~$b$ that are both initially $0$.
 %
 %\vspace{-3mm}
 
+\vspace{-1mm}
+
 \section{Concepts to STG translation algorithm\label{sec:algorithm}}
 
 \vspace{-2mm}
@@ -549,9 +552,7 @@ operates, and present a pseudocode form of the algorithm in
 Algorithm~\ref{alg:translation}. 
 
 We will use the David cell example, the concept specification file of which can 
-be seen in Section~\ref{sub:file_layout}. This is a rudimentary example, but is 
-useful in displaying how the algorithm handles a system featuring both OR- and 
-AND-causality.
+be seen in Section~\ref{sub:file_layout}. 
 
 There are multiple ways of representing a specification using concepts. However,
 all levels of abstraction available to the designer are built out of primitive 
@@ -611,97 +612,57 @@ To start with this, we list all causes for each effect.
 \caption{Lists of cause transitions by effect transitions
 		\label{tab:list-of-concepts}}
   \centering
-\begin{tabular}[htb]{| m{2.6cm} | m{2.0cm} |}
+\begin{tabular}[htb]{| m{2.7cm} | m{2.0cm} |}
   \hline
 Causes & \, Effect \\ \hline \hline
-$a1^{-}$ & $r1^{+}$ \\ \hline
-$a1^{+}$ & $r1^{-}$ \\ \hline
-$r1^{+}$ & $a1^{+}$ \\ \hline
-$r1^{-}$, $r2^{+}$ & $a1^{-}$ \\ \hline
-$a2^{-}$, $a1^{+}$ & $r2^{+}$ \\ \hline
-$a2^{+}$,$a1^{+}$ & $r2^{-}$ \\ \hline
-$r2^{+}$ & $a2^{+}$ \\ \hline
-$r2^{-}$ & $a2^{-}$ \\ \hline
+$a1^{-}$, $r2^{-}$, $a2^{-}$ 			& $r1^{+}$ 	\\ \hline
+$a1^{+}$ 						& $r1^{-}$ 	\\ \hline
+$r1^{+}$, $r2^{-}$, $a2^{-}$, $e^{-}$ 	& $a1^{+}$ 	\\ \hline
+$r1^{-}$, $r2^{+}$, $a2^{+}$ 			& $a1^{-}$ 	\\ \hline
+$a2^{-}$, $a1^{+}$, $r1^{-}$ 			& $r2^{+}$ 	\\ \hline
+$a2^{+}$, $a1^{-}$, $e^{+}$ 			& $r2^{-}$ 	\\ \hline
+$r2^{+}$, $a1^{+}$ 				& $a2^{+}$ 	\\ \hline
+$r2^{-}$, $a1^{-}$ 				& $a2^{-}$ 	\\ \hline
+$a1^{-}$ 						& $e^{+}$ 	\\ \hline
+$r1^{+}$ 						& $e^{-}$	\\ \hline
+
   \end{tabular}
-  \vspace{-1mm}
+  \vspace{-3mm}
 \end{table}
 
-%\noindent From this, we can then combine the lists by effect transition, to 
-%give us a list of lists. This can be viewed in Table~\ref{tab:list-of-lists}.
-%
-%\vspace{-1mm}
+\noindent All of the included causalities are AND-causalities, and hence, there
+are several single cause transitions for each effect transition. If there were 
+OR-causality included, the list of possible causes would be included with these
+AND-causalities. For example:  $r2^{+}$, $a1^{+}$, $[x^{+}, y^{+}]$ causing
+$a2{+}$. $x$ and $y$ are in a list of their own, and this shows OR-causalitly;
+either $x$ or $y$ must transition high for $a2^{+}$ to occur. However, this does
+not account for the other AND-causalities. 
 
-%\begin{table}[h]
-%\caption{Lists of lists of cause transitions
-%		\label{tab:list-of-lists}}
-%
-%  \centering
-%\begin{tabular}[htb]{| m{2.6cm} | m{2.0cm} |}
-%  \hline
-%Causes & \, Effect \\ \hline \hline
-%[$a^{+}$, $b^{+}$] & $c^{+}$ \\ \hline
-%[$a^{-}$], [$b^{-}$] & $c^{-}$ \\ \hline
-%
-%  \end{tabular}
-% \vspace{-3mm}
-%\end{table}
+In this event, we would perform the the \emph{Cartesian product}, which combines
+all the AND- and OR-causalities. For the example above, this would produce:
 
-\noindent Note how for the $c^{-}$ transition there is 2 different single item 
-lists. Each one is an AND-causality, and why they are each in a separate list
-will become apparent in the next step. 
+$r2^{+}$, $a1^{+}$, $x^{+}$ causes $a2/1^{+}$
 
-This step is applying the \emph{Cartesian Product} to each of the list of lists
-for each effect transition. This will "expand the brackets", combining each
-item of each list with every item of every other list, creating a single list 
-which provides us with the number of this transition and which arcs to connect
-for each transition of each type. For this example, it is fairly simple, $c^{+}$
-has one list, and therefore the result of the Cartesian Product is the same as 
-this list. $c^{-}$ has two single item lists, and performing the cartesian 
-product on this will give us $[a^{-}\,b^{-}]$. 
+$r2^{+}$, $a1^{+}$, $y^{+}$ causes $a2/2^{+}$
 
-These newly formed lists provide us with the number of transitions for each 
-effect transition. This means there will be two $c^{+}$ transitions, as the list
-as the result of the Cartesian product is a list of two items. The first 
-$c^{+}$ transition will be caused by $a^{+}$, the second will be caused by 
-$b^{+}$. 
+\noindent This includes one of the OR-causality transitions with all of the 
+AND-causality transitions. It also leaves us with two separate $a2^{+}$ 
+transitions. These are both needed in order to show the two possible 
+combinations of transitions necessary for $a2^{+}$, and would be included as two
+separate transition objects in an STG. 
 
-For $c^{-}$, there will be only one transition requiring both $a^{-}$ and 
-$b^{-}$.
-
-Now, we can list the read-arcs to be connected for each transition of $c$.
-This can be viewed in Table~\ref{tab:list-by-transition}.
-
-\begin{table}[h]
-\caption{List of all effect transitions and their causes
-		\label{tab:list-by-transition}}
-
-  \centering
-\begin{tabular}[htb]{| m{2.6cm} | m{2.0cm} |}
-  \hline
-Causes & \, Effect \\ \hline \hline
-$a^{+}$ & $c^{+}(0)$ \\ \hline
-$b^{+}$ & $c^{+}(1)$ \\ \hline
-$a^{-}$, $b^{-}$ & $c^{-}$ \\ \hline
-  \end{tabular}
-\vspace{-1mm}
-\end{table}
-
-The numbers of the $c^{+}$ transitions are necessary for reference
-when definining arcs, for example, $b^{+}$ needs to connect to 
-$c^{+}(1)$, not $c^{+}(0)$ or just $c^{+}$ as this can cause 
-erroneous arcs to be included. 
-
-For clarity, where there is only one transition, such as with $c^{-}$
-we will refer to this simply as $c^{-}$, but this is effectively $c^{-}(0)$.
+However, for the David cell example, there is no OR-causality. We still perform
+the step of applying the Cartesian product to each of these lists of transitions
+for each effect transition, but the result will be the same as the original lists.
 
 This concludes the part of the algorithm which defines the arcs
-and transitions. Next, the algorithm begins to build the STGs. 
+and transitions. Next, the algorithm begins to build the STGs. This is where
+we start to use the initial state and interface concepts. 
 
 First of all, we need to add places for each signal. These are used to
 show whether a signal has transitioned high or low at any point. 
-A token in a $0$ place for example shows that that signal has 
-transitioned low. We add a $0$ and $1$ place for each signal, 
-which for this example gives us $a0$, $a1$, $b0$, $b1$, $c0$ and $c1$.
+For example a token in a $0$ place for example shows that that signal has 
+transitioned low. 
 
 The interface is defined at the start of the algorithm, by listing them as 
 $inputs$, $outputs$ or $internals$, so now we need to include all the 
@@ -715,58 +676,36 @@ this transition to the $1$ place for this signal. Conversely, if it is a $-$
 transition, we connect the $1$ place for this signal to the transition, and 
 connect this transition to the $0$ place.
 
-%\begin{figure}[h]
-%\vspace{-4mm}
-%\begin{centering}
-%\includegraphics[scale=0.3]{Images/or-gate-loops-stg}
-%\par\end{centering}
-%%\vspace{-1mm}
-%\protect\caption{\label{fig:loops} STG containing only consistency loops}
-%\vspace{-1mm}
-%\end{figure}
-
 Now the algorithm introduces the initial states. All of the signals are 
 specified to be initially 0, meaning that the first transition will be the $+$.
 From the consistency loops, to allow this to happen, we need to place a token 
-in each $0$ place for each signal. This will produce the STG displayed in 
-Figure~\ref{fig:tokens}. Note that both $c^{+}$ transitions are 
-included in the consistency loops.
-
-\begin{figure}[h]
-\vspace{-4mm}
-\begin{centering}
-\includegraphics[scale=0.3]{Images/or-gate-inits-stg}
-\par\end{centering}
-%\vspace{-1mm}
-\protect\caption{\label{fig:tokens} STG with consistency loops and 
-			initial states}
-\vspace{-1mm}
-\end{figure}
+in each $0$ place for each signal.
 
 Finally, we can add the connections to the transitions, and cause the 
-expected interaction between signals. We use read-arcs to connect the effect
-transitions to the places after the transition of the cause. For example, for
-\lstinline{rise a ~> rise b}, we will connect the $a1$ place to the 
-transition of $c^{+}$. We use read-arcs for these, as for this example, only
-after $c^{+}$ has occured, and placed a token in $x1$, will $c^{+}$ be allowed
-to occur, but the read arc will not consume the token in $x1$ which would block
-$x^{-}$ from being able to occur. 
+expected interaction between signals. 
+
+%We use read-arcs to connect the effect
+%transitions to the places after the transition of the cause. For example, for
+%\lstinline{rise a ~> rise b}, we will connect the $a1$ place to the 
+%transition of $c^{+}$. We use read-arcs for these, as for this example, only
+%after $c^{+}$ has occured, and placed a token in $x1$, will $c^{+}$ be allowed
+%to occur, but the read arc will not consume the token in $x1$ which would block
+%$x^{-}$ from being able to occur. 
 
 Following this, the specification is fully translated, and the resulting STG 
-will be the same as shown in Figure~\ref{fig:or-gate-stg}.
+will be the same as shown in Figure~\ref{fig:dc-stg-translated}.
 
 \begin{figure}[h]
 \vspace{-4mm}
 \begin{centering}
-\includegraphics[scale=0.3]{Images/or-gate-stg}
+\includegraphics[scale=0.3]{Images/dc-translated-stg}
 \par\end{centering}
-%\vspace{-1mm}
-\protect\caption{\label{fig:or-gate-stg} Fully translated OR-gate STG}
+\protect\caption{\label{fig:dc-stg-translated} Fully translated David cell STG}
 \vspace{-5mm}
 \end{figure}
 
 
-\begin{algorithm}[h]
+\begin{algorithm}[t]
 \begin{algorithmic}
 \caption{Algorithm for translating concepts to STGs\label{alg:translation}}
 \For {Signal $s$ in \textbf{System}}
@@ -867,9 +806,11 @@ from within \noun{Workcraft}.
 %  $ stack build
 %\end{lstlisting}
 %
-%\vspace{-5mm}
+\vspace{-3mm}
 
 \subsection{Concepts file layout \label{sub:file_layout}}
+
+\vspace{-3mm}
 
 \begin{figure}[h]
 \begin{centering}
@@ -918,15 +859,15 @@ All concept files must be edited in a plain-text editor, and saved with the
 The following describes important information about specific lines.
 
 \begin{description}
-  \item [Line 1]
-  This line must be included in all concept files, with the module name
+  \item [Line 1]  This line must be included in all concept files, with the 
+  module name chosen by the user.
   
-  \item [Line 2] must also remain in all concept files, so that the built-in
-  operators and existing gates/protocols can be used. 
+  \item [Line 2] is included so that the built-in operators and existing 
+  gates/protocols can be used. 
   
   \item [Line 3] is where a user can begin to define their concepts. 
-  ``\texttt{circuit}'' must begin the line, but after this, a user can choose 
-  what characters they wish to represent their signals.
+  ``\texttt{circuit}'' must begin the line for the concept to be translated.
+  A user can choose what characters they wish to represent their signals.
   
   \item [Line 4] is simply ``\texttt{where}''. This is used to separate the main
   concept definition from the user-defined concepts.
@@ -939,10 +880,10 @@ The lines discussed above are the basics of writing concepts. With this
 information, a user can write concept files, but the following lines can be 
 used for ease-of-use, ease-of-understanding, and reuse. 
 
-The example we have used is of that of an OR-gate. We have defined the 
+The example we have used is of that of a David cell. We have defined the 
 interface, initial state and the operation of this separatley, by defining 
 these concepts following the ``'$\mathsf{where}$''. The full circuit 
-specification is then composed of all three of these defined concepts. 
+specification is then composed of all of these defined concepts. 
 
 \subsection{Using \noun{Plato} from within \noun{Workcraft} \label{sec:workcraft_usage}}
 
@@ -953,15 +894,12 @@ specification is then composed of all three of these defined concepts.
 \vspace{-3mm}
 \includegraphics[scale=0.25]{Images/workcraft_design_flow.JPG}
 \par\end{centering}
-
 \begin{centering}
 \protect\caption{\label{fig:design_flow_screenshot}\noun{Workcraft} and 
 			\noun{plato} usage.}
-
 \par\end{centering}
 \vspace{-3mm}
 \end{figure}
-
 
 This section will discuss how to use \noun{Plato} from within
 \noun{Workcraft}. There are many other features of \noun{Workcraft}, both as 
@@ -1036,11 +974,11 @@ has not been installed correctly.
 
 \vspace{-3mm}
 
-In this work, we have displayed the process of specifying behavioural and 
-compositional concepts for asynchronous circuits, using an open-source
-tool, \noun{Plato}~\cite{2016_concepts_github}. This tool implements a domain-specific 
-language, featuring some built-in concepts at varying levels, allowing users to
-specify behaviours in a preferred way. 
+In this work, we have displayed the open-source
+tool, \noun{Plato}~\cite{2016_concepts_github}. This tool implements a 
+domain-specific language for behavioural concepts, featuring some built-in 
+concepts at varying levels, allowing users to specify behaviours in a preferred 
+way. 
 
 This tool also features translation, a method of converting concepts into Signal
 Transition Graphs, output in a format usable by other existing design, 
@@ -1048,7 +986,7 @@ verification and synthesis tools.
 
 \noun{Plato}, can be used on it's own using a command-line interface, and is
 integrated into \noun{Workcraft}, which can visualise many graphical modelling
-methods, including STG which can be automatically imported from the
+methods, including STGs, which can be automatically imported from the
 tool, either from concept specifications written by a user from within 
 \noun{Workcraft}, or by importing a previously written concept file.
 \noun{Workcraft} also features several verification and synthesis tools 
@@ -1056,35 +994,20 @@ integrated, which can automatically use STGs translated from concepts.
 
 Using concepts, a user can reduce the time of designing an asynchronous
 control circuit from the ground up, as well as allow reuse of components
-either as part of a scenario or entire scenarios to reduce the design-time
-of future projects. Composition of concepts can help
+by importing them from previously written user concept files which can be 
+specified either as part of a scenario or entire scenarios to reduce the 
+design-time of future projects. Composition of concepts can help
 reduce errors and save time in comparison to performing these manually.
 This method can help to make asynchronous circuits more appealing
 to industrial designers.
 
-Currently, this method works with Signal Transition Graphs, however
-it can be applied to other modelling disciplines, such as Finite State
-Machines~(FSM), and an automated concepts to FSM translation method
-is aimed to be implemented.
-
-%\emph{Process mining} can also be used for various purposes in conjunction
-%with designing asynchronous circuits. For example, process mining can discover
-%a behavioural model when none currently exists, and can be used to check 
-%that an existing specification is realistic, or find less complex models. 
-%All of this can be performed automatically, by tools such as
-%\noun{PGminer}~\cite{mokhov2016mining}, given
-%an event log with observations of a real analogue or digital system, and aid a
-%designer in reducing design time and errors. We aim to test the possibility of 
-%producing concepts directly from the mining of these event logs.
+Currently, this method works with Signal Transition Graphs, and
+Finite State Machines~(FSM).
 
 The \noun{Plato} tool we have discussed is available 
 from~\cite{2016_concepts_github}, and as stated, is integrated into 
 \noun{Workcraft}~\cite{Workcraft_website}. A manual is included with the tool, 
-which features descriptions of the features. We host a regularly updated blog 
-which discusses some interesting properties of concepts, and new ideas we find 
-for concepts, and this is available  at~\cite{2016_blog_concepts}.
-
-%\vspace{-2mm}
+which features descriptions of the features. 
 
 \bibliographystyle{unsrt}
 \bibliography{publications}
