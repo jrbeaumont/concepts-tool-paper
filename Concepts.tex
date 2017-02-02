@@ -521,7 +521,7 @@ circuit a b c = operation <> interface
   inits = initialise0 [a, b, c]
 \end{minted}
 
-There can bne multiple ways of representing a specification using concepts, however,
+There can be multiple ways of representing a specification using concepts, however,
 all levels of abstraction available to the designer are built out of signal-level
 concepts. Given a specification, we can therefore break down 
 all gate- and protocol-level constructs into `atoms', which significantly 
@@ -535,17 +535,12 @@ concepts, and focus on the arcs only.
 \begin{tabular}[htb]{| m{2.7cm} | m{2.0cm} |}
   \hline
 Causes & \, Effect \\ \hline \hline
-$a1^{-}$, $r2^{-}$, $a2^{-}$ 			& $r1^{+}$ 	\\ \hline
-$a1^{+}$ 						& $r1^{-}$ 	\\ \hline
-$r1^{+}$, $r2^{-}$, $a2^{-}$, $e^{-}$ 	& $a1^{+}$ 	\\ \hline
-$r1^{-}$, $r2^{+}$, $a2^{+}$ 			& $a1^{-}$ 	\\ \hline
-$a2^{-}$, $a1^{+}$, $r1^{-}$ 			& $r2^{+}$ 	\\ \hline
-$a2^{+}$, $a1^{-}$, $e^{+}$ 			& $r2^{-}$ 	\\ \hline
-$r2^{+}$, $a1^{+}$ 				& $a2^{+}$ 	\\ \hline
-$r2^{-}$, $a1^{-}$ 				& $a2^{-}$ 	\\ \hline
-$a1^{-}$ 						& $e^{+}$ 	\\ \hline
-$r1^{+}$ 						& $e^{-}$	\\ \hline
-
+$a^{+}$, $b^{+}$		& $c^{+}$ 	\\ \hline
+$a^{-}$, $b^{-}$ 		& $c^{-}$ 	\\ \hline
+$c^{-}$			& $a^{+}$ 	\\ \hline
+$c^{+}$			& $a^{-}$ 	\\ \hline
+$c^{-}$			& $b^{+}$ 	\\ \hline
+$c^{+}$			& $b^{-}$ 	\\ \hline
   \end{tabular}
   \vspace{-3mm}
 \end{table}
@@ -553,29 +548,30 @@ $r1^{+}$ 						& $e^{-}$	\\ \hline
 To start with this, we list all causes for each effect. These lists can be found in
 Table~\ref{tab:list-of-concepts}.
 All of the included causalities are AND-causalities, and hence, there
-are several single cause transitions for each effect transition. If there were 
+is at least one single cause transitions for each effect transition. If there were 
 OR-causality included, the list of possible causes would be included with these
-AND-causalities. For example:  $r2^{+}$, $a1^{+}$, $[x^{+}, y^{+}]$ causing
-$a2{+}$. $x$ and $y$ are in a list of their own, and this shows OR-causalitly;
-either $x$ or $y$ must transition high for $a2^{+}$ to occur. However, this does
+AND-causalities. For example:  $a^{+}$, $b^{+}$, $[x^{+}, y^{+}]$ causing
+$c{+}$. $x$ and $y$ are in a list of their own, and this shows OR-causalitly;
+either $x$ or $y$ must transition high for $C^{+}$ to occur. However, this does
 not account for the other AND-causalities. 
 
 In this event, we would perform the \emph{Cartesian product}, which combines
 all the AND- and OR-causalities. For the example above, this would produce:
 
-$r2^{+}$, $a1^{+}$, $x^{+}$ causes $a2/1^{+}$
+$a^{+}$, $b^{+}$, $x^{+}$ causes $c/1^{+}$
 
-$r2^{+}$, $a1^{+}$, $y^{+}$ causes $a2/2^{+}$
+$a^{+}$, $b^{+}$, $y^{+}$ causes $c/2^{+}$
 
 \noindent This includes one of the OR-causality transitions with all of the 
-AND-causality transitions. It also leaves us with two separate $a2^{+}$ 
+AND-causality transitions. It also leaves us with two separate $c^{+}$ 
 transitions. These are both needed in order to show the two possible 
-combinations of transitions necessary for $a2^{+}$, and would be included as two
+combinations of transitions necessary for $c^{+}$, and would be included as two
 separate transition objects in an STG. 
 
-However, for the David cell example, there is no OR-causality. We still perform
-the step of applying the Cartesian product to each of these lists of transitions
-for each effect transition, but the result will be the same as the original lists.
+However, for the C-element with environment example, there is no OR-causality. 
+We still perform the step of applying the Cartesian product to each of these 
+lists of transitions for each effect transition, but the result will be the 
+same as the original lists.
 
 This concludes the part of the algorithm which defines the arcs
 and transitions. Next, the algorithm begins to build the STGs. This is where
@@ -615,14 +611,17 @@ expected interaction between signals.
 %$x^{-}$ from being able to occur. 
 
 Following this, the specification is fully translated, and the resulting STG 
-will be the same as shown in Figure~\ref{fig:dc-stg-translated}.
+will be the same as shown in Figure~\ref{fig:cElement-stg-translated}. 
+This can now be used with tools, to verify and synthesize. It can also be
+\emph{resynthesized} using these tools, to produce a more compact STG,
+such as that seen in Figure~\ref{fig:cElement-stg}
 
 \begin{figure}[h]
 \vspace{-4mm}
 \begin{centering}
-\includegraphics[scale=0.3]{Images/dc-translated-stg}
+\includegraphics[scale=0.3]{Images/cElement-stg-translated}
 \par\end{centering}
-\protect\caption{\label{fig:dc-stg-translated} Fully translated David cell STG}
+\protect\caption{\label{fig:cElement-stg-translated} Fully translated C-element with environment STG}
 \vspace{-3mm}
 \end{figure}
 
@@ -632,56 +631,12 @@ will be the same as shown in Figure~\ref{fig:dc-stg-translated}.
 
 \vspace{-2mm}
 
-%In this section, we will cover how to install the tool, how to prepare a
-%concepts file and run \noun{Plato} either through command line, or through 
-%\noun{Workcraft}, and the output it produces for each of these cases.
-
 In this section, we will discuss the design flow, including the preparation of 
 a concepts file, the translation methods from within \noun{Workcraft}, and 
 the uses from the translated STGs. This tool can also be used from command line,
 however, the design flow can include a GUI from authoring concepts to synthesis
 from within \noun{Workcraft}. 
 
-%\vspace{-2mm}
-%
-%\subsection{Installing the tool \label{sub:installing}}
-%
-%\vspace{-2mm}
-%
-%\noun{Plato} can be downloaded from~\cite{2016_concepts_github} on it's
-%own, or it is included in the download of Workcraft. It can be used on 
-%\emph{Windows}, \emph{Linux} or \emph{Mac OS X}.
-%
-%Download either\noun{Plato} or \noun{Workcraft}, extract it and move it to
-%a known directory. Using a terminal, navigate to this directory,
-%or if using \noun{Workcraft}, navigate to the \noun{Workcraft} directory, and
-%then navigate to the \noun{Plato} directory, found in \texttt{tools/concepts} 
-%(for \emph{OS X}, the \noun{Workcraft} directory is located within the 
-%\texttt{Workcraft.app} contents folder. The concepts tool will be found at 
-%\texttt{Contents/Resources/tools/concepts}.
-%
-%Now, the process of installing the tool is the same, regardless of how you aim 
-%to use it. First of all, \noun{stack} needs to be installed 
-%(download and instructions available from~\cite{stack_website}. 
-%To install stack and \noun{Plato}, run: 
-%
-%\vspace{-2mm}
-%
-%\begin{lstlisting}[language=bash]
-%  $ stack setup --no-system-ghc
-%\end{lstlisting}
-%
-%\vspace{-1mm}
-%
-%This will prepare stack to install \noun{Plato}. Now, to build and install
-%the tool, simply run:
-%
-%\vspace{-1mm}
-%
-%\begin{lstlisting}[language=bash]
-%  $ stack build
-%\end{lstlisting}
-%
 \vspace{-3mm}
 
 \subsection{Concepts file layout \label{sub:file_layout}}
@@ -692,31 +647,18 @@ from within \noun{Workcraft}.
 \begin{centering}
 
 \begin{minted}[fontsize=\normalsize]{haskell}
-module DC where
+module CElement where
 
 import Tuura.Concept.STG
 
-circuit r1 a1 r2 a2 e = handshakeLeft 
-                      <> handshakeRight 
-                      <> outputHandshake <> interface 
-	              <> initialState <> internal 
-		      <> mutex <> ackHandshake 
-                      <> reset
-  where
-  	handshakeLeft = handshake r1 a1
-  	handshakeRight = handshake r2 a2
-  	outputHandshake = handshake a1 r2
-  	mutex = me r1 r2 
-  	ackHandshake = handshake a1 a2
-	reset = fall a2 ~> rise r1
-  	internal = rise r1 ~> fall e 
-                 <> fall e ~> rise a1 
-                 <> fall a1 ~> rise e
-		 <> rise e ~> fall r2
-	interface = inputs[r1, a2] <> outputs[a1, r2] 
-                  <> internals[e]
-	initialState = initialise0 [r1, a1, r2, a2] 
-                     <> initialise1 [e]
+circuit a b c = operation <> interface 
+             <> inits 
+ where
+  operation = cElement a b c <> environment
+  environment = inverter c a 
+             <> inverter c b
+  interface = inputs[a, b] <> outputs[c] 
+  inits = initialise0 [a, b, c]
 \end{minted}
 
 \par\end{centering}
@@ -751,13 +693,11 @@ The following describes important information about specific lines.
 \vspace{-1mm}
 
 The lines discussed above are the basics of writing concepts. With this 
-information, a user can write concept files, but the following lines can be 
-used for ease-of-use, ease-of-understanding, and reuse. 
-
-The example we have used is of that of a David cell. We have defined the 
-interface, initial state and the operation of this separatley, by defining 
-these concepts following the ``\mintinline{haskell}{where}''. The full circuit 
-specification is then composed of all of these defined concepts. 
+information, a user can write concept files. We have used the 
+Celement with environment example here. We have defined the interface, initial 
+state and the operation of this separatley, by defining these concepts following the 
+``\mintinline{haskell}{where}''. The full circuit specification is then 
+composed of all of these defined concepts. 
 
 \subsection{Using \noun{Plato} from within \noun{Workcraft} \label{sec:workcraft_usage}}
 
@@ -766,7 +706,7 @@ specification is then composed of all of these defined concepts.
 \begin{figure*}[t]
 \begin{centering}
 \vspace{-3mm}
-\includegraphics[scale=0.45]{Images/workcraft_design_flow.JPG}
+\includegraphics[scale=0.41]{Images/workcraft_design_flow.png}
 \par\end{centering}
 \begin{centering}
 \protect\caption{\label{fig:design_flow_screenshot}\noun{Workcraft} and 
