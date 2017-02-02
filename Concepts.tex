@@ -135,9 +135,7 @@ In this paper, we will discuss the implementation of the domain specific
 language and translation tool for concepts, implemented in \noun{Haskell}, called 
 \noun{Plato}~\cite{2016_concepts_github}.
 If STGs are the assembly language of asynchronous circuits, \noun{Plato} is a 
-compiler from a higher-level language, concepts, to this assembler. 
-
-\noun{Plato} is 
+compiler from a higher-level language, concepts, to this assembler. \noun{Plato} is 
 integrated into \noun{Workcraft}~\cite{Workcraft_website}, an open-source 
 EDA tool which also features some verification and synthesis tools for STGs.
 
@@ -152,7 +150,7 @@ The contributions of this paper are:
   \noun{Workcraft} to translate concepts in Section~\ref{sec:tool-use}.
 \end{itemize}
 
-\vspace{-5mm}
+%\vspace{-5mm}
 
 \section{Features of \noun{Plato}\label{sec:tool-func}}
 
@@ -548,6 +546,52 @@ In this section, we will display an example of how the translation algorithm
 operates, and present a pseudocode form of the algorithm in 
 Algorithm~\ref{alg:translation}. 
 
+\begin{algorithm}[t]
+\begin{algorithmic}
+\caption{Algorithm for translating concepts to STGs\label{alg:translation}}
+\For {Signal $s$ in \textbf{System}}
+  \State \textbf{define} interface of $s$ as \emph{Input/Output/Internal}
+\EndFor
+
+\For {Each effect transition $e$}
+  \State $allCauses$ $\leftarrow$ Concatinate lists  possible causes for $e$
+  \State $transitionList$ $\leftarrow$ \emph{Cartesian Product} \textbf{of} 
+	$allCauses$
+  \For {$i = 0$ to Length of $transitionList$}
+    \State \textbf{add} $e(i)$ to $transitions$
+  \EndFor 
+\EndFor
+\For {Each \textbf{signal} $s$ in system}
+  \State \textbf{add} place \textbf{$s$.Name}$0$
+  \State \textbf{add} place \textbf{$s$.Name}$1$
+\EndFor
+\For {Each \textbf{transition} $t$ in $transitions$}
+  \If {transition is high}
+    \State \textbf{connect} (place $t$.signalName$0$, transition)
+    \State \textbf{connect} (transition, place $t$.signalName$1$)
+    \For {Each \textbf{cause transition} $c$ for $t$}
+      \State \textbf{read-arc} (place $t$.signalName$1$, $c$)
+    \EndFor
+  \EndIf
+  \If {transition is low}
+    \State \textbf{connect} (place $t$.signalName$1$, transition)
+    \State \textbf{connect} (transition, place $t$.signalName$0$)
+    \For {Each \textbf{cause transition} $c$ for $t$}
+      \State \textbf{read-arc} (place $t$.signalName$0$, $c$)
+    \EndFor
+  \EndIf
+\EndFor
+\For {Each initial state $state$ concept}
+  \If {$state$ is low}
+    \State \textbf{add-token}(\textbf{signalName.place}$0$)
+  \EndIf 
+  \If {$state$ is high}
+    \State \textbf{add-token}(\textbf{signalName.place}$1$)
+  \EndIf
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
 We will use the David cell example, the concept specification file of which can 
 be seen in Section~\ref{sub:file_layout}. 
 
@@ -660,7 +704,7 @@ we start to use the initial state and interface concepts.
 
 First of all, we need to add places for each signal. These are used to
 show whether a signal has transitioned high or low at any point. 
-For example a token in a $0$ place for example shows that that signal has 
+For example a token in a $0$ place shows that that signal has 
 transitioned low. 
 
 The interface is defined at the start of the algorithm, by listing them as 
@@ -702,54 +746,6 @@ will be the same as shown in Figure~\ref{fig:dc-stg-translated}.
 \protect\caption{\label{fig:dc-stg-translated} Fully translated David cell STG}
 \vspace{-5mm}
 \end{figure}
-
-
-\begin{algorithm}[t]
-\begin{algorithmic}
-\caption{Algorithm for translating concepts to STGs\label{alg:translation}}
-\For {Signal $s$ in \textbf{System}}
-  \State \textbf{define} interface of $s$ as \emph{Input/Output/Internal}
-\EndFor
-
-\For {Each effect transition $e$}
-  \State $allCauses$ $\leftarrow$ Concatinate lists  possible causes for $e$
-  \State $transitionList$ $\leftarrow$ \emph{Cartesian Product} \textbf{of} 
-	$allCauses$
-  \For {$i = 0$ to Length of $transitionList$}
-    \State \textbf{add} $e(i)$ to $transitions$
-  \EndFor 
-\EndFor
-\For {Each \textbf{signal} $s$ in system}
-  \State \textbf{add} place \textbf{$s$.Name}$0$
-  \State \textbf{add} place \textbf{$s$.Name}$1$
-\EndFor
-\For {Each \textbf{transition} $t$ in $transitions$}
-  \If {transition is high}
-    \State \textbf{connect} (place $t$.signalName$0$, transition)
-    \State \textbf{connect} (transition, place $t$.signalName$1$)
-    \For {Each \textbf{cause transition} $c$ for $t$}
-      \State \textbf{read-arc} (place $t$.signalName$1$, $c$)
-    \EndFor
-  \EndIf
-  \If {transition is low}
-    \State \textbf{connect} (place $t$.signalName$1$, transition)
-    \State \textbf{connect} (transition, place $t$.signalName$0$)
-    \For {Each \textbf{cause transition} $c$ for $t$}
-      \State \textbf{read-arc} (place $t$.signalName$0$, $c$)
-    \EndFor
-  \EndIf
-\EndFor
-\For {Each initial state $state$ concept}
-  \If {$state$ is low}
-    \State \textbf{add-token}(\textbf{signalName.place}$0$)
-  \EndIf 
-  \If {$state$ is high}
-    \State \textbf{add-token}(\textbf{signalName.place}$1$)
-  \EndIf
-\EndFor
-\end{algorithmic}
-\end{algorithm}
-
 
 \section{Usage of the tool\label{sec:tool-use}}
 
@@ -852,9 +848,7 @@ circuit r1 a1 r2 a2 e = handshakeLeft
 \end{figure}
 
 The concepts file we will discuss is found in Figure~\ref{fig:concepts_file}.
-All concept files must be edited in a plain-text editor, and saved with the 
-``.hs'' file extension, as the concepts are written in Haskell code. 
-
+Concepts files are an extension of Haskell files, and hence, use the ``.hs'' file extension.
 The following describes important information about specific lines.
 
 \begin{description}
@@ -866,10 +860,10 @@ The following describes important information about specific lines.
   
   \item [Line 3] is where a user can begin to define their concepts. 
   ``\texttt{circuit}'' must begin the line for the concept to be translated.
-  A user can choose what characters they wish to represent their signals.
+  A user can choose what names they wish to represent their signals.
   
   \item [Line 4] is simply ``\texttt{where}''. This is used to separate the main
-  concept definition from the user-defined concepts.
+  concept definition from other user-defined concepts.
 
 \end{description}
 
@@ -891,7 +885,7 @@ specification is then composed of all of these defined concepts.
 \begin{figure*}[t]
 \begin{centering}
 \vspace{-3mm}
-\includegraphics[scale=0.3]{Images/workcraft_design_flow.JPG}
+\includegraphics[scale=0.45]{Images/workcraft_design_flow.JPG}
 \par\end{centering}
 \begin{centering}
 \protect\caption{\label{fig:design_flow_screenshot}\noun{Workcraft} and 
@@ -900,11 +894,16 @@ specification is then composed of all of these defined concepts.
 \vspace{-3mm}
 \end{figure*}
 
+\noun{Plato}, can be used on it's own using a command-line interface, and has been
+integrated into \noun{Workcraft}, an open-source EDA tool. This can visualise many graphical modelling
+methods, including STGs, and also features several other tools integrated, which can perform verification
+and synthesis of these models automatically.
+
+STGs are a featured modelling method within \noun{Workcraft},
+which can be automatically imported from \noun{plato}, either from concept specifications written by a user from within 
+\noun{Workcraft}, or by importing a previously written concept file. 
 This section will discuss how to use \noun{Plato} from within
-\noun{Workcraft}. There are many other features of \noun{Workcraft}, both as 
-part of the STG plug in, some of which I will discuss in the context of 
-concepts here, and as part of other modelling formalisms. More information on 
-these can be found at~\cite{Workcraft_website}.
+\noun{Workcraft}.
 
 \vspace{-2mm}
  
@@ -955,19 +954,19 @@ Any concept files imported will be automatically translated to an STG.
 
 \vspace{-3mm}
 
-\subsection{Errors}
-
-\vspace{-2mm}
-
-If any errors are encountered during the translation process, \noun{Workcraft} 
-will produce a helpful error message. This usually can tell you with more 
-detail what the issue that is causing the error is, but will ask you to refer 
-to \noun{Workcraft}'s console window for specific line numbers or signals which
-need to be corrected. 
-
-These errors will include whether a signal has not been declared as an input or
-output, a signal has not had it's initial state given, or even that \noun{Plato}
-has not been installed correctly. 
+%\subsection{Errors}
+%
+%\vspace{-2mm}
+%
+%If any errors are encountered during the translation process, \noun{Workcraft} 
+%will produce a helpful error message. This usually can tell you with more 
+%detail what the issue that is causing the error is, but will ask you to refer 
+%to \noun{Workcraft}'s console window for specific line numbers or signals which
+%need to be corrected. 
+%
+%These errors will include whether a signal has not been declared as an input or
+%output, a signal has not had it's initial state given, or even that \noun{Plato}
+%has not been installed correctly. 
 
 \section{Conclusions and future work\label{sec:conclusions}}
 
@@ -1000,8 +999,8 @@ reduce errors and save time in comparison to performing these manually.
 This method can help to make asynchronous circuits more appealing
 to industrial designers.
 
-Currently, this method works with Signal Transition Graphs, and
-Finite State Machines~(FSM).
+%Currently, this method works with Signal Transition Graphs, and
+%Finite State Machines~(FSM).
 
 The \noun{Plato} tool we have discussed is available 
 from~\cite{2016_concepts_github}, and as stated, is integrated into 
