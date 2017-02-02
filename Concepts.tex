@@ -17,6 +17,7 @@
 \usepackage{array}
 \usepackage{blindtext}
 \usepackage{listings}
+\usepackage{minted}
 \lstset{basicstyle=\footnotesize, language=Haskell}
 
 \makeatletter
@@ -213,6 +214,10 @@ A key concept in asynchronous circuits is \emph{causality}:
 one signal transition \emph{causes} another signal transition, a cause and an 
 effect. This is denoted in the form: 
 
+\begin{minted}[fontsize=\normalsize]{haskell}
+	rise a ~> rise c
+\end{minted}
+
 \begin{lstlisting}[language=haskell]
 	         rise a ~> rise c
 \end{lstlisting}
@@ -293,6 +298,11 @@ inverter a b = rise a ~> fall b <> fall a ~> rise b
 \noindent A \emph{C-element} is a gate with two inputs, in this example $a$ and $b$, and one
 output~$c$, which synchronises both rising and falling input transitions
 via AND-causality:
+
+\begin{minted}[fontsize=\small]{haskell}
+cElement a b c = rise a ~> rise c <> rise b ~> rise c
+          <> fall a ~> fall c <> fall b ~> fall c
+\end{minted}
 
 \begin{lstlisting}[language=haskell]
 cElement a b c = rise a ~> rise c <> rise b ~> rise c
@@ -810,6 +820,35 @@ from within \noun{Workcraft}.
 \subsection{Concepts file layout \label{sub:file_layout}}
 
 \vspace{-3mm}
+
+\begin{minted}{haskell}
+module DC where
+
+import Tuura.Concept.STG
+
+circuit r1 a1 r2 a2 e = handshakeLeft 
+                      <> handshakeRight 
+                      <> outputHandshake <> interface 
+	              <> initialState <> internal 
+		      <> mutex <> ackHandshake 
+                      <> reset
+  where
+  	handshakeLeft = handshake r1 a1
+  	handshakeRight = handshake r2 a2
+  	outputHandshake = handshake a1 r2
+  	mutex = me r1 r2 
+  	ackHandshake = handshake a1 a2
+	reset = fall a2 ~> rise r1
+  	internal = rise r1 ~> fall e 
+                 <> fall e ~> rise a1 
+                 <> fall a1 ~> rise e
+		 <> rise e ~> fall r2
+	interface = inputs[r1, a2] <> outputs[a1, r2] 
+                  <> internals[e]
+	initialState = initialise0 [r1, a1, r2, a2] 
+                     <> initialise1 [e]
+                     
+\end{minted}
 
 \begin{figure}[h]
 \begin{centering}
