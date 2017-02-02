@@ -84,7 +84,8 @@ concepts, which can be reused within the same or any other specification that
 they wish to increase the speed of designing a system, and future systems. 
 
 With concepts, we aim to solve the problems that can arise from the more 
-commonly used monolithic approach, where a user must design each system in the 
+commonly used monolithic approach with Signal Transition Graphs (STGs)~\cite{Chu_1987_phd}\cite{Rosenblum_1985_tpn},
+where a user must design each system in the 
 form of an STG from a blank page. The scalability of this is poor: as the 
 system grows in complexity its monolithic specification becomes challenging to 
 comprehend and debug. When the number of signals increases, the gates and 
@@ -94,31 +95,22 @@ include with each occurance of these signals.
 \begin{figure}[h]
 \vspace{-3mm}
 \begin{centering}
-\includegraphics[scale=0.25]{Images/DC-stg.pdf}
+\includegraphics[scale=0.3]{Images/cElement-stg.pdf}
 \par\end{centering}
-\protect\caption{\label{fig:DC-stg} STG containing only consistency loops}
+\protect\caption{\label{fig:cElement-stg} Example STG}
 \vspace{-6mm}
 \end{figure}
 
-For example, Figure~\ref{fig:DC-stg} contains the Signal Transition Graph of a
-David cell. While this STG is in a loop, it is useful to know that signals $r1$ 
-and $a1$ form a hanshake, as do $r2$ and $a2$. Signals $r1$ and $r2$ are in a
-mutual exclusion relationship. These are among other facts which can make
-the specification for a David cell particularly tricky. 
+For example, Figure~\ref{fig:cElement-stg} contains an STG. 
+While it seems fairly simple, and it is possible to list the interactions between each
+individual signal, it would be useful to know that there is a C-element, with $a$ and $b$ as
+the inputs, and $c$ as the output. Not only this, but the environment of this, what 
+causes the inputs to change, is simply an inverter from the output, $c$, to both inputs. 
+With this information, we have gone from listing several differing signal-level interactions,
+to describing the behaviour of this circuit at gate-level. 
 
-%The problem becomes particularly severe when designing 
-%multi-mode systems, such as power regulators, where capturing all aspects of 
-%system behaviour in a consistent specification is a major design 
-%challenge~\cite{2014_sokolov_ftfc}\cite{sokolov2015design}. 
-
-The issues that can arise from this can therefore cause a long design, full of 
-testing and debugging, this is particularly undesirable for industry, as 
-this increases the design time of each circuit greatly. 
-
-STGs~\cite{Chu_1987_phd}\cite{Rosenblum_1985_tpn} are commonly used for the 
-specification, verification and synthesis of asynchronous control circuits as 
-they are supported by multiple EDA tools, such as 
-\noun{Petrify}~\cite{Cortadella}, \noun{Mpsat}~\cite{khomenko2004detecting}, 
+STGs are supported by multiple EDA tools for verification and synthesis of asynchronous control circuits,
+such as \noun{Petrify}~\cite{Cortadella}, \noun{Mpsat}~\cite{khomenko2004detecting}, 
 \noun{Versify}~\cite{i1997formal}, 
 \noun{Workcraft}~\cite{2007_poliakov_workcraft}\cite{Workcraft_website}, 
 and others. These tools take an STG specification and can formally verify its correctness, 
@@ -149,8 +141,6 @@ The contributions of this paper are:
   \item We explain how to use the tool from within
   \noun{Workcraft} to translate concepts in Section~\ref{sec:tool-use}.
 \end{itemize}
-
-%\vspace{-5mm}
 
 \section{Features of \noun{Plato}\label{sec:tool-func}}
 
@@ -235,7 +225,7 @@ AND-causality is commonly used to imply behaviours in circuits, for specific
 requirements of effect transitions.  
 
 The above notation can cause long-winded specifications when lots of 
-AND-causality is involved. To solve this we provise a listing option. The 
+AND-causality is involved. To solve this we provide a listing option. The 
 following will acheive the same results:
 
 \begin{minted}[fontsize=\normalsize]{haskell}
@@ -263,7 +253,7 @@ in Section~\ref{sec:algorithm}.
 
 \vspace{-2mm}
 
-\subsubsection{Gate-level concepts} Using the causality concept we can express
+\subsubsection{Gate-level concepts \label{subsub:gate-level}} Using the causality concept we can express
 the behaviour of gates in asynchronous circuits. For example, a \emph{buffer}
 is a gate with one input signal and one output signal,
 whose output transitions causally depend on the input ones:
@@ -438,107 +428,11 @@ declared in lists by on state:
  initialise0[a, b, c] <> initialise1[x,y]
 \end{minted}
 
-%\noindent As an example, we can include this in the specification of a 
-%handshake, to create a handshake with built-in initial state.
-%$\mathsf{initialise}\,a\, 0$ sets the state of the signal
-%$a$ to $0$. We can compose an initial state concept with the handshake concept
-%into a combined $\mathsf{handshake00}\,a\, b$ concept as
-%
-%\begin{minted}[fontsize=\normalsize]{haskell}
-%handshake00 a b = handshake a b <> initialise a 0 
-%                  <> initialise b 0
-%\end{minted}
-%
-%The resulting concept corresponds to a handshake between signals~$a$
-%and~$b$ that are both initially $0$.
-
-\vspace{-2mm}
-
-%\subsection{Built-in concepts\label{sub:built-in}}
-%
-%\vspace{-3mm}
-%
-%In our previous paper, \cite{2015_Beaumont_MEMOCODE}, we have displayed several
-%examples of different concepts and how they can be described in terms of 
-%concepts in several ways, either from base level signal-level concepts, or 
-%through reuse of pre-defined gate- and protocol-level concepts.
-%
-%In this section, we will detail further concepts included with the \noun{Plato}
-%along with those already described in Sections~\ref{sub:concept-notation} 
-%and~\ref{sub:trans-concepts}. All of these are often used in the specification 
-%of asynchronous circuits and therefore it is useful to include them, to avoid a 
-%user having to define these for each specification. For each of these we will 
-%explain their use for asynchronous circuits, and give the standard usage of the 
-%concept. 
-%
-%\begin{itemize}
-%  
-%  \item $\mathsf{handshake11}\,a \,b$ is a protocol-level concept, similar to 
-%  $\mathsf{handshake00}\,a \,b$ as discussed in Section~\ref{sub:initState}. 
-%  The behaviours of the signals are the same as in the standard 
-%  \texttt{handshake} concepts, but this includes initial states for the 
-%   signals. For this concept, both signals will be initialised to 1, or high.
-%\vspace{-4mm}  
-%  \item []
-%  
-%  \item $\mathsf{me}\,a \,b$ is a protocol-level concept. This concept defines 
-%  \emph{Mutual Exclusion} between two signals. This means that when one 
-%  of these signals is high, the other cannot transition high.
-%\vspace{-4mm}
-%  \item []
-%  
-%  \item $\mathsf{meElement}\,r1\,r2\,g1\,g2$ is a gate-level concept to 
-%  apply the mutual exclusion protocol. In this case, there are four signals. 
-%  Two are intputs ($r1$ and $r2$), the other two are 
-%  outputs~($g1$ and $g2$). $r1$ transitioning high will cause $g1$ to go
-%  transition high, and this is the same for $r2$ and $g2$, however,
-%  $g1$ and $g2$ are mutually exclusive. The aim of this concept is to 
-%  ensure that the request signals, $r1$ and $r2$, cause their respective
-%  grant signals, $g1$ and $g2$, to transition high but never at the same 
-%  time. 
-%\vspace{-4mm}
-%  \item []
-%  
-%  \item $\mathsf{andGate}\,a\,b\,c$ is a gate-level concept, using 
-%  OR-causality to implement a standard AND gate. Signals $a$ and 
-%  $b$ are inputs to the gate, and $c$ is the output. \emph{Both} 
-%  $rise a$ \emph{and} $rise b$ must occur for $rise c$ to occur. 
-%  Following this, \emph{either} $fall a$ \emph{or} $fall b$ must 
-%  occur for $fall c$ to occur.
-%\vspace{-4mm}
-%  \item []  
-%
-%  \item $\mathsf{orGate}\,a\,b\,c$ is a gate-level concept, also using 
-%  OR-causality. Signals $a$ and $b$ are inputs to the gate, and $c$ is the 
-%  output. \emph{Either} $rise a$ \emph{or} $rise b$ must occur for $rise c$ to 
-%  occur. Following this, \emph{both} $fall a$ and $fall b$ must occur for 
-%  $fall c$ to occur. 
-%  
-%\end{itemize}
-%
-%\noindent All of the concepts described in this section are some of the most
-%common behaviours found in asynchronous circuits, and these can be used
-%to specify many different asynchronous circuits. 
-%
-%These can also be used in order to define new protocols and gates for a designer
-%to use in their own specifications, making the design process easier in future 
-%systems. 
-%
-%\vspace{-3mm}
-
 \vspace{-1mm}
 
 \section{Concepts to STG translation algorithm\label{sec:algorithm}}
 
 \vspace{-2mm}
-%
-%Concepts are a useful way of specifying asynchronous circuits, but
-%specifications also need to be \emph{verified} against certain properties to
-%ensure their correctness, and once they are deemed to be correct, they need to
-%be \emph{synthesised} into efficient circuit implementations. Many software
-%tools exist which automatically verify and synthesise STG specifications,
-%such as \noun{Petrify}~\cite{Cortadella} and
-%\noun{Mpsat}~\cite{khomenko2004detecting}.
 
 In order to reuse the tools developed by the community, it is
 necessary to be able to automatically translate concept specifications to STGs.
@@ -592,64 +486,49 @@ Algorithm~\ref{alg:translation}.
 \end{algorithmic}
 \end{algorithm}
 
-We will use the David cell example, the concept specification file of which can 
-be seen in Section~\ref{sub:file_layout}. 
+We will use the C-element with environment example as featured in Figure~\ref{fig:cElement-stg}.
+The concept specification for this will be:
 
-There are multiple ways of representing a specification using concepts. However,
-all levels of abstraction available to the designer are built out of primitive 
-low-level signal concepts. Given a specification, we can therefore break down 
+\begin{minted}[fontsize=\normalsize]{haskell}
+circuit a b c = operation <> interface 
+             <> inits
+ where
+  operation = outputRise <> outputFall 
+           <> inputRise <> inputFall
+  outputRise = [rise a, rise b] ~&~> rise c
+  outputFall = [fall a, fall b] ~&~> fall c
+  inputRise = fall c ~> rise a 
+           <> fall c ~> rise b
+  inputFall = rise c ~> fall a 
+           <> rise c ~> fall b
+  interface = inputs [a, b] <> outputs [c]
+  inits = initialise0 [a, b, c]
+\end{minted}
+
+This concept specification is fairly long, and describes each signal interaction.
+However, we have already defined a C-element concept and an inverter concept
+ in Section~\ref{subsub:gate-level}. Therefore, we can simplify this specification, 
+ to use gate-level concepts instead:
+ \vspace{5mm}
+ 
+\begin{minted}[fontsize=\normalsize]{haskell}
+circuit a b c = operation <> interface 
+             <> inits
+ where
+  operation = cElement a b c 
+           <> inverter c a <> inverter c b
+  interface = inputs [a, b] <> outputs [c]
+  inits = initialise0 [a, b, c]
+\end{minted}
+
+There can bne multiple ways of representing a specification using concepts, however,
+all levels of abstraction available to the designer are built out of signal-level
+concepts. Given a specification, we can therefore break down 
 all gate- and protocol-level constructs into `atoms', which significantly 
 simplifies the translation task. For now, we will ignore initial states and interface
 concepts, and focus on the arcs only.
 
-%For this example, the causalities are broken down into these signal-level 
-%concepts:
-%
-%\begin{lstlisting}
-%module DC where
-%
-%import Tuura.Concept.STG
-%
-%circuit r1 a1 r2 a2 e = handshakeLeft 
-%                      <> handshakeRight 
-%                      <> outputHandshake <> interface 
-%	              <> initialState <> internal 
-%		      <> mutex <> ackHandshake 
-%                      <> reset
-%  where
-%  	handshakeLeft = handshake r1 a1
-%  	handshakeRight = handshake r2 a2
-%  	outputHandshake = handshake a1 r2
-%  	mutex = me r1 r2 
-%  	ackHandshake = handshake a1 a2
-%	reset = fall a2 ~> rise r1
-%  	internal = rise r1 ~> fall e 
-%                 <> fall e ~> rise a1 
-%                 <> fall a1 ~> rise e
-%		 <> rise e ~> fall r2
-%	interface = inputs[r1, a2] <> outputs[a1, r2] 
-%                  <> internals[e]
-%	initialState = initialise0 [r1, a1, r2, a2] 
-%                     <> initialise1 [e]
-%\end{lstlisting}
-
-%\noindent The first step is to prepare the read-arcs, and this is done by
-%reformating these concepts into lists of causes for effects.
-%Each list will be of possible causes for each OR- and AND-causality signal-level
-%concept in the specification, meaning that for each OR-causality concept, 
-%there will be 2 or more signals in the list, and for each AND-causality 
-%concept there will be a single item list.
-%
-%For example, taking the concept\\
-%\lstinline[language=haskell]{[rise a, rise b] ~|~> rise c}, there are
-%two possible transitions for $c^{+}$ here, $a^{+}$ and $b^{+}$. These therefore 
-%form a two item list. 
-
-
-
-%\vspace{-1mm}
-
-\begin{table}[h]
+\begin{table}[t]
 \caption{Lists of cause transitions by effect transitions
 		\label{tab:list-of-concepts}}
   \centering
@@ -744,8 +623,10 @@ will be the same as shown in Figure~\ref{fig:dc-stg-translated}.
 \includegraphics[scale=0.3]{Images/dc-translated-stg}
 \par\end{centering}
 \protect\caption{\label{fig:dc-stg-translated} Fully translated David cell STG}
-\vspace{-5mm}
+\vspace{-3mm}
 \end{figure}
+
+\vspace{-3mm}
 
 \section{Usage of the tool\label{sec:tool-use}}
 
