@@ -1,11 +1,3 @@
-% TO:DO
-%
-% Update examples (such as figure 1) to use David cell too
-%
-% Remove some references, some are old, some have been updated
-% 
-% Generally ensure that the whole paper runs smoothly, everything is in order, and nothing referes to an old version of this paper
-%
 
 \documentclass[british,conference,compsoc]{IEEEtran}
 \usepackage[T1]{fontenc}
@@ -16,9 +8,9 @@
 \usepackage{setspace}
 \usepackage{array}
 \usepackage{blindtext}
-\usepackage{listings}
+%\usepackage{listings}
 \usepackage{minted}
-\lstset{basicstyle=\footnotesize, language=Haskell}
+%\lstset{basicstyle=\footnotesize, language=Haskell}
 
 \makeatletter
 
@@ -77,8 +69,8 @@ tools, such as \noun{Petrify} and \noun{Mpsat}.
 
 \vspace{-3mm}
 
-\emph{Concepts} have been presented in order to provide a more compact, 
-adaptive and intuitive method of designing asynchronous circuits, using a fully
+\emph{Concepts} have been presented in order to provide a more compact
+and intuitive method of designing asynchronous circuits, using a fully
 compositional description method. Composition is an 
 important part of concepts and the use of composition in some algebraic 
 representations, such as with DI algebra~\cite{270632} and Conditional Signal 
@@ -111,7 +103,7 @@ include with each occurance of these signals.
 For example, Figure~\ref{fig:DC-stg} contains the Signal Transition Graph of a
 David cell. While this STG is in a loop, it is useful to know that signals $r1$ 
 and $a1$ form a hanshake, as do $r2$ and $a2$. Signals $r1$ and $r2$ are in a
-mutual exclusion relationship. These are among other protocols which can make
+mutual exclusion relationship. These are among other facts which can make
 the specification for a David cell particularly tricky. 
 
 %The problem becomes particularly severe when designing 
@@ -121,7 +113,7 @@ the specification for a David cell particularly tricky.
 
 The issues that can arise from this can therefore cause a long design, full of 
 testing and debugging, this is particularly undesirable for industry, as 
-this increases the design time of each design greatly. 
+this increases the design time of each circuit greatly. 
 
 STGs~\cite{Chu_1987_phd}\cite{Rosenblum_1985_tpn} are commonly used for the 
 specification, verification and synthesis of asynchronous control circuits as 
@@ -129,11 +121,9 @@ they are supported by multiple EDA tools, such as
 \noun{Petrify}~\cite{Cortadella}, \noun{Mpsat}~\cite{khomenko2004detecting}, 
 \noun{Versify}~\cite{i1997formal}, 
 \noun{Workcraft}~\cite{2007_poliakov_workcraft}\cite{Workcraft_website}, 
-and others.
-
-These tools take an STG specification and can formally verify its correctness, 
-as well as synthesise an asynchronous circuit implementation that is \
-emph{speed-independent}, i.e. guaranteed to work correctly regardless of 
+and others. These tools take an STG specification and can formally verify its correctness, 
+as well as synthesise an asynchronous circuit implementation that is 
+\emph{speed-independent}, i.e. guaranteed to work correctly regardless of 
 component delays~\cite{Muller_1959_ts}.
 
 Concepts are not supported by these tools, and rather than
@@ -142,8 +132,8 @@ consuming process, we can \emph{translate} concepts to STGs, for use with these
 existing tools.
 
 In this paper, we will discuss the implementation of the domain specific 
-language and translation tool for concepts, called 
-\noun{Plato}~\cite{2016_concepts_github} embedded in Haskell. 
+language and translation tool for concepts, implemented in \noun{Haskell}, called 
+\noun{Plato}~\cite{2016_concepts_github}.
 If STGs are the assembly language of asynchronous circuits, \noun{Plato} is a 
 compiler from a higher-level language, concepts, to this assembler. 
 
@@ -155,10 +145,10 @@ The contributions of this paper are:
 \vspace{-1mm}
 \begin{itemize}
   \item We detail the notations of concepts within \noun{Plato} and the built in
-  concepts and their uses in Section~\ref{sec:tool-func}
+  concepts and their uses in Section~\ref{sec:tool-func}.
   \item We present the implemented algorithm for translating concepts to STGs
   in Section~\ref{sec:algorithm}.
-  \item We explain how to use the tool both stand-alone and within
+  \item We explain how to use the tool from within
   \noun{Workcraft} to translate concepts in Section~\ref{sec:tool-use}.
 \end{itemize}
 
@@ -190,7 +180,7 @@ concepts for these.
 \subsubsection{\label{signal-level}Signal-level concepts}Asynchronous circuit 
 specifications are mainly composed of signal transitions, and interactions 
 between these, to show causal relationships. Signal transitions are denoted as 
-$a^{+}$ and $a^{-}$, where $a$ is any signal name, at least one character, and 
+$a^{+}$ and $a^{-}$, where $a$ is any signal name, and 
 the $+$ or $-$ indicates which way the this signal transitions, $+$ denoting a 
 low-to-high or 0 to 1 transition, and $-$ denoting a high-to-low, 1 to 0 
 transition. 
@@ -202,8 +192,8 @@ transition specifications. $a^{+}$ and $a^{-}$ are in post-fix notation, where
 the operator is stated after the operand. Haskell does not support post-fix 
 notation, and as such, we have to use a differing signal transition notation. 
 
-For the tool, signal transitions $a^{+}$ and $a^{-}$ are noted as $rise\,a$ and 
-$fall\,a$ respectively. We will use the tool notation for examples, but 
+For the tool, signal transitions $a^{+}$ and $a^{-}$ are noted as \mintinline{haskell}{rise a} and 
+\mintinline{haskell}{fall a} respectively. We will use the tool notation for examples, but 
 describe these using standard notation.
 
 Signal-level concepts are the base level of concepts, and are 
@@ -215,18 +205,14 @@ one signal transition \emph{causes} another signal transition, a cause and an
 effect. This is denoted in the form: 
 
 \begin{minted}[fontsize=\normalsize]{haskell}
-	rise a ~> rise c
+	    rise a ~> rise c
 \end{minted}
-
-\begin{lstlisting}[language=haskell]
-	         rise a ~> rise c
-\end{lstlisting}
 
 \vspace{-1mm}
 
 This is read as $a^{+}$ causes $c^{+}$, meaning that for the $c^{+}$ transition 
 to occur, $a^{+}$ must have occurred previously. The 
-\lstinline[language=haskell]{~>}
+\mintinline{haskell}{~>}
 operator is used to show causal relationships between signals.
  
 While this concept is called \emph{causality}, this doesn't necessarily imply
@@ -235,14 +221,14 @@ timings, such as any $\mathit{cause}$ transition immediately forcing the
 list all possible $\mathit{cause}$ transitions which need to occur in order
  for an $\mathit{effect}$ transition.
 
-One can compose any concepts using the \lstinline[language=haskell]{<>} 
-(diamond) operator, and this applies
+One can compose any concepts using the \mintinline{haskell}{<>} 
+operator, and this applies
 to concepts of any level, whether predefined or user-defined. For example, 
 two causality concepts can be composed.
 
-\begin{lstlisting}[language=haskell]
-       rise a ~> rise c <> rise b ~> rise c
-\end{lstlisting}
+\begin{minted}[fontsize=\normalsize]{haskell}
+  rise a ~> rise c <> rise b ~> rise c
+\end{minted}
 
 In words, $a^{+}$ \emph{and} $b^{+}$ must occur before $c^{+}$ can occur. 
 This corresponds to so-called AND-causality in the fact that several cause 
@@ -254,9 +240,9 @@ The above notation can cause long-winded specifications when lots of
 AND-causality is involved. To solve this we provise a listing option. The 
 following will acheive the same results:
 
-\begin{lstlisting}[language=haskell]
-            [rise a, rise b] ~&~> rise c
-\end{lstlisting}
+\begin{minted}[fontsize=\normalsize]{haskell}
+      [rise a, rise b] ~&~> rise c
+\end{minted}
 
 This form of concept can be composed as usual with any other concepts.
 
@@ -268,9 +254,9 @@ occur.
 With OR-causality, the notation used lists all possible causes for the stated 
 effect:
 
-\begin{lstlisting}[language=haskell]
-            [rise x, rise y] ~|~> rise z
-\end{lstlisting}
+\begin{minted}[fontsize=\normalsize]{haskell}
+      [rise x, rise y] ~|~> rise z
+\end{minted}
 
 This is, \emph{either} $x^{+}$ \emph{or} $y^{+}$ must occur in order for 
 $z^{+}$ to occur. The interactions when an effect transition is included in both AND- and 
@@ -284,36 +270,35 @@ the behaviour of gates in asynchronous circuits. For example, a \emph{buffer}
 is a gate with one input signal and one output signal,
 whose output transitions causally depend on the input ones:
 
-\begin{lstlisting}[language=haskell]
-buffer a b = rise a ~> rise b <> fall a ~> fall b
-\end{lstlisting}
+\begin{minted}[fontsize=\normalsize]{haskell}
+buffer a b = rise a ~> rise b 
+          <> fall a ~> fall b
+\end{minted}
 
 \noindent An \emph{inverter} has a similar conceptual specification, but the
 output transition is inverted:
 
-\begin{lstlisting}[language=haskell]
-inverter a b = rise a ~> fall b <> fall a ~> rise b
-\end{lstlisting}
+\begin{minted}[fontsize=\normalsize]{haskell}
+inverter a b = rise a ~> fall b
+            <> fall a ~> rise b
+\end{minted}
 
 \noindent A \emph{C-element} is a gate with two inputs, in this example $a$ and $b$, and one
 output~$c$, which synchronises both rising and falling input transitions
 via AND-causality:
 
-\begin{minted}[fontsize=\small]{haskell}
-cElement a b c = rise a ~> rise c <> rise b ~> rise c
-          <> fall a ~> fall c <> fall b ~> fall c
+\begin{minted}[fontsize=\normalsize]{haskell}
+cElement a b c = rise a ~> rise c 
+              <> rise b ~> rise c
+              <> fall a ~> fall c 
+              <> fall b ~> fall c
 \end{minted}
-
-\begin{lstlisting}[language=haskell]
-cElement a b c = rise a ~> rise c <> rise b ~> rise c
-              <> fall a ~> fall c <> fall b ~> fall c
-\end{lstlisting}
 
 An alternative way to express the same concept is to reuse the buffer concept:
 
-\begin{lstlisting}[language=haskell]
-    cElement a b c = buffer a c <> buffer b c
-\end{lstlisting}
+\begin{minted}[fontsize=\normalsize]{haskell}
+cElement a b c = buffer a c <> buffer b c
+\end{minted}
 
 A C-element combines the constraints imposed on the output
 transitions by two `virtual' buffers. Behaviour of other gates can be similarly
@@ -324,18 +309,19 @@ be found in~\cite{2015_Beaumont_MEMOCODE}.
 
 \subsubsection{Protocol-level concepts} In addition to gate-level concepts
 described above it is often important to specify \emph{protocols}
-of interaction between multiple gates, components or signals. 
-
-Here we demonstrate how one can use concepts to specify asynchronous handshakes
+of interaction between multiple gates, components or signals. Here we 
+demonstrate how one can use concepts to specify asynchronous handshakes
 and mutual exclusion mechanisms.
 
 Given two signals $a$ and $b$, a \emph{handshake} between them is
 the following composition of causality concepts:
 
-\begin{lstlisting}[language=haskell]
-handshake a b = rise a ~> rise b <> rise b ~> fall a 
-             <> fall a ~> fall b <> fall b ~> rise a
-\end{lstlisting}
+\begin{minted}[fontsize=\normalsize]{haskell}
+handshake a b = rise a ~> rise b 
+             <> rise b ~> fall a 
+             <> fall a ~> fall b 
+             <> fall b ~> rise a
+\end{minted}
 
 Intuitively, we have a two-way asynchronous communication channel,
 where one party sends transitions $a^{+}$ and $a^{-}$ and the other
@@ -344,9 +330,9 @@ Note that the four causality concepts match those found
 in the buffer and inverter concepts, which leads to an alternative
 way to express a handshake between~$a$ and~$b$:
 
-\begin{lstlisting}
-    handshake a b = buffer a b <> inverter b a
-\end{lstlisting}
+\begin{minted}[fontsize=\normalsize]{haskell}
+handshake a b = buffer a b <> inverter b a
+\end{minted}
 
 This conceptual understanding of a handshake as being composed
 from a buffer and an inverter is often used by circuit designers as
@@ -360,7 +346,7 @@ a convenient way of reasoning.
 
 The concepts we have discussed so far are aimed at specifying the behaviour of 
 signals in a circuit. When translating these to STGs however, these behaviours 
-do not necessarily result in a correct specification, meaning they will not be 
+do not result in a complete specification, meaning they will not be 
 verifiable by standard tools, and therefore not useful in further operations, 
 such as synthesis.
 
@@ -375,7 +361,7 @@ are important for specification, namely \emph{interface} and
 An important part of a specification is how these signals interact with the 
 outside world, which could be another scenario or another circuit, for example.
 These signals can be inputs from the outside world, outputs or an internal 
-signal, which is used only within this scenario. 
+signal, which is used only within this circuit. 
 
 To specify the type of a signal (\emph{input},
 \emph{output} or \emph{internal}) we introduce the \textsf{interface} concept.
@@ -402,13 +388,15 @@ The intuition is as follows:
     output in another components, then in the composition it will be an output.
     \item An internal signal is similar to an output signal in the sense
 that it is driven by the circuit (not the environment), but it is hidden, 
-i.e.not accessible via the circuit interface. Once a signal is hidden and 
+i.e. not accessible via the circuit interface. Once a signal is hidden and 
 declared internal it cannot be revealed.
 \end{itemize}
 
 \noindent Specifying signal types is important when designing asynchronous
-circuits, as it helps to quickly identify errors (e.g. an input transition is
-caused by a hidden internal transition), and reuse existing tools for circuit
+circuits, as it helps to quickly identify errors, for example, when an input transition is
+caused by a hidden internal transition, as internal transitions are used only by the circuit 
+and cannot be accessed from the environment, and as such, an internal transition cannot
+cause an input transition. We can then reuse existing tools for circuit
 simulation, verification and synthesis. Signal type information is also used
 in the algorithm for automated translation of concepts to
 STGs (Section~\ref{sec:algorithm}).
@@ -418,9 +406,9 @@ specifying types of sets of signals for convenience, and to be included inline
 with other concepts. For example, to specify that signals $a$ and $b$ are 
 inputs, $c$ is an output, and $t$ is internal, it is possible to write:
 
-\begin{lstlisting}
-   inputs[a, b] <> outputs [c] <> internals [t]
-\end{lstlisting}
+\begin{minted}[fontsize=\normalsize]{haskell}
+inputs[a, b] <> outputs [c] <> internals [t]
+\end{minted}
 
 \vspace{-4mm}
 
@@ -431,40 +419,40 @@ transitions of a scenario will be. Without these, no transition can occur.
 
 Each signal must have it's initial state declared before translation can occur. 
 In order to specify the initial state of a handshake between signals~$a$
-and~$b$, we use the $\mathsf{initialise}$ concept.
-The possible initial states are \emph{high} or \emph{low}, referred to as 
+and~$b$, we use the \mintinline{haskell}{initialise} concept.
+The possible initial states are \emph{low} or \emph{high}, referred to as 
 \emph{0} or \emph{1} respectively:
 
-\begin{lstlisting}
-        initialise a 0 <> initialise x 1
-\end{lstlisting}
+\begin{minted}[fontsize=\normalsize]{haskell}
+    initialise a 0 <> initialise x 1
+\end{minted}
 
 \noindent A signal can only be declared as initially high or low. If the 
 initial state of a signal is not defined, an error will occur, and the 
-translation will not continue. Conversely, if the event a signal has it's 
+translation will not continue. Conversely, in the event a signal has it's 
 initial state declared as both high and low, and is thus inconsistent, in a 
 specification then the translation will also fail.
 
 For the ease of use, and to speed up the process, initial states can also be 
 declared in lists by on state:
 
-\begin{lstlisting}
-    initialise0[a, b, c] <> initialise1[x,y]
-\end{lstlisting}
+\begin{minted}[fontsize=\normalsize]{haskell}
+ initialise0[a, b, c] <> initialise1[x,y]
+\end{minted}
 
-\noindent As an example, we can include this in the specification of a 
-handshake, to create a handshake with built-in initial state.
-$\mathsf{initialise}\,a\, 0$ sets the state of the signal
-$a$ to $0$. We can compose an initial state concept with the handshake concept
-into a combined $\mathsf{handshake00}\,a\, b$ concept as
-
-\begin{lstlisting}
-handshake00 a b = handshake a b <> initialise a 0 
-                  <> initialise b 0
-\end{lstlisting}
-
-The resulting concept corresponds to a handshake between signals~$a$
-and~$b$ that are both initially $0$.
+%\noindent As an example, we can include this in the specification of a 
+%handshake, to create a handshake with built-in initial state.
+%$\mathsf{initialise}\,a\, 0$ sets the state of the signal
+%$a$ to $0$. We can compose an initial state concept with the handshake concept
+%into a combined $\mathsf{handshake00}\,a\, b$ concept as
+%
+%\begin{minted}[fontsize=\normalsize]{haskell}
+%handshake00 a b = handshake a b <> initialise a 0 
+%                  <> initialise b 0
+%\end{minted}
+%
+%The resulting concept corresponds to a handshake between signals~$a$
+%and~$b$ that are both initially $0$.
 
 \vspace{-2mm}
 
@@ -613,9 +601,9 @@ concepts, and focus on the arcs only.
 %two possible transitions for $c^{+}$ here, $a^{+}$ and $b^{+}$. These therefore 
 %form a two item list. 
 
-To start with this, we list all causes for each effect.
 
-\vspace{-1mm}
+
+%\vspace{-1mm}
 
 \begin{table}[h]
 \caption{Lists of cause transitions by effect transitions
@@ -639,7 +627,9 @@ $r1^{+}$ 						& $e^{-}$	\\ \hline
   \vspace{-3mm}
 \end{table}
 
-\noindent All of the included causalities are AND-causalities, and hence, there
+To start with this, we list all causes for each effect. These lists can be found in
+Table~\ref{tab:list-of-concepts}.
+All of the included causalities are AND-causalities, and hence, there
 are several single cause transitions for each effect transition. If there were 
 OR-causality included, the list of possible causes would be included with these
 AND-causalities. For example:  $r2^{+}$, $a1^{+}$, $[x^{+}, y^{+}]$ causing
@@ -647,7 +637,7 @@ $a2{+}$. $x$ and $y$ are in a list of their own, and this shows OR-causalitly;
 either $x$ or $y$ must transition high for $a2^{+}$ to occur. However, this does
 not account for the other AND-causalities. 
 
-In this event, we would perform the the \emph{Cartesian product}, which combines
+In this event, we would perform the \emph{Cartesian product}, which combines
 all the AND- and OR-causalities. For the example above, this would produce:
 
 $r2^{+}$, $a1^{+}$, $x^{+}$ causes $a2/1^{+}$
@@ -821,39 +811,10 @@ from within \noun{Workcraft}.
 
 \vspace{-3mm}
 
-\begin{minted}{haskell}
-module DC where
-
-import Tuura.Concept.STG
-
-circuit r1 a1 r2 a2 e = handshakeLeft 
-                      <> handshakeRight 
-                      <> outputHandshake <> interface 
-	              <> initialState <> internal 
-		      <> mutex <> ackHandshake 
-                      <> reset
-  where
-  	handshakeLeft = handshake r1 a1
-  	handshakeRight = handshake r2 a2
-  	outputHandshake = handshake a1 r2
-  	mutex = me r1 r2 
-  	ackHandshake = handshake a1 a2
-	reset = fall a2 ~> rise r1
-  	internal = rise r1 ~> fall e 
-                 <> fall e ~> rise a1 
-                 <> fall a1 ~> rise e
-		 <> rise e ~> fall r2
-	interface = inputs[r1, a2] <> outputs[a1, r2] 
-                  <> internals[e]
-	initialState = initialise0 [r1, a1, r2, a2] 
-                     <> initialise1 [e]
-                     
-\end{minted}
-
 \begin{figure}[h]
 \begin{centering}
 
-\begin{lstlisting}
+\begin{minted}[fontsize=\normalsize]{haskell}
 module DC where
 
 import Tuura.Concept.STG
@@ -879,7 +840,7 @@ circuit r1 a1 r2 a2 e = handshakeLeft
                   <> internals[e]
 	initialState = initialise0 [r1, a1, r2, a2] 
                      <> initialise1 [e]
-\end{lstlisting}
+\end{minted}
 
 \par\end{centering}
 \vspace{-2mm}
@@ -920,7 +881,7 @@ used for ease-of-use, ease-of-understanding, and reuse.
 
 The example we have used is of that of a David cell. We have defined the 
 interface, initial state and the operation of this separatley, by defining 
-these concepts following the ``'$\mathsf{where}$''. The full circuit 
+these concepts following the ``\mintinline{haskell}{where}''. The full circuit 
 specification is then composed of all of these defined concepts. 
 
 \subsection{Using \noun{Plato} from within \noun{Workcraft} \label{sec:workcraft_usage}}
