@@ -100,12 +100,11 @@ include with each occurrence of these signals.
 \end{figure}
 
 For example, Figure~\ref{fig:cElement-stg} contains an STG. 
-While it seems fairly simple, and it is possible to list the interactions between each
-individual signal, it would be useful to know that there is a C-element, with $a$ and $b$ as
-the inputs, and $c$ as the output. Not only this, but the environment of this, what 
-causes the inputs to change, is simply an inverter from the output, $c$, to both inputs. 
-With this information, we have gone from listing several differing signal-level interactions,
-to describing the behaviour of this circuit at gate-level. 
+While it seems fairly simple, it would be useful to know that this features a C-element,
+and the environment of this is simply an inverter from the output, $c$, to both inputs.
+Instead, it is possible to note that there are two handshakes formed by the signal pairs of $a$,$c$ and $b$,$c$. 
+From this information we can discern not only signal interactions, but the behavioural
+relationships of these signals. 
 
 STGs are supported by multiple EDA tools for verification and synthesis of asynchronous control circuits,
 such as \noun{Petrify}~\cite{Cortadella}, \noun{Mpsat}~\cite{khomenko2004detecting}, 
@@ -509,8 +508,7 @@ This concept specification is fairly long, and describes each signal interaction
 However, we have already defined a C-element concept and an inverter concept
  in Section~\ref{subsub:gate-level}. Therefore, we can simplify this specification, 
  to use gate-level concepts instead:
- \vspace{5mm}
- 
+
 \begin{minted}[fontsize=\normalsize]{haskell}
 circuit a b c = operation <> interface 
              <> inits
@@ -521,6 +519,14 @@ circuit a b c = operation <> interface
   inits = initialise0 [a, b, c]
 \end{minted}
 
+The signal-level concepts between the signal pairs of $a$ and $c$, and $b$ and $c$
+also match those of a handshake. So we can also specify the operation as:
+
+\begin{minted}[fontsize=\normalsize]{haskell}
+  operation = handshake a c 
+           <> handshake b c
+\end{minted}
+
 There can be multiple ways of representing a specification using concepts, however,
 all levels of abstraction available to the designer are built out of signal-level
 concepts. Given a specification, we can therefore break down 
@@ -528,7 +534,8 @@ all gate- and protocol-level constructs into `atoms', which significantly
 simplifies the translation task. For now, we will ignore initial states and interface
 concepts, and focus on the arcs only.
 
-\begin{table}[t]
+\begin{table}[h]
+\vspace{-2mm}
 \caption{Lists of cause transitions by effect transitions
 		\label{tab:list-of-concepts}}
   \centering
@@ -701,12 +708,12 @@ composed of all of these defined concepts.
 
 \subsection{Using \noun{Plato} from within \noun{Workcraft} \label{sec:workcraft_usage}}
 
-\vspace{-2mm}
+\vspace{-3mm}
 
 \begin{figure*}[t]
 \begin{centering}
 \vspace{-3mm}
-\includegraphics[scale=0.41]{Images/workcraft_design_flow.png}
+\includegraphics[scale=0.55]{Images/workcraft_design_flow.png}
 \par\end{centering}
 \begin{centering}
 \protect\caption{\label{fig:design_flow_screenshot}\noun{Workcraft} and 
@@ -757,7 +764,7 @@ In \noun{Workcraft} it is also possible to import concepts directly from a file,
 without having to view the concepts first. This can be done from the 
 ``\emph{File}'' menu, by selecting the ``\emph{Import...}'' option. 
 
-\begin{figure}[H]
+\begin{figure}[h]
 \begin{centering}
 \vspace{-3mm}
 \includegraphics[scale=0.4]{Images/import_menu_screenshot.png}
