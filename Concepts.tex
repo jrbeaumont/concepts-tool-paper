@@ -190,11 +190,13 @@ A key concept in asynchronous circuits is \emph{causality}:
 one signal transition \emph{causes} another signal transition, a cause and an 
 effect. This is denoted in the form: 
 
-\begin{minted}[fontsize=\normalsize]{haskell}
-	    rise a ~> rise c
-\end{minted}
-
 \vspace{-1mm}
+
+\begin{center}
+{\mintinline{haskell}{rise a ~>} \mintinline{haskell}{rise c}}
+\end{center}
+
+%\vspace{-1mm}
 
 This is read as $a^{+}$ causes $c^{+}$, meaning that for the $c^{+}$ transition 
 to occur, $a^{+}$ must have occurred previously. The 
@@ -212,9 +214,9 @@ operator, and this applies
 to concepts of any level, whether predefined or user-defined. For example, 
 two causality concepts can be composed.
 
-\begin{minted}[fontsize=\normalsize]{haskell}
-  rise a ~> rise c <> rise b ~> rise c
-\end{minted}
+\begin{center}
+\mintinline{haskell}{rise a ~>} \mintinline{haskell}{rise c <>} \mintinline{haskell}{rise b ~>} \mintinline{haskell}{rise c}
+\end{center}
 
 In words, $a^{+}$ \emph{and} $b^{+}$ must occur before $c^{+}$ can occur. 
 This corresponds to so-called AND-causality in the fact that several cause 
@@ -226,9 +228,9 @@ The above notation can cause long-winded specifications when lots of
 AND-causality is involved. To solve this we provide a listing option. The 
 following will achieve the same results:
 
-\begin{minted}[fontsize=\normalsize]{haskell}
-      [rise a, rise b] ~&~> rise c
-\end{minted}
+\begin{center}
+      [\mintinline{haskell}{rise a,}\mintinline{haskell}{ rise b}] \mintinline{haskell}{~&~>} \mintinline{haskell}{rise c}
+\end{center}
 
 This form of concept can be composed as usual with any other concepts.
 
@@ -240,9 +242,9 @@ occur.
 With OR-causality, the notation used lists all possible causes for the stated 
 effect:
 
-\begin{minted}[fontsize=\normalsize]{haskell}
-      [rise x, rise y] ~|~> rise z
-\end{minted}
+\begin{center}
+      [\mintinline{haskell}{rise x,} \mintinline{haskell}{rise y}] \mintinline{haskell}{~|~>} \mintinline{haskell}{rise z}
+\end{center}
 
 This is, \emph{either} $x^{+}$ \emph{or} $y^{+}$ must occur in order for 
 $z^{+}$ to occur. The interactions when an effect transition is included in both AND- and 
@@ -392,9 +394,9 @@ specifying types of sets of signals for convenience, and to be included in-line
 with other concepts. For example, to specify that signals $a$ and $b$ are 
 inputs, $c$ is an output, and $t$ is internal, it is possible to write:
 
-\begin{minted}[fontsize=\normalsize]{haskell}
-inputs[a, b] <> outputs [c] <> internals [t]
-\end{minted}
+\begin{center}
+\mintinline{haskell}{inputs [a, b] <>} \mintinline{haskell}{outputs [c]} \mintinline{haskell}{<>} \mintinline{haskell}{internals [t]}
+\end{center}
 
 \vspace{-4mm}
 
@@ -409,9 +411,9 @@ and~$b$, we use the \mintinline{haskell}{initialise} concept.
 The possible initial states are \emph{low} or \emph{high}, referred to as 
 \emph{0} or \emph{1} respectively:
 
-\begin{minted}[fontsize=\normalsize]{haskell}
-    initialise a 0 <> initialise x 1
-\end{minted}
+\begin{center}
+   \mintinline{haskell}{initialise a 0 <>}\mintinline{haskell}{initialise x 1}
+\end{center}
 
 \noindent A signal can only be declared as initially high or low. If the 
 initial state of a signal is not defined, an error will occur, and the 
@@ -422,11 +424,11 @@ specification then the translation will also fail.
 For the ease of use, and to speed up the process, initial states can also be 
 declared in lists by on state:
 
-\begin{minted}[fontsize=\normalsize]{haskell}
- initialise0[a, b, c] <> initialise1[x,y]
-\end{minted}
+\begin{center}
+\mintinline{haskell}{initialise0[a, b, c] <>} \mintinline{haskell}{initialise1[x,y]}
+\end{center}
 
-\vspace{-1mm}
+\vspace{-2mm}
 
 \section{Concepts to STG translation algorithm\label{sec:algorithm}}
 
@@ -556,9 +558,17 @@ not account for the other AND-causalities.
 In this event, we would perform the \emph{Cartesian product}, which combines
 all the AND- and OR-causalities. For the example above, this would produce:
 
+\vspace{-2mm}
+
+\begin{center}
+
 $a^{+}$, $b^{+}$, $x^{+}$ causes $c/1^{+}$
 
 $a^{+}$, $b^{+}$, $y^{+}$ causes $c/2^{+}$
+
+\end{center}
+
+\vspace{-2mm}
 
 \noindent This includes one of the OR-causality transitions with all of the 
 AND-causality transitions. It also leaves us with two separate $c^{+}$ 
