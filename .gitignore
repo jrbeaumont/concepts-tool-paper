@@ -5,4 +5,5 @@
 Concepts.pdf
 *.synctex.gz
 *.bib.bak
+_minted*
 NCL-EEE-MICRO-MEMO-2016-204.pdf
