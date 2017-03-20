@@ -106,7 +106,8 @@ Instead, it is possible to note that there are two handshakes formed by the sign
 From this information we can discern not only signal interactions, but the behavioural
 relationships of these signals. 
 
-STGs are supported by multiple EDA tools for verification and synthesis of asynchronous control circuits,
+STGs are supported by multiple electronic design automation~(EDA) tools for verification and synthesis 
+of asynchronous control circuits,
 such as \noun{Petrify}~\cite{Cortadella}, \noun{Mpsat}~\cite{khomenko2004detecting}, 
 \noun{Versify}~\cite{i1997formal}, 
 \noun{Workcraft}~\cite{2007_poliakov_workcraft}\cite{Workcraft_website}, 
@@ -143,8 +144,8 @@ The contributions of this paper are:
 
 \vspace{-3mm}
 
-The abstract base of concepts, on which these asynchronous specifications of 
-circuits is discussed in~\cite{2015_Beaumont_MEMOCODE}.
+The abstract base of concepts, on which asynchronous circuit specifications 
+is founded, is discussed in~\cite{2015_Beaumont_MEMOCODE}.
 
 \vspace{-3mm}
 
@@ -166,7 +167,7 @@ concepts for these.
 specifications are mainly composed of signal transitions, and interactions 
 between these, to show causal relationships. Signal transitions are denoted as 
 $a^{+}$ and $a^{-}$, where $a$ is any signal name, and 
-the $+$ or $-$ indicates which way the this signal transitions, $+$ denoting a 
+the $+$ or $-$ indicates which way this signal transitions, $+$ denoting a 
 low-to-high or 0 to 1 transition, and $-$ denoting a high-to-low, 1 to 0 
 transition. 
 
@@ -202,11 +203,11 @@ to occur, $a^{+}$ must have occurred previously. The
 \mintinline{haskell}{~>}
 operator is used to show causal relationships between signals.
  
-While this concept is called \emph{causality}, this doesn't necessarily imply
-timings, such as any $\mathit{cause}$ transition immediately forcing the
- $\mathit{effect}$ transition it applies to. Causality can be used in order to
-list all possible $\mathit{cause}$ transitions which need to occur in order
- for an $\mathit{effect}$ transition.
+%While this concept is called \emph{causality}, this doesn't necessarily imply
+%timings, such as any \emph{cause} transition immediately forcing the
+%\emph{effect} transition it applies to. Causality can be used in order to
+%list all possible \emph{cause} transitions which need to occur in order
+%for an \emph{effect} transition.
 
 One can compose any concepts using the \mintinline{haskell}{<>} 
 operator, and this applies
@@ -318,7 +319,8 @@ in the buffer and inverter concepts, which leads to an alternative
 way to express a handshake between~$a$ and~$b$:
 
 \begin{minted}[fontsize=\normalsize]{haskell}
-handshake a b = buffer a b <> inverter b a
+handshake a b = buffer a b 
+             <> inverter b a
 \end{minted}
 
 This conceptual understanding of a handshake as being composed
@@ -351,7 +353,7 @@ These signals can be inputs from the outside world, outputs or an internal
 signal, which is used only within this circuit. 
 
 To specify the type of a signal (\emph{input},
-\emph{output} or \emph{internal}) we introduce the \textsf{interface} concept.
+\emph{output} or \emph{internal}) we introduce the \texttt{interface} concept.
 Signal types are composed according to the following rules:
 
 \vspace{-2mm}
@@ -388,7 +390,7 @@ simulation, verification and synthesis. Signal type information is also used
 in the algorithm for automated translation of concepts to
 STGs (Section~\ref{sec:algorithm}).
 
-Concepts \textsf{inputs}, \textsf{outputs}, \textsf{internals} are defined for
+Concepts \texttt{inputs}, \texttt{outputs}, \texttt{internals} are defined for
 specifying types of sets of signals for convenience, and to be included in-line
 with other concepts. For example, to specify that signals $a$ and $b$ are 
 inputs, $c$ is an output, and $t$ is internal, it is possible to write:
@@ -404,7 +406,7 @@ inputs, $c$ is an output, and $t$ is internal, it is possible to write:
 Specifying the initial state is important, as it determines what the first 
 transitions of a scenario will be. Without these, no transition can occur.
 
-Each signal must have it's initial state declared before translation can occur. 
+Each signal must have its initial state declared before translation can occur. 
 In order to specify the initial state of a handshake between signals~$a$
 and~$b$, we use the \mintinline{haskell}{initialise} concept.
 The possible initial states are \emph{low} or \emph{high}, referred to as 
@@ -416,12 +418,11 @@ The possible initial states are \emph{low} or \emph{high}, referred to as
 
 \noindent A signal can only be declared as initially high or low. If the 
 initial state of a signal is not defined, an error will occur, and the 
-translation will not continue. Conversely, in the event a signal has it's 
+translation will not continue. Conversely, in the event a signal has its 
 initial state declared as both high and low, and is thus inconsistent, in a 
 specification then the translation will also fail.
 
-For the ease of use, and to speed up the process, initial states can also be 
-declared in lists by on state:
+For ease-of-use, initial states can also be declared in lists:
 
 \begin{center}
 \mintinline{haskell}{initialise0[a, b, c] <>} \mintinline{haskell}{initialise1[x,y]}
@@ -492,19 +493,20 @@ The concept specification for this will be:
 circuit a b c = operation <> interface 
              <> inits
  where
-  operation = outputRise <> outputFall 
-           <> inputRise <> inputFall
-  outputRise = [rise a, rise b] ~&~> rise c
-  outputFall = [fall a, fall b] ~&~> fall c
-  inputRise = fall c ~> rise a 
+  operation = outRise <> outFall 
+           <> inRise <> inFall
+  outRise = [rise a, rise b] ~&~> rise c
+  outFall = [fall a, fall b] ~&~> fall c
+  inRise = fall c ~> rise a 
            <> fall c ~> rise b
-  inputFall = rise c ~> fall a 
+  inFall = rise c ~> fall a 
            <> rise c ~> fall b
-  interface = inputs [a, b] <> outputs [c]
+  interface = inputs [a, b] 
+           <> outputs [c]
   inits = initialise0 [a, b, c]
 \end{minted}
 
-This concept specification is fairly long, and describes each signal interaction.
+\noindent This concept specification is fairly long, and describes each signal interaction.
 However, we have already defined a C-element concept and an inverter concept
  in Section~\ref{subsub:gate-level}. Therefore, we can simplify this specification, 
  to use gate-level concepts instead:
@@ -514,8 +516,10 @@ circuit a b c = operation <> interface
              <> inits
  where
   operation = cElement a b c 
-           <> inverter c a <> inverter c b
-  interface = inputs [a, b] <> outputs [c]
+           <> inverter c a 
+           <> inverter c b
+  interface = inputs [a, b] 
+           <> outputs [c]
   inits = initialise0 [a, b, c]
 \end{minted}
 
@@ -523,12 +527,11 @@ The signal-level concepts between the signal pairs of $a$ and $c$, and $b$ and $
 also match those of a handshake. So we can also specify the operation as:
 
 \begin{minted}[fontsize=\normalsize]{haskell}
-  operation = handshake a c 
-           <> handshake b c
+     handshake a c <> handshake b c
 \end{minted}
 
-There can be multiple ways of representing a specification using concepts, however,
-all levels of abstraction available to the designer are built out of signal-level
+\noindent There can be multiple ways of representing a specification using concepts, 
+however, all levels of abstraction available to the designer are built out of signal-level
 concepts. Given a specification, we can therefore break down 
 all gate- and protocol-level constructs into `atoms', which significantly 
 simplifies the translation task. For now, we will ignore initial states and interface
@@ -555,11 +558,11 @@ $c^{+}$			& $b^{-}$ 	\\ \hline
 To start with this, we list all causes for each effect. These lists can be found in
 Table~\ref{tab:list-of-concepts}.
 All of the included causalities are AND-causalities, and hence, there
-is at least one single cause transitions for each effect transition. If there were 
-OR-causality included, the list of possible causes would be included with these
+is at least one single cause transitions for each effect transition. If 
+OR-causality was included, the list of possible causes would be included with these
 AND-causalities. For example:  $a^{+}$, $b^{+}$, $[x^{+}, y^{+}]$ causing
-$c{+}$. $x$ and $y$ are in a list of their own, and this shows OR-causality;
-either $x$ or $y$ must transition high for $C^{+}$ to occur. However, this does
+$c^{+}$. $x$ and $y$ are in a list of their own, and this shows OR-causality;
+either $x$ or $y$ must transition high for $c^{+}$ to occur. However, this does
 not account for the other AND-causalities. 
 
 In this event, we would perform the \emph{Cartesian product}, which combines
@@ -594,7 +597,7 @@ we start to use the initial state and interface concepts.
 
 First of all, we need to add places for each signal. These are used to
 show whether a signal has transitioned high or low at any point. 
-For example a token in a $0$ place shows that that signal has 
+For example a token in a $0$ place shows that this signal has 
 transitioned low. 
 
 The interface is defined at the start of the algorithm, by listing them as 
@@ -661,9 +664,8 @@ import Tuura.Concept.STG
 circuit a b c = operation <> interface 
              <> inits 
  where
-  operation = cElement a b c <> environment
-  environment = inverter c a 
-             <> inverter c b
+  operation = cElement a b c <> env
+  env = inverter c a <> inverter c b
   interface = inputs[a, b] <> outputs[c] 
   inits = initialise0 [a, b, c]
 \end{minted}
@@ -717,18 +719,18 @@ composed of all of these defined concepts.
 \par\end{centering}
 \begin{centering}
 \protect\caption{\label{fig:design_flow_screenshot}\noun{Workcraft} and 
-			\noun{plato} usage.}
+			\noun{Plato} usage.}
 \par\end{centering}
 \vspace{-3mm}
 \end{figure*}
 
-\noun{Plato}, can be used on it's own using a command-line interface, and has been
+\noun{Plato}, can be used on its own using a command-line interface, and has been
 integrated into \noun{Workcraft}, an open-source EDA tool. This can visualise many graphical modeling
 methods, including STGs, and also features several other tools integrated, which can perform verification
 and synthesis of these models automatically.
 
 STGs are a featured modeling method within \noun{Workcraft},
-which can be automatically imported from \noun{plato}, either from concept specifications written by a user from within 
+which can be automatically imported from \noun{Plato}, either from concept specifications written by a user from within 
 \noun{Workcraft}, or by importing a previously written concept file. 
 This section will discuss how to use \noun{Plato} from within
 \noun{Workcraft}.
@@ -810,7 +812,7 @@ This tool also features translation, a method of converting concepts into Signal
 Transition Graphs, output in a format usable by other existing design, 
 verification and synthesis tools. 
 
-\noun{Plato}, can be used on it's own using a command-line interface, and is
+\noun{Plato}, can be used on its own using a command-line interface, and is
 integrated into \noun{Workcraft}, which can visualise many graphical modeling
 methods, including STGs, which can be automatically imported from the
 tool, either from concept specifications written by a user from within 
