@@ -90,21 +90,21 @@ comprehend and debug. When the number of signals increases, the gates and
 protocols describing the interactions between some signals become difficult to
 include with each occurrence of these signals. 
 
-\begin{figure}[h]
-\vspace{-3mm}
-\begin{centering}
-\includegraphics[scale=0.3]{Images/cElement-stg.pdf}
-\par\end{centering}
-\protect\caption{\label{fig:cElement-stg} Example STG}
-\vspace{-6mm}
-\end{figure}
-
-For example, Figure~\ref{fig:cElement-stg} contains an STG. 
-While it seems fairly simple, it would be useful to know that this features a C-element,
-and the environment of this is simply an inverter from the output, $c$, to both inputs.
-Instead, it is possible to note that there are two handshakes formed by the signal pairs of $a$,$c$ and $b$,$c$. 
-From this information we can discern not only signal interactions, but the behavioural
-relationships of these signals. 
+%\begin{figure}[h]
+%\vspace{-3mm}
+%\begin{centering}
+%\includegraphics[scale=0.3]{Images/cElement-stg.pdf}
+%\par\end{centering}
+%\protect\caption{\label{fig:cElement-stg} Example STG}
+%\vspace{-6mm}
+%\end{figure}
+%
+%For example, Figure~\ref{fig:cElement-stg} contains an STG. 
+%While it seems fairly simple, it would be useful to know that this features a C-element,
+%and the environment of this is simply an inverter from the output, $c$, to both inputs.
+%Instead, it is possible to note that there are two handshakes formed by the signal pairs of $a$,$c$ and $b$,$c$. 
+%From this information we can discern not only signal interactions, but the behavioural
+%relationships of these signals. 
 
 STGs are supported by multiple electronic design automation~(EDA) tools for verification and synthesis 
 of asynchronous control circuits,
@@ -437,57 +437,65 @@ For ease-of-use, initial states can also be declared in lists:
 In order to reuse the tools developed by the community, it is
 necessary to be able to automatically translate concept specifications to STGs.
 In this section, we will display an example of how the translation algorithm 
-operates, and present a pseudocode form of the algorithm in 
-Algorithm~\ref{alg:translation}. 
+operates, and present a pseudocode form in Algorithm~\ref{alg:translation}. 
 
-\begin{algorithm}[t]
+\begin{algorithm}[H]
 \begin{algorithmic}[1]
-\caption{Algorithm for translating concepts to STGs\label{alg:translation}}
+\caption{Algorithm for concepts to STG translation\label{alg:translation}}
+\For {Each effect $e$}
+  \State $allCauses$ $\leftarrow$ \textbf{Concatenate} lists of causes for $e$ \label{alg:list}
+  \State $transitionList$ $\leftarrow$ \textbf{CartesianProduct} $allCauses$
+  \State \textbf{addAll} $transitionList$ \textbf{to} $transitions$
+\EndFor
 \For {Signal $s$ in \textbf{System}}
   \State \textbf{define} interface of $s$ as \emph{Input/Output/Internal}
-\EndFor
-
-\For {Each effect transition $e$}
-  \State $allCauses$ $\leftarrow$ Concatenate lists  possible causes for $e$
-  \State $transitionList$ $\leftarrow$ \emph{Cartesian Product} \textbf{of} 
-	$allCauses$
-  \For {$i = 0$ to Length of $transitionList$}
-    \State \textbf{add} $e(i)$ to $transitions$
-  \EndFor 
-\EndFor
-\For {Each \textbf{signal} $s$ in system}
   \State \textbf{add} place \textbf{$s$.Name}$0$
   \State \textbf{add} place \textbf{$s$.Name}$1$
-\EndFor
-\For {Each \textbf{transition} $t$ in $transitions$}
-  \If {transition is high}
-    \State \textbf{connect} (place $t$.signalName$0$, transition)
-    \State \textbf{connect} (transition, place $t$.signalName$1$)
-    \For {Each \textbf{cause transition} $c$ for $t$}
-      \State \textbf{read-arc} (place $t$.signalName$1$, $c$)
-    \EndFor
-  \EndIf
-  \If {transition is low}
-    \State \textbf{connect} (place $t$.signalName$1$, transition)
-    \State \textbf{connect} (transition, place $t$.signalName$0$)
-    \For {Each \textbf{cause transition} $c$ for $t$}
-      \State \textbf{read-arc} (place $t$.signalName$0$, $c$)
-    \EndFor
-  \EndIf
+  \For {Each \textbf{transition} $t$  \textbf{of} $s$}
+    \If {$t$ is $rise$}
+      \State \textbf{connect} (place $t$.signalName$0$, $t$)
+      \State \textbf{connect} ($t$, place $t$.signalName$1$)
+    \ElsIf {$t$ is $fall$}
+      \State \textbf{connect} (place $t$.signalName$1$, $t$)
+      \State \textbf{connect} ($t$, place $t$.signalName$0$)
+    \EndIf
+  \EndFor
 \EndFor
 \For {Each initial state $state$ concept}
   \If {$state$ is low}
     \State \textbf{add-token}(\textbf{signalName.place}$0$)
-  \EndIf 
-  \If {$state$ is high}
+  \ElsIf {$state$ is high}
     \State \textbf{add-token}(\textbf{signalName.place}$1$)
+  \EndIf
+\EndFor
+\For {Each \textbf{transition} $t$ in $transitions$}
+  \If {$t$ is $rise$}
+    \For {Each \textbf{effect transition} $e$ of $t$}
+      \State \textbf{read-arc} (place $t$.signalName$1$, $e$)
+    \EndFor
+  \ElsIf{$t$ is $fall$}
+    \For {Each \textbf{effect transition} $e$ for $t$}
+      \State \textbf{read-arc} (place $t$.signalName$0$, $e$)
+    \EndFor
   \EndIf
 \EndFor
 \end{algorithmic}
 \end{algorithm}
 
-We will use the C-element with environment example as featured in Figure~\ref{fig:cElement-stg}.
-The concept specification for this will be:
+We will use a C-element with environment example, which features two inputs to a C-element, $a$ and $b$, and the output
+of this, $c$, connected to the input of an inverter, the output of which is used to drive the inputs, $a$ and $b$.
+For reference, a simplified STG of this is featured in Figure~\ref{fig:cElement-stg}.
+
+\begin{figure}[h]
+\vspace{-3mm}
+\begin{centering}
+\includegraphics[scale=0.3]{Images/cElement-stg.pdf}
+\par\end{centering}
+\protect\caption{\label{fig:cElement-stg} Example STG}
+\vspace{-3mm}
+\end{figure}
+
+Working from this STG, one could describe the low-level operations by inputs and outputs:
 
 \begin{minted}[fontsize=\normalsize]{haskell}
 circuit a b c = operation <> interface 
@@ -506,8 +514,15 @@ circuit a b c = operation <> interface
   inits = initialise0 [a, b, c]
 \end{minted}
 
-\noindent This concept specification is fairly long, and describes each signal interaction.
-However, we have already defined a C-element concept and an inverter concept
+\vspace{1mm}
+
+\noindent This provides four separate behavioural concepts, \mintinline{haskell}{outRise} and \mintinline{haskell}{outFall}
+which describe how the outputs transition, and
+\mintinline{haskell}{inRise} and \mintinline{haskell}{inFall}, describing how the inputs transition. These are good
+to describe the low-level behaviour of each signal in relation to the other signals, but this concept specification
+is fairly long. 
+
+We have already defined a C-element concept and an inverter concept, however,
  in Section~\ref{subsub:gate-level}. Therefore, we can simplify this specification, 
  to use gate-level concepts instead:
 
@@ -555,17 +570,18 @@ $c^{+}$			& $b^{-}$ 	\\ \hline
   \vspace{-3mm}
 \end{table}
 
-To start with this, we list all causes for each effect. These lists can be found in
-Table~\ref{tab:list-of-concepts}.
+To start with we list all causes for each effect. This is performed on Line 2 of the algorithm, for every effect transition. 
+These lists can be found in Table~\ref{tab:list-of-concepts}.
 All of the included causalities are AND-causalities, and hence, there
-is at least one single cause transitions for each effect transition. If 
-OR-causality was included, the list of possible causes would be included with these
+is at least one single cause transitions for each effect transition. 
+
+If OR-causality was included, the list of possible causes would be included with these
 AND-causalities. For example:  $a^{+}$, $b^{+}$, $[x^{+}, y^{+}]$ causing
 $c^{+}$. $x$ and $y$ are in a list of their own, and this shows OR-causality;
 either $x$ or $y$ must transition high for $c^{+}$ to occur. However, this does
 not account for the other AND-causalities. 
 
-In this event, we would perform the \emph{Cartesian product}, which combines
+In this event, we would perform the \emph{Cartesian product}~(Algorithm~\ref{alg:translation}, Line 3), which combines
 all the AND- and OR-causalities. For the example above, this would produce:
 
 \vspace{-2mm}
@@ -589,22 +605,26 @@ separate transition objects in an STG.
 However, for the C-element with environment example, there is no OR-causality. 
 We still perform the step of applying the Cartesian product to each of these 
 lists of transitions for each effect transition, but the result will be the 
-same as the original lists.
+same as the original lists, seen in Table~\ref{tab:list-of-concepts}.
 
 This concludes the part of the algorithm which defines the arcs
 and transitions. Next, the algorithm begins to build the STGs. This is where
 we start to use the initial state and interface concepts. 
 
-First of all, we need to add places for each signal. These are used to
+First of all, the interface is defined, by listing all signals as 
+$inputs$, $outputs$ or $internals$, based on the specification. This
+is performed by Line 7 of the algorithm, with Line 6 ensuring every
+signal has its interface declared. 
+
+Now we need to add places for each signal. These are used to
 show whether a signal has transitioned high or low at any point. 
 For example a token in a $0$ place shows that this signal has 
-transitioned low. 
+transitioned low. The algorithm performs this on Lines 10 and 11.  
 
-The interface is defined at the start of the algorithm, by listing them as 
-$inputs$, $outputs$ or $internals$, so now we need to include all the 
-transitions, and connect these to the places to form consistency loops, to 
-ensure that all signals in this system can only transition in one way when this 
-signal's previous transition was in the opposite direction. 
+Now we include all of the 
+transitions for each signal, high and low, and connect these to the places to form consistency loops
+This ensures that all signals in this system will not repeat a same-direction transition, i.e. a signal will
+not transition high, and then high again sometime later.
 
 This is done by taking each transition, and if it is a $+$ transition, 
 connecting the $0$ place for this signal to the transition, then connecting 
@@ -612,13 +632,29 @@ this transition to the $1$ place for this signal. Conversely, if it is a $-$
 transition, we connect the $1$ place for this signal to the transition, and 
 connect this transition to the $0$ place.
 
+Algorithm~\ref{alg:translation} Lines 12 and 13 perform this operation for a $+$ transition,
+and Lines 15 and 16 do the same for a $-$ transition. Line 10 ensures this is performed for 
+each and every transition object for a signal, and again, Line 6 ensures this applies to every signal
+in the system. 
+
 Now the algorithm introduces the initial states. All of the signals are 
-specified to be initially 0, meaning that the first transition will be the $+$.
+specified to be initially 0 in this example, meaning that the first transition will be the $+$.
 From the consistency loops, to allow this to happen, we need to place a token 
-in each $0$ place for each signal.
+in each $0$ place for each signal. Lines 20-26 of the algorithm create these tokens,
+with Lines 21 and 22 creating a token for an initially $0$ signal, and Lines 23 and 24 
+creating a token for an initially $1$ signal. 
 
 Finally, we can add the connections to the transitions, and cause the 
-expected interaction between signals. 
+expected interaction between signals. This is done using read-arcs, which 
+are arcs which require, but do not consume tokens for transitions. We
+connect a read-arc from the place after a cause transition, to the effect transition object. 
+For example, for \mintinline{haskell}{rise a ~> rise b} we connect the place after $a^{+}$, namely $a0$,
+to the transition $b^{+}$. In this case, $b^{+}$ will not occur until $a0$ contains a token,
+and when it does occur, the token will remain in $a0$ following the $b^{+}$ transition. 
+
+The read-arc connections are performed by Line 30 for a $rise$ transition, connecting the
+cause signals $1$ to the effect transition object, and Line 34 connects the $0$ place of a 
+falling transition to the effect transition object. 
 
 Following this, the specification is fully translated, and the resulting STG 
 will be the same as shown in Figure~\ref{fig:cElement-stg-translated}. 
