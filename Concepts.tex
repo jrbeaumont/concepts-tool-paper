@@ -140,6 +140,8 @@ The contributions of this paper are:
   \noun{Workcraft} to translate concepts in Section~\ref{sec:tool-use}.
 \end{itemize}
 
+\vspace{-5mm}
+
 \section{Features of \noun{Plato}\label{sec:tool-func}}
 
 \vspace{-3mm}
@@ -156,12 +158,10 @@ is founded, is discussed in~\cite{2015_Beaumont_MEMOCODE}.
 Concepts can be composed of other concepts, and this applies to the behaviours 
 of signals, as well as the specifying of the initial states and the signal 
 types. This allows there to be different levels of concepts, each level of 
-which will feature a composition of concepts from a lower level. 
-
-In this section we will explain these levels, and the standard notations of 
+which will feature a composition of concepts from a lower level. In this section we will explain these levels, and the standard notations of 
 concepts for these. 
 
-\vspace{-2mm}
+\vspace{-3mm}
 
 \subsubsection{\label{signal-level}Signal-level concepts}Asynchronous circuit 
 specifications are mainly composed of signal transitions, and interactions 
@@ -178,7 +178,7 @@ transition specifications. $a^{+}$ and $a^{-}$ are in post-fix notation, where
 the operator is stated after the operand. Haskell does not support post-fix 
 notation, and as such, we have to use a differing signal transition notation. 
 
-For the tool, signal transitions $a^{+}$ and $a^{-}$ are noted as \mintinline{haskell}{rise a} and 
+In \noun{Plato}, signal transitions $a^{+}$ and $a^{-}$ are noted as \mintinline{haskell}{rise a} and 
 \mintinline{haskell}{fall a} respectively. We will use the tool notation for examples, but 
 describe these using standard notation.
 
@@ -190,13 +190,13 @@ A key concept in asynchronous circuits is \emph{causality}:
 one signal transition \emph{causes} another signal transition, a cause and an 
 effect. This is denoted in the form: 
 
-\vspace{-1mm}
+\vspace{-2mm}
 
 \begin{center}
 {\mintinline{haskell}{rise a ~>} \mintinline{haskell}{rise c}}
 \end{center}
 
-%\vspace{-1mm}
+\vspace{-1mm}
 
 This is read as $a^{+}$ causes $c^{+}$, meaning that for the $c^{+}$ transition 
 to occur, $a^{+}$ must have occurred previously. The 
@@ -214,9 +214,13 @@ operator, and this applies
 to concepts of any level, whether predefined or user-defined. For example, 
 two causality concepts can be composed.
 
+\vspace{-1.5mm}
+
 \begin{center}
 \mintinline{haskell}{rise a ~>} \mintinline{haskell}{rise c <>} \mintinline{haskell}{rise b ~>} \mintinline{haskell}{rise c}
 \end{center}
+
+\vspace{-1mm}
 
 In words, $a^{+}$ \emph{and} $b^{+}$ must occur before $c^{+}$ can occur. 
 This corresponds to so-called AND-causality in the fact that several cause 
@@ -228,9 +232,13 @@ The above notation can cause long-winded specifications when lots of
 AND-causality is involved. To solve this we provide a listing option. The 
 following will achieve the same results:
 
+\vspace{-3mm}
+
 \begin{center}
-      [\mintinline{haskell}{rise a,}\mintinline{haskell}{ rise b}] \mintinline{haskell}{~&~>} \mintinline{haskell}{rise c}
+      [\mintinline{haskell}{rise a,}\mintinline{haskell}{rise b}] \mintinline{haskell}{~&~>} \mintinline{haskell}{rise c}
 \end{center}
+
+\vspace{-1mm}
 
 This form of concept can be composed as usual with any other concepts.
 
@@ -242,9 +250,13 @@ occur.
 With OR-causality, the notation used lists all possible causes for the stated 
 effect:
 
+\vspace{-1.5mm}
+
 \begin{center}
       [\mintinline{haskell}{rise x,} \mintinline{haskell}{rise y}] \mintinline{haskell}{~|~>} \mintinline{haskell}{rise z}
 \end{center}
+
+\vspace{-1mm}
 
 This is, \emph{either} $x^{+}$ \emph{or} $y^{+}$ must occur in order for 
 $z^{+}$ to occur. The interactions when an effect transition is included in both AND- and 
@@ -298,8 +310,7 @@ be found in~\cite{2015_Beaumont_MEMOCODE}.
 \subsubsection{Protocol-level concepts} In addition to gate-level concepts
 described above it is often important to specify \emph{protocols}
 of interaction between multiple gates, components or signals. Here we 
-demonstrate how one can use concepts to specify asynchronous handshakes
-and mutual exclusion mechanisms.
+demonstrate how one can use concepts to specify asynchronous handshakes.
 
 Given two signals $a$ and $b$, a \emph{handshake} between them is
 the following composition of causality concepts:
@@ -327,17 +338,16 @@ This conceptual understanding of a handshake as being composed
 from a buffer and an inverter is often used by circuit designers as
 a convenient way of reasoning.
 
-\vspace{-2mm}
+\vspace{-3mm}
 
 \subsection{Concepts required for translation\label{sub:trans-concepts}}
 
-\vspace{-2mm}
+\vspace{-2.5mm}
 
 The concepts we have discussed so far are aimed at specifying the behaviour of 
 signals in a circuit. When translating these to STGs however, these behaviours 
 do not result in a complete specification, meaning they will not be 
-verifiable by standard tools, and therefore not useful in further operations, 
-such as synthesis.
+verifiable by standard tools, and therefore not synthesizable.
 
 This is due to various parts of an STG that we have not yet discussed, which 
 are important for specification, namely \emph{interface} and 
@@ -372,34 +382,40 @@ Signal types are composed according to the following rules:
 \]
 
 The intuition is as follows:
+
+\vspace{-2mm}
 \begin{itemize}
     \item If a signal is an input in one component of the system, but is an
-    output in another components, then in the composition it will be an output.
+    output in another component, then in the composition it will be an output.
     \item An internal signal is similar to an output signal in the sense
-that it is driven by the circuit (not the environment), but it is hidden, 
-i.e. not accessible via the circuit interface. Once a signal is hidden and 
-declared internal it cannot be revealed.
+    that it is driven by the circuit (not the environment), but it is hidden, 
+    i.e. not accessible via the circuit interface. Once a signal is hidden and 
+    declared internal it cannot be revealed.
 \end{itemize}
 
 \noindent Specifying signal types is important when designing asynchronous
 circuits, as it helps to quickly identify errors, for example, when an input transition is
 caused by a hidden internal transition, as internal transitions are used only by the circuit 
 and cannot be accessed from the environment, and as such, an internal transition cannot
-cause an input transition. We can then reuse existing tools for circuit
+cause an input transition. 
+
+We can then reuse existing tools for circuit
 simulation, verification and synthesis. Signal type information is also used
 in the algorithm for automated translation of concepts to
 STGs (Section~\ref{sec:algorithm}).
 
 Concepts \texttt{inputs}, \texttt{outputs}, \texttt{internals} are defined for
-specifying types of sets of signals for convenience, and to be included in-line
+specifying the type of sets of signals, and can be included in-line
 with other concepts. For example, to specify that signals $a$ and $b$ are 
-inputs, $c$ is an output, and $t$ is internal, it is possible to write:
+inputs, $c$ is an output, and $t$ is internal:
+
+\vspace{-2mm}
 
 \begin{center}
 \mintinline{haskell}{inputs [a, b] <>} \mintinline{haskell}{outputs [c]} \mintinline{haskell}{<>} \mintinline{haskell}{internals [t]}
 \end{center}
 
-\vspace{-4mm}
+\vspace{-5mm}
 
 \subsubsection{Initial state concepts\label{sub:initState}}
 
@@ -412,15 +428,18 @@ and~$b$, we use the \mintinline{haskell}{initialise} concept.
 The possible initial states are \emph{low} or \emph{high}, referred to as 
 \emph{0} or \emph{1} respectively:
 
+\vspace{-1mm}
+
 \begin{center}
    \mintinline{haskell}{initialise a 0 <>}\mintinline{haskell}{initialise x 1}
 \end{center}
 
+\vspace{-1mm}
+
 \noindent A signal can only be declared as initially high or low. If the 
 initial state of a signal is not defined, an error will occur, and the 
-translation will not continue. Conversely, in the event a signal has its 
-initial state declared as both high and low, and is thus inconsistent, in a 
-specification then the translation will also fail.
+translation will not continue. In the event a signal has its 
+initial state declared as both high and low, and is thus inconsistent, then the translation will also fail.
 
 For ease-of-use, initial states can also be declared in lists:
 
@@ -434,10 +453,12 @@ For ease-of-use, initial states can also be declared in lists:
 
 \vspace{-2mm}
 
-In order to reuse the tools developed by the community, it is
-necessary to be able to automatically translate concept specifications to STGs.
+%In order to reuse the tools developed by the community, it is
+%necessary to be able to automatically translate concept specifications to STGs.
 In this section, we will display an example of how the translation algorithm 
 operates, and present a pseudocode form in Algorithm~\ref{alg:translation}. 
+
+\vspace{-2mm}
 
 \begin{algorithm}[H]
 \begin{algorithmic}[1]
@@ -482,18 +503,20 @@ operates, and present a pseudocode form in Algorithm~\ref{alg:translation}.
 \end{algorithmic}
 \end{algorithm}
 
-We will use a C-element with environment example, which features two inputs to a C-element, $a$ and $b$, and the output
-of this, $c$, connected to the input of an inverter, the output of which is used to drive the inputs, $a$ and $b$.
-For reference, a simplified STG of this is featured in Figure~\ref{fig:cElement-stg}.
-
 \begin{figure}[h]
-\vspace{-3mm}
+\vspace{-5mm}
 \begin{centering}
 \includegraphics[scale=0.3]{Images/cElement-stg.pdf}
 \par\end{centering}
 \protect\caption{\label{fig:cElement-stg} Example STG}
 \vspace{-3mm}
 \end{figure}
+
+
+We will use a C-element with environment example, which features two inputs to a C-element, $a$ and $b$, and the output
+of this, $c$, connected to the input of an inverter, the output of which is used to drive the inputs, $a$ and $b$.
+For reference, a simplified STG of this is featured in Figure~\ref{fig:cElement-stg}.
+
 
 Working from this STG, one could describe the low-level operations by inputs and outputs:
 
@@ -522,9 +545,9 @@ which describe how the outputs transition, and
 to describe the low-level behaviour of each signal in relation to the other signals, but this concept specification
 is fairly long. 
 
-We have already defined a C-element concept and an inverter concept, however,
- in Section~\ref{subsub:gate-level}. Therefore, we can simplify this specification, 
- to use gate-level concepts instead:
+We have already defined C-element and inverter concepts
+in Section~\ref{subsub:gate-level}. Therefore, we can simplify this specification, 
+to use gate-level concepts instead:
 
 \begin{minted}[fontsize=\normalsize]{haskell}
 circuit a b c = operation <> interface 
@@ -541,9 +564,13 @@ circuit a b c = operation <> interface
 The signal-level concepts between the signal pairs of $a$ and $c$, and $b$ and $c$
 also match those of a handshake. So we can also specify the operation as:
 
-\begin{minted}[fontsize=\normalsize]{haskell}
-     handshake a c <> handshake b c
-\end{minted}
+\vspace{-1.5mm}
+
+\begin{center}
+   \mintinline{haskell}{handshake a c} \mintinline{haskell}{<>} \mintinline{haskell}{handshake b c}
+\end{center}
+
+\vspace{-1.5mm}
 
 \noindent There can be multiple ways of representing a specification using concepts, 
 however, all levels of abstraction available to the designer are built out of signal-level
@@ -581,8 +608,8 @@ $c^{+}$. $x$ and $y$ are in a list of their own, and this shows OR-causality;
 either $x$ or $y$ must transition high for $c^{+}$ to occur. However, this does
 not account for the other AND-causalities. 
 
-In this event, we would perform the \emph{Cartesian product}~(Algorithm~\ref{alg:translation}, Line 3), which combines
-all the AND- and OR-causalities. For the example above, this would produce:
+In this case, we perform the \emph{Cartesian product}~(Algorithm~\ref{alg:translation}, Line 3), which combines
+all AND- and OR-causalities. For the example above, this would produce:
 
 \vspace{-2mm}
 
@@ -628,18 +655,20 @@ not transition high, and then high again sometime later.
 
 This is done by taking each transition, and if it is a $+$ transition, 
 connecting the $0$ place for this signal to the transition, then connecting 
-this transition to the $1$ place for this signal. Conversely, if it is a $-$ 
+this transition to the $1$ place for this signal. If it is a $-$ 
 transition, we connect the $1$ place for this signal to the transition, and 
 connect this transition to the $0$ place.
 
-Algorithm~\ref{alg:translation} Lines 12 and 13 perform this operation for a $+$ transition,
+Algorithm~\ref{alg:translation}, Lines 12 and 13 perform this operation for a $+$ transition,
 and Lines 15 and 16 do the same for a $-$ transition. Line 10 ensures this is performed for 
-each and every transition object for a signal, and again, Line 6 ensures this applies to every signal
-in the system. 
+each and every transition object for a signal.
 
-Now the algorithm introduces the initial states. All of the signals are 
+%, and again, Line 6 ensures this applies to every signal
+%in the system. 
+
+Next, the algorithm introduces the initial states. All of the signals are 
 specified to be initially 0 in this example, meaning that the first transition will be the $+$.
-From the consistency loops, to allow this to happen, we need to place a token 
+In the consistency loops, we need to place a token 
 in each $0$ place for each signal. Lines 20-26 of the algorithm create these tokens,
 with Lines 21 and 22 creating a token for an initially $0$ signal, and Lines 23 and 24 
 creating a token for an initially $1$ signal. 
@@ -662,26 +691,24 @@ This can now be used with tools, to verify and synthesize. It can also be
 \emph{resynthesized} using these tools, to produce a more compact STG,
 such as that seen in Figure~\ref{fig:cElement-stg}
 
-\begin{figure}[h]
+\begin{figure}[H]
 \vspace{-4mm}
 \begin{centering}
 \includegraphics[scale=0.3]{Images/cElement-stg-translated}
 \par\end{centering}
 \protect\caption{\label{fig:cElement-stg-translated} Fully translated C-element with environment STG}
-\vspace{-3mm}
+\vspace{-4mm}
 \end{figure}
 
-\vspace{-3mm}
+\vspace{-5mm}
 
 \section{Usage of the tool\label{sec:tool-use}}
 
-\vspace{-2mm}
+\vspace{-3mm}
 
-In this section, we will discuss the design flow, including the preparation of 
+We will now discuss the design flow, including the preparation of 
 a concepts file, the translation methods from within \noun{Workcraft}, and 
-the uses from the translated STGs. This tool can also be used from command line,
-however, the design flow can include a GUI from authoring concepts to synthesis
-from within \noun{Workcraft}. 
+the uses of the translated STGs.
 
 \vspace{-3mm}
 
@@ -691,7 +718,7 @@ from within \noun{Workcraft}.
 
 \begin{figure}[h]
 \begin{centering}
-
+\vspace{-3mm}
 \begin{minted}[fontsize=\normalsize]{haskell}
 module CElement where
 
@@ -707,10 +734,10 @@ circuit a b c = operation <> interface
 \end{minted}
 
 \par\end{centering}
-\vspace{-2mm}
+\vspace{-1mm}
 \begin{centering}
 \protect\caption{\label{fig:concepts_file}A concepts file}
-\vspace{-2mm}
+\vspace{-3mm}
 \par\end{centering}
 
 \end{figure}
@@ -718,6 +745,8 @@ circuit a b c = operation <> interface
 The concepts file we will discuss is found in Figure~\ref{fig:concepts_file}.
 Concepts files are an extension of Haskell files, and hence, use the ``.hs'' file extension.
 The following describes important information about specific lines.
+
+\vspace{-1.5mm}
 
 \begin{description}
   \item [Line 1]  This line must be included in all concept files, with the 
@@ -743,6 +772,8 @@ C-element with environment example here. We have defined the interface, initial
 state and the operation of this separately, by defining these concepts following the 
 ``\mintinline{haskell}{where}''. The full circuit specification is then 
 composed of all of these defined concepts. 
+
+\vspace{-2.5mm}
 
 \subsection{Using \noun{Plato} from within \noun{Workcraft} \label{sec:workcraft_usage}}
 
@@ -771,7 +802,7 @@ which can be automatically imported from \noun{Plato}, either from concept speci
 This section will discuss how to use \noun{Plato} from within
 \noun{Workcraft}.
 
-\vspace{-2mm}
+\vspace{-3.2mm}
  
 \subsubsection{Translating and authoring concepts}
 
@@ -796,7 +827,7 @@ operations can be made to this STG or to the concepts file.
 
 \subsubsection{Importing concepts directly}
 
-\vspace{-2mm}
+\vspace{-3mm}
 
 In \noun{Workcraft} it is also possible to import concepts directly from a file,
 without having to view the concepts first. This can be done from the 
@@ -844,22 +875,21 @@ domain-specific language for behavioural concepts, featuring some built-in
 concepts at varying levels, allowing users to specify behaviours in a preferred 
 way. 
 
-This tool also features translation, a method of converting concepts into Signal
+This tool also features a method of converting concepts into Signal
 Transition Graphs, output in a format usable by other existing design, 
 verification and synthesis tools. 
 
 \noun{Plato}, can be used on its own using a command-line interface, and is
 integrated into \noun{Workcraft}, which can visualise many graphical modeling
-methods, including STGs, which can be automatically imported from the
-tool, either from concept specifications written by a user from within 
+methods, including STGs, which can be automatically imported from \noun{Plato}
+either from concept specifications written by a user from within 
 \noun{Workcraft}, or by importing a previously written concept file.
-\noun{Workcraft} also features several verification and synthesis tools 
+\noun{Workcraft} also has several verification and synthesis tools 
 integrated, which can automatically use STGs translated from concepts. 
 
 Using concepts, a user can reduce the time of designing an asynchronous
-control circuit from the ground up, as well as allow reuse of components
-by importing them from previously written user concept files which can be 
-specified either as part of a scenario or entire scenarios to reduce the 
+control circuit from the ground up, as well as reuse components
+by importing them from previously written user concept files which can reduce 
 design-time of future projects. Composition of concepts can help
 reduce errors and save time in comparison to performing these manually.
 This method can help to make asynchronous circuits more appealing
@@ -869,9 +899,11 @@ to industrial designers.
 %Finite State Machines~(FSM).
 
 The \noun{Plato} tool we have discussed is available 
-from~\cite{2016_concepts_github}, and as stated, is integrated into 
+from~\cite{2016_concepts_github}, and is included with 
 \noun{Workcraft}~\cite{Workcraft_website}. A manual is included with the tool, 
-which features descriptions of the features. 
+which contains descriptions of the features. 
+
+\vspace{-2.5mm}
 
 \bibliographystyle{unsrt}
 \bibliography{publications}
