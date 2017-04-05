@@ -71,8 +71,8 @@ tools, such as \noun{Petrify} and \noun{Mpsat}.
 and intuitive method of designing asynchronous circuits, using a fully
 compositional description method. Composition is an 
 important part of concepts and the use of composition in some algebraic 
-representations, such as with DI algebra~\cite{270632} and Conditional Signal 
-Graphs~\cite{6243877} helped to inspire this. 
+representations, such as with DI algebra~\cite{270632}, Conditional Signal 
+Graphs~\cite{6243877} and Algebra of Parameterised Graphs~\cite{mokhov2014algebra} helped to inspire this. 
 
 As discussed in~\cite{2015_Beaumont_MEMOCODE}, concepts are a useful language 
 for specifying the behaviours of asynchronous circuits, in the preferred form 
@@ -156,7 +156,7 @@ is founded, is discussed in~\cite{2015_Beaumont_MEMOCODE}.
 \vspace{-3mm}
 
 Concepts can be composed of other concepts, and this applies to the behaviours 
-of signals, as well as the specifying of the initial states and the signal 
+of signals, as well as the specification of the initial states and the signal 
 types. This allows there to be different levels of concepts, each level of 
 which will feature a composition of concepts from a lower level. In this section we will explain these levels, and the standard notations of 
 concepts for these. 
@@ -179,8 +179,7 @@ the operator is stated after the operand. Haskell does not support post-fix
 notation, and as such, we have to use a differing signal transition notation. 
 
 In \noun{Plato}, signal transitions $a^{+}$ and $a^{-}$ are noted as \mintinline{haskell}{rise a} and 
-\mintinline{haskell}{fall a} respectively. We will use the tool notation for examples, but 
-describe these using standard notation.
+\mintinline{haskell}{fall a} respectively. We will use the tool notation in code examples, but describe these using standard notation in the text
 
 Signal-level concepts are the base level of concepts, and are 
 the type all other concepts are built on. Here we display the standard concepts
@@ -199,9 +198,9 @@ effect. This is denoted in the form:
 \vspace{-1mm}
 
 This is read as $a^{+}$ causes $c^{+}$, meaning that for the $c^{+}$ transition 
-to occur, $a^{+}$ must have occurred previously. The 
+to occur, $a^{+}$ must have occurred previously. The operator
 \mintinline{haskell}{~>}
-operator is used to show causal relationships between signals.
+is used to show causal relationships between signals.
  
 %While this concept is called \emph{causality}, this doesn't necessarily imply
 %timings, such as any \emph{cause} transition immediately forcing the
@@ -209,8 +208,8 @@ operator is used to show causal relationships between signals.
 %list all possible \emph{cause} transitions which need to occur in order
 %for an \emph{effect} transition.
 
-One can compose any concepts using the \mintinline{haskell}{<>} 
-operator, and this applies
+One can compose any concepts using the
+operator \mintinline{haskell}{<>}, and this applies
 to concepts of any level, whether predefined or user-defined. For example, 
 two causality concepts can be composed.
 
@@ -463,39 +462,39 @@ operates, and present a pseudocode form in Algorithm~\ref{alg:translation}.
 \begin{algorithm}[H]
 \begin{algorithmic}[1]
 \caption{Algorithm for concepts to STG translation\label{alg:translation}}
-\For {Each effect $e$}
+\For {\textbf{each} effect $e$}
   \State $allCauses$ $\leftarrow$ \textbf{Concatenate} lists of causes for $e$ \label{alg:list}
   \State $transitionList$ $\leftarrow$ \textbf{CartesianProduct} $allCauses$
   \State \textbf{addAll} $transitionList$ \textbf{to} $transitions$
 \EndFor
-\For {Signal $s$ in \textbf{System}}
-  \State \textbf{define} interface of $s$ as \emph{Input/Output/Internal}
+\For {\textbf{each} signal $s$ \textbf{in} system}
+  \State \textbf{define interface} of $s$ as \emph{Input/Output/Internal}
   \State \textbf{add} place \textbf{$s$.Name}$0$
   \State \textbf{add} place \textbf{$s$.Name}$1$
-  \For {Each \textbf{transition} $t$  \textbf{of} $s$}
-    \If {$t$ is $rise$}
+  \For {\textbf{each} transition $t$ \textbf{of} $s$}
+    \If {$t$ \textbf{is} $rise$}
       \State \textbf{connect} (place $t$.signalName$0$, $t$)
       \State \textbf{connect} ($t$, place $t$.signalName$1$)
-    \ElsIf {$t$ is $fall$}
+    \ElsIf {$t$ \textbf{is} $fall$}
       \State \textbf{connect} (place $t$.signalName$1$, $t$)
       \State \textbf{connect} ($t$, place $t$.signalName$0$)
     \EndIf
   \EndFor
 \EndFor
-\For {Each initial state $state$ concept}
-  \If {$state$ is low}
+\For {\textbf{each} initial state $state$}
+  \If {$state$ \textbf{is} low}
     \State \textbf{add-token}(\textbf{signalName.place}$0$)
-  \ElsIf {$state$ is high}
+  \ElsIf {$state$ \textbf{is} high}
     \State \textbf{add-token}(\textbf{signalName.place}$1$)
   \EndIf
 \EndFor
-\For {Each \textbf{transition} $t$ in $transitions$}
-  \If {$t$ is $rise$}
-    \For {Each \textbf{effect transition} $e$ of $t$}
+\For {\textbf{each} transition $t$ \textbf{in} $transitions$}
+  \If {$t$ \textbf{is} $rise$}
+    \For {\textbf{each} effect transition $e$ \textbf{of} $t$}
       \State \textbf{read-arc} (place $t$.signalName$1$, $e$)
     \EndFor
-  \ElsIf{$t$ is $fall$}
-    \For {Each \textbf{effect transition} $e$ for $t$}
+  \ElsIf{$t$ \textbf{is} $fall$}
+    \For {\textbf{each} effect transition $e$ \textbf{of} $t$}
       \State \textbf{read-arc} (place $t$.signalName$0$, $e$)
     \EndFor
   \EndIf
@@ -521,20 +520,19 @@ For reference, a simplified STG of this is featured in Figure~\ref{fig:cElement-
 Working from this STG, one could describe the low-level operations by inputs and outputs:
 
 \begin{minted}[fontsize=\normalsize]{haskell}
-circuit a b c = operation <> interface 
-             <> inits
+circuit a b c = opers <> inter <> inits
  where
-  operation = outRise <> outFall 
-           <> inRise <> inFall
+  opers   = outRise <> outFall 
+         <> inRise <> inFall
   outRise = [rise a, rise b] ~&~> rise c
   outFall = [fall a, fall b] ~&~> fall c
-  inRise = fall c ~> rise a 
-           <> fall c ~> rise b
-  inFall = rise c ~> fall a 
-           <> rise c ~> fall b
-  interface = inputs [a, b] 
-           <> outputs [c]
-  inits = initialise0 [a, b, c]
+  inRise  = fall c ~> rise a 
+         <> fall c ~> rise b
+  inFall  = rise c ~> fall a 
+         <> rise c ~> fall b
+  inter   = inputs [a, b] 
+         <> outputs [c]
+  inits   = initialise0 [a, b, c]
 \end{minted}
 
 \vspace{1mm}
@@ -550,13 +548,12 @@ in Section~\ref{subsub:gate-level}. Therefore, we can simplify this specificatio
 to use gate-level concepts instead:
 
 \begin{minted}[fontsize=\normalsize]{haskell}
-circuit a b c = operation <> interface 
-             <> inits
+circuit a b c = opers <> inter <> inits
  where
-  operation = cElement a b c 
+  opers = cElement a b c 
            <> inverter c a 
            <> inverter c b
-  interface = inputs [a, b] 
+  inter = inputs [a, b] 
            <> outputs [c]
   inits = initialise0 [a, b, c]
 \end{minted}
@@ -646,7 +643,7 @@ signal has its interface declared.
 Now we need to add places for each signal. These are used to
 show whether a signal has transitioned high or low at any point. 
 For example a token in a $0$ place shows that this signal has 
-transitioned low. The algorithm performs this on Lines 10 and 11.  
+transitioned low. The algorithm performs this on Lines 10-11.  
 
 Now we include all of the 
 transitions for each signal, high and low, and connect these to the places to form consistency loops
@@ -659,8 +656,8 @@ this transition to the $1$ place for this signal. If it is a $-$
 transition, we connect the $1$ place for this signal to the transition, and 
 connect this transition to the $0$ place.
 
-Algorithm~\ref{alg:translation}, Lines 12 and 13 perform this operation for a $+$ transition,
-and Lines 15 and 16 do the same for a $-$ transition. Line 10 ensures this is performed for 
+Algorithm~\ref{alg:translation}, Lines 12-13 perform this operation for a $+$ transition,
+and Lines 15-16 do the same for a $-$ transition. Line 10 ensures this is performed for 
 each and every transition object for a signal.
 
 %, and again, Line 6 ensures this applies to every signal
@@ -670,7 +667,7 @@ Next, the algorithm introduces the initial states. All of the signals are
 specified to be initially 0 in this example, meaning that the first transition will be the $+$.
 In the consistency loops, we need to place a token 
 in each $0$ place for each signal. Lines 20-26 of the algorithm create these tokens,
-with Lines 21 and 22 creating a token for an initially $0$ signal, and Lines 23 and 24 
+with Lines 21-22 creating a token for an initially $0$ signal, and Lines 23-24 
 creating a token for an initially $1$ signal. 
 
 Finally, we can add the connections to the transitions, and cause the 
@@ -700,7 +697,7 @@ such as that seen in Figure~\ref{fig:cElement-stg}
 \vspace{-4mm}
 \end{figure}
 
-\vspace{-5mm}
+%\vspace{-5mm}
 
 \section{Usage of the tool\label{sec:tool-use}}
 
@@ -714,7 +711,7 @@ the uses of the translated STGs.
 
 \subsection{Concepts file layout \label{sub:file_layout}}
 
-\vspace{-3mm}
+\vspace{-4mm}
 
 \begin{figure}[h]
 \begin{centering}
@@ -724,12 +721,11 @@ module CElement where
 
 import Tuura.Concept.STG
 
-circuit a b c = operation <> interface 
-             <> inits 
+circuit a b c = opers <> inter <> inits 
  where
-  operation = cElement a b c <> env
-  env = inverter c a <> inverter c b
-  interface = inputs[a, b] <> outputs[c] 
+  opers = cElement a b c <> env
+  env   = inverter c a <> inverter c b
+  inter = inputs[a, b] <> outputs[c] 
   inits = initialise0 [a, b, c]
 \end{minted}
 
@@ -844,7 +840,7 @@ without having to view the concepts first. This can be done from the
 			option of \emph{.hs} files.}
 
 \par\end{centering}
-\vspace{-3mm}
+\vspace{-6mm}
 \end{figure}
 
 Any concept files imported will be automatically translated to an STG.
