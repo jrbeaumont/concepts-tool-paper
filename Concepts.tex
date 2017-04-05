@@ -72,7 +72,7 @@ and intuitive method of designing asynchronous circuits, using a fully
 compositional description method. Composition is an 
 important part of concepts and the use of composition in some algebraic 
 representations, such as with DI algebra~\cite{270632}, Conditional Signal 
-Graphs~\cite{6243877} and Algebra of Parameterised Graphs~\cite{mokhov2014algebra} helped to inspire this. 
+Graphs~\cite{6243877} and Algebra of Parameterised Graphs~\cite{2014_mokhov_pg} helped to inspire this. 
 
 As discussed in~\cite{2015_Beaumont_MEMOCODE}, concepts are a useful language 
 for specifying the behaviours of asynchronous circuits, in the preferred form 
@@ -110,7 +110,7 @@ STGs are supported by multiple electronic design automation~(EDA) tools for veri
 of asynchronous control circuits,
 such as \noun{Petrify}~\cite{Cortadella}, \noun{Mpsat}~\cite{khomenko2004detecting}, 
 \noun{Versify}~\cite{i1997formal}, 
-\noun{Workcraft}~\cite{2007_poliakov_workcraft}\cite{Workcraft_website}, 
+\noun{Workcraft}~\cite{Sokolov-2016-book-Workcraft}\cite{Workcraft_website}, 
 and others. These tools take an STG specification and can formally verify its correctness, 
 as well as synthesize an asynchronous circuit implementation that is 
 \emph{speed-independent}, i.e. guaranteed to work correctly regardless of 
@@ -149,11 +149,11 @@ The contributions of this paper are:
 The abstract base of concepts, on which asynchronous circuit specifications 
 is founded, is discussed in~\cite{2015_Beaumont_MEMOCODE}.
 
-\vspace{-3mm}
+\vspace{-3.5mm}
 
 \subsection{Concept notation \label{sub:concept-notation}}
 
-\vspace{-3mm}
+\vspace{-3.5mm}
 
 Concepts can be composed of other concepts, and this applies to the behaviours 
 of signals, as well as the specification of the initial states and the signal 
@@ -192,7 +192,7 @@ effect. This is denoted in the form:
 \vspace{-2mm}
 
 \begin{center}
-{\mintinline{haskell}{rise a ~>} \mintinline{haskell}{rise c}}
+{\mintinline{haskell}{rise a} \mintinline{haskell}{~>} \mintinline{haskell}{rise c}}
 \end{center}
 
 \vspace{-1mm}
@@ -216,7 +216,7 @@ two causality concepts can be composed.
 \vspace{-1.5mm}
 
 \begin{center}
-\mintinline{haskell}{rise a ~>} \mintinline{haskell}{rise c <>} \mintinline{haskell}{rise b ~>} \mintinline{haskell}{rise c}
+\mintinline{haskell}{rise a} \mintinline{haskell}{~>} \mintinline{haskell}{rise c} \mintinline{haskell}{<>} \mintinline{haskell}{rise b} \mintinline{haskell}{~>} \mintinline{haskell}{rise c}
 \end{center}
 
 \vspace{-1mm}
@@ -234,7 +234,7 @@ following will achieve the same results:
 \vspace{-3mm}
 
 \begin{center}
-      [\mintinline{haskell}{rise a,}\mintinline{haskell}{rise b}] \mintinline{haskell}{~&~>} \mintinline{haskell}{rise c}
+      [\mintinline{haskell}{rise a,} \mintinline{haskell}{rise b}] \mintinline{haskell}{~&~>} \mintinline{haskell}{rise c}
 \end{center}
 
 \vspace{-1mm}
@@ -337,11 +337,11 @@ This conceptual understanding of a handshake as being composed
 from a buffer and an inverter is often used by circuit designers as
 a convenient way of reasoning.
 
-\vspace{-3mm}
+\vspace{-3.5mm}
 
 \subsection{Concepts required for translation\label{sub:trans-concepts}}
 
-\vspace{-2.5mm}
+\vspace{-3.5mm}
 
 The concepts we have discussed so far are aimed at specifying the behaviour of 
 signals in a circuit. When translating these to STGs however, these behaviours 
@@ -411,7 +411,8 @@ inputs, $c$ is an output, and $t$ is internal:
 \vspace{-2mm}
 
 \begin{center}
-\mintinline{haskell}{inputs [a, b] <>} \mintinline{haskell}{outputs [c]} \mintinline{haskell}{<>} \mintinline{haskell}{internals [t]}
+\mintinline{haskell}{inputs [a, b]} \mintinline{haskell}{<>} \mintinline{haskell}{outputs [c]} \\
+\mintinline{haskell}{<>} \mintinline{haskell}{internals [t]}
 \end{center}
 
 \vspace{-5mm}
@@ -430,7 +431,7 @@ The possible initial states are \emph{low} or \emph{high}, referred to as
 \vspace{-1mm}
 
 \begin{center}
-   \mintinline{haskell}{initialise a 0 <>}\mintinline{haskell}{initialise x 1}
+   \mintinline{haskell}{initialise a 0} \mintinline{haskell}{<>} \mintinline{haskell}{initialise x 1}
 \end{center}
 
 \vspace{-1mm}
@@ -443,7 +444,7 @@ initial state declared as both high and low, and is thus inconsistent, then the 
 For ease-of-use, initial states can also be declared in lists:
 
 \begin{center}
-\mintinline{haskell}{initialise0[a, b, c] <>} \mintinline{haskell}{initialise1[x,y]}
+\mintinline{haskell}{initialise0[a, b, c]} \mintinline{haskell}{<>} \mintinline{haskell}{initialise1[x,y]}
 \end{center}
 
 \vspace{-2mm}
@@ -519,23 +520,26 @@ For reference, a simplified STG of this is featured in Figure~\ref{fig:cElement-
 
 Working from this STG, one could describe the low-level operations by inputs and outputs:
 
+\vspace{-1mm}
+
 \begin{minted}[fontsize=\normalsize]{haskell}
-circuit a b c = opers <> inter <> inits
+circuit a b c = protocol <> ports 
+             <> init
  where
-  opers   = outRise <> outFall 
-         <> inRise <> inFall
-  outRise = [rise a, rise b] ~&~> rise c
-  outFall = [fall a, fall b] ~&~> fall c
-  inRise  = fall c ~> rise a 
-         <> fall c ~> rise b
-  inFall  = rise c ~> fall a 
-         <> rise c ~> fall b
-  inter   = inputs [a, b] 
-         <> outputs [c]
-  inits   = initialise0 [a, b, c]
+  protocol = outRise <> outFall 
+          <> inRise <> inFall
+  outRise  = [rise a,rise b] ~&~> rise c
+  outFall  = [fall a,fall b] ~&~> fall c
+  inRise   = fall c ~> rise a 
+          <> fall c ~> rise b
+  inFall   = rise c ~> fall a 
+          <> rise c ~> fall b
+  ports    = inputs [a, b] 
+          <> outputs [c]
+  init     = initialise0 [a, b, c]
 \end{minted}
 
-\vspace{1mm}
+%\vspace{1mm}
 
 \noindent This provides four separate behavioural concepts, \mintinline{haskell}{outRise} and \mintinline{haskell}{outFall}
 which describe how the outputs transition, and
@@ -547,15 +551,18 @@ We have already defined C-element and inverter concepts
 in Section~\ref{subsub:gate-level}. Therefore, we can simplify this specification, 
 to use gate-level concepts instead:
 
+\vspace{-1mm}
+
 \begin{minted}[fontsize=\normalsize]{haskell}
-circuit a b c = opers <> inter <> inits
+circuit a b c = protocol <> ports 
+             <> init
  where
-  opers = cElement a b c 
-           <> inverter c a 
-           <> inverter c b
-  inter = inputs [a, b] 
-           <> outputs [c]
-  inits = initialise0 [a, b, c]
+  protocol = cElement a b c 
+          <> inverter c a 
+          <> inverter c b
+  ports    = inputs [a, b] 
+          <> outputs [c]
+  init     = initialise0 [a, b, c]
 \end{minted}
 
 The signal-level concepts between the signal pairs of $a$ and $c$, and $b$ and $c$
@@ -718,15 +725,16 @@ the uses of the translated STGs.
 \vspace{-3mm}
 \begin{minted}[fontsize=\normalsize]{haskell}
 module CElement where
-
 import Tuura.Concept.STG
 
-circuit a b c = opers <> inter <> inits 
+circuit a b c = protocol <> ports 
+             <> init 
  where
-  opers = cElement a b c <> env
-  env   = inverter c a <> inverter c b
-  inter = inputs[a, b] <> outputs[c] 
-  inits = initialise0 [a, b, c]
+  protocol = cElement a b c <> env
+  env      = inverter c a 
+          <> inverter c b
+  ports    = inputs[a, b] <> outputs[c] 
+  init     = initialise0 [a, b, c]
 \end{minted}
 
 \par\end{centering}
@@ -769,11 +777,11 @@ state and the operation of this separately, by defining these concepts following
 ``\mintinline{haskell}{where}''. The full circuit specification is then 
 composed of all of these defined concepts. 
 
-\vspace{-2.5mm}
+\vspace{-4mm}
 
 \subsection{Using \noun{Plato} from within \noun{Workcraft} \label{sec:workcraft_usage}}
 
-\vspace{-3mm}
+\vspace{-4mm}
 
 \begin{figure*}[t]
 \begin{centering}
@@ -798,7 +806,7 @@ which can be automatically imported from \noun{Plato}, either from concept speci
 This section will discuss how to use \noun{Plato} from within
 \noun{Workcraft}.
 
-\vspace{-3.2mm}
+\vspace{-3.5mm}
  
 \subsubsection{Translating and authoring concepts}
 
@@ -832,7 +840,7 @@ without having to view the concepts first. This can be done from the
 \begin{figure}[h]
 \begin{centering}
 \vspace{-3mm}
-\includegraphics[scale=0.4]{Images/import_menu_screenshot.png}
+\includegraphics[scale=0.35]{Images/import_menu_screenshot.png}
 \par\end{centering}
 
 \begin{centering}
@@ -840,7 +848,7 @@ without having to view the concepts first. This can be done from the
 			option of \emph{.hs} files.}
 
 \par\end{centering}
-\vspace{-6mm}
+\vspace{-5mm}
 \end{figure}
 
 Any concept files imported will be automatically translated to an STG.
