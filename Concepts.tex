@@ -1,5 +1,6 @@
 
-\documentclass[british,conference,compsoc]{IEEEtran}
+%\documentclass[british,conference,compsoc]{IEEEtran}
+\documentclass[british, 10pt, conference, compsocconf]{IEEEtran}
 \usepackage[T1]{fontenc}
 \usepackage{float}
 \usepackage{amsmath}
@@ -65,7 +66,7 @@ tools, such as \noun{Petrify} and \noun{Mpsat}.
 
 \section{Introduction}
 
-\vspace{-3mm}
+\vspace{-1mm}
 
 \emph{Concepts} have been presented in order to provide a more compact
 and intuitive method of designing asynchronous circuits, using a fully
@@ -91,12 +92,12 @@ protocols describing the interactions between some signals become difficult to
 include with each occurrence of these signals. 
 
 %\begin{figure}[h]
-%\vspace{-3mm}
+%%\vspace{-3mm}
 %\begin{centering}
 %\includegraphics[scale=0.3]{Images/cElement-stg.pdf}
 %\par\end{centering}
 %\protect\caption{\label{fig:cElement-stg} Example STG}
-%\vspace{-6mm}
+%%\vspace{-6mm}
 %\end{figure}
 %
 %For example, Figure~\ref{fig:cElement-stg} contains an STG. 
@@ -130,7 +131,7 @@ integrated into \noun{Workcraft}~\cite{Workcraft_website}, an open-source
 EDA tool which also features some verification and synthesis tools for STGs.
 
 The contributions of this paper are:
-\vspace{-1mm}
+%\vspace{-1mm}
 \begin{itemize}
   \item We detail the notations of concepts within \noun{Plato} and the built in
   concepts and their uses in Section~\ref{sec:tool-func}.
@@ -140,20 +141,20 @@ The contributions of this paper are:
   \noun{Workcraft} to translate concepts in Section~\ref{sec:tool-use}.
 \end{itemize}
 
-\vspace{-5mm}
+\vspace{-1mm}
 
 \section{Features of \noun{Plato}\label{sec:tool-func}}
 
-\vspace{-3mm}
+%\vspace{-3mm}
 
 The abstract base of concepts, on which asynchronous circuit specifications 
 is founded, is discussed in~\cite{2015_Beaumont_MEMOCODE}.
 
-\vspace{-3.5mm}
+\vspace{-1mm}
 
 \subsection{Concept notation \label{sub:concept-notation}}
 
-\vspace{-3.5mm}
+%\vspace{-3.5mm}
 
 Concepts can be composed of other concepts, and this applies to the behaviours 
 of signals, as well as the specification of the initial states and the signal 
@@ -161,7 +162,7 @@ types. This allows there to be different levels of concepts, each level of
 which will feature a composition of concepts from a lower level. In this section we will explain these levels, and the standard notations of 
 concepts for these. 
 
-\vspace{-3mm}
+%\vspace{-3mm}
 
 \subsubsection{\label{signal-level}Signal-level concepts}Asynchronous circuit 
 specifications are mainly composed of signal transitions, and interactions 
@@ -189,13 +190,13 @@ A key concept in asynchronous circuits is \emph{causality}:
 one signal transition \emph{causes} another signal transition, a cause and an 
 effect. This is denoted in the form: 
 
-\vspace{-2mm}
+\vspace{-1.5mm}
 
 \begin{center}
 {\mintinline{haskell}{rise a} \mintinline{haskell}{~>} \mintinline{haskell}{rise c}}
 \end{center}
 
-\vspace{-1mm}
+\vspace{-1.5mm}
 
 This is read as $a^{+}$ causes $c^{+}$, meaning that for the $c^{+}$ transition 
 to occur, $a^{+}$ must have occurred previously. The operator
@@ -219,7 +220,7 @@ two causality concepts can be composed.
 \mintinline{haskell}{rise a} \mintinline{haskell}{~>} \mintinline{haskell}{rise c} \mintinline{haskell}{<>} \mintinline{haskell}{rise b} \mintinline{haskell}{~>} \mintinline{haskell}{rise c}
 \end{center}
 
-\vspace{-1mm}
+\vspace{-2mm}
 
 In words, $a^{+}$ \emph{and} $b^{+}$ must occur before $c^{+}$ can occur. 
 This corresponds to so-called AND-causality in the fact that several cause 
@@ -262,7 +263,7 @@ $z^{+}$ to occur. The interactions when an effect transition is included in both
 OR-causality are interesting, and an example of when this occurs can be found 
 in Section~\ref{sec:algorithm}.
 
-\vspace{-2mm}
+%\vspace{-2mm}
 
 \subsubsection{Gate-level concepts \label{subsub:gate-level}} Using the causality concept we can express
 the behaviour of gates in asynchronous circuits. For example, a \emph{buffer}
@@ -277,14 +278,20 @@ buffer a b = rise a ~> rise b
 \noindent An \emph{inverter} has a similar conceptual specification, but the
 output transition is inverted:
 
+\vspace{-1mm}
+
 \begin{minted}[fontsize=\normalsize]{haskell}
 inverter a b = rise a ~> fall b
             <> fall a ~> rise b
 \end{minted}
 
+\vspace{-1mm}
+
 \noindent A \emph{C-element} is a gate with two inputs, in this example $a$ and $b$, and one
 output~$c$, which synchronizes both rising and falling input transitions
 via AND-causality:
+
+%\vspace{-1mm}
 
 \begin{minted}[fontsize=\normalsize]{haskell}
 cElement a b c = rise a ~> rise c 
@@ -304,7 +311,7 @@ transitions by two `virtual' buffers. Behaviour of other gates can be similarly
 defined in this way. An expanded example of a C-element and other examples can 
 be found in~\cite{2015_Beaumont_MEMOCODE}.
 
-\vspace{-2mm}
+%\vspace{-2mm}
 
 \subsubsection{Protocol-level concepts} In addition to gate-level concepts
 described above it is often important to specify \emph{protocols}
@@ -337,11 +344,11 @@ This conceptual understanding of a handshake as being composed
 from a buffer and an inverter is often used by circuit designers as
 a convenient way of reasoning.
 
-\vspace{-3.5mm}
+\vspace{-1mm}
 
 \subsection{Concepts required for translation\label{sub:trans-concepts}}
 
-\vspace{-3.5mm}
+\vspace{-1mm}
 
 The concepts we have discussed so far are aimed at specifying the behaviour of 
 signals in a circuit. When translating these to STGs however, these behaviours 
@@ -352,7 +359,7 @@ This is due to various parts of an STG that we have not yet discussed, which
 are important for specification, namely \emph{interface} and 
 \emph{initial states}.
 
-\vspace{-3mm}
+%\vspace{-3mm}
 
 \subsubsection{Interface concepts\label{sub:interface}} 
 
@@ -365,7 +372,7 @@ To specify the type of a signal (\emph{input},
 \emph{output} or \emph{internal}) we introduce the \texttt{interface} concept.
 Signal types are composed according to the following rules:
 
-\vspace{-2mm}
+\vspace{-1mm}
 
 \[
 \begin{array}{|l||l|l|l|}
@@ -382,7 +389,7 @@ Signal types are composed according to the following rules:
 
 The intuition is as follows:
 
-\vspace{-2mm}
+%\vspace{-2mm}
 \begin{itemize}
     \item If a signal is an input in one component of the system, but is an
     output in another component, then in the composition it will be an output.
@@ -415,7 +422,7 @@ inputs, $c$ is an output, and $t$ is internal:
 \mintinline{haskell}{<>} \mintinline{haskell}{internals [t]}
 \end{center}
 
-\vspace{-5mm}
+\vspace{-2mm}
 
 \subsubsection{Initial state concepts\label{sub:initState}}
 
@@ -443,15 +450,17 @@ initial state declared as both high and low, and is thus inconsistent, then the 
 
 For ease-of-use, initial states can also be declared in lists:
 
+\vspace{-1mm}
+
 \begin{center}
 \mintinline{haskell}{initialise0[a, b, c]} \mintinline{haskell}{<>} \mintinline{haskell}{initialise1[x,y]}
 \end{center}
 
-\vspace{-2mm}
+%\vspace{-2mm}
 
 \section{Concepts to STG translation algorithm\label{sec:algorithm}}
 
-\vspace{-2mm}
+%\vspace{-2mm}
 
 %In order to reuse the tools developed by the community, it is
 %necessary to be able to automatically translate concept specifications to STGs.
@@ -504,7 +513,7 @@ operates, and present a pseudocode form in Algorithm~\ref{alg:translation}.
 \end{algorithm}
 
 \begin{figure}[h]
-\vspace{-5mm}
+\vspace{-3mm}
 \begin{centering}
 \includegraphics[scale=0.3]{Images/cElement-stg.pdf}
 \par\end{centering}
@@ -520,8 +529,7 @@ For reference, a simplified STG of this is featured in Figure~\ref{fig:cElement-
 
 Working from this STG, one could describe the low-level operations by inputs and outputs:
 
-\vspace{-1mm}
-
+%\vspace{-1mm}
 \begin{minted}[fontsize=\normalsize]{haskell}
 circuit a b c = protocol <> ports 
              <> init
@@ -551,7 +559,7 @@ We have already defined C-element and inverter concepts
 in Section~\ref{subsub:gate-level}. Therefore, we can simplify this specification, 
 to use gate-level concepts instead:
 
-\vspace{-1mm}
+%\vspace{-1mm}
 
 \begin{minted}[fontsize=\normalsize]{haskell}
 circuit a b c = protocol <> ports 
@@ -681,7 +689,7 @@ Finally, we can add the connections to the transitions, and cause the
 expected interaction between signals. This is done using read-arcs, which 
 are arcs which require, but do not consume tokens for transitions. We
 connect a read-arc from the place after a cause transition, to the effect transition object. 
-For example, for \mintinline{haskell}{rise a ~> rise b} we connect the place after $a^{+}$, namely $a0$,
+For example, for \mintinline{haskell}{rise a} \mintinline{haskell}{~>} \mintinline{haskell}{rise b} we connect the place after $a^{+}$, namely $a0$,
 to the transition $b^{+}$. In this case, $b^{+}$ will not occur until $a0$ contains a token,
 and when it does occur, the token will remain in $a0$ following the $b^{+}$ transition. 
 
@@ -701,28 +709,28 @@ such as that seen in Figure~\ref{fig:cElement-stg}
 \includegraphics[scale=0.3]{Images/cElement-stg-translated}
 \par\end{centering}
 \protect\caption{\label{fig:cElement-stg-translated} Fully translated C-element with environment STG}
-\vspace{-4mm}
+\vspace{-3mm}
 \end{figure}
 
-%\vspace{-5mm}
+%%\vspace{-5mm}
 
 \section{Usage of the tool\label{sec:tool-use}}
 
-\vspace{-3mm}
+\vspace{-1mm}
 
 We will now discuss the design flow, including the preparation of 
 a concepts file, the translation methods from within \noun{Workcraft}, and 
 the uses of the translated STGs.
 
-\vspace{-3mm}
+\vspace{-1mm}
 
 \subsection{Concepts file layout \label{sub:file_layout}}
 
-\vspace{-4mm}
+\vspace{-2mm}
 
 \begin{figure}[h]
 \begin{centering}
-\vspace{-3mm}
+\vspace{-1mm}
 \begin{minted}[fontsize=\normalsize]{haskell}
 module CElement where
 import Tuura.Concept.STG
@@ -738,10 +746,10 @@ circuit a b c = protocol <> ports
 \end{minted}
 
 \par\end{centering}
-\vspace{-1mm}
+%\vspace{-1mm}
 \begin{centering}
 \protect\caption{\label{fig:concepts_file}A concepts file}
-\vspace{-3mm}
+\vspace{-1mm}
 \par\end{centering}
 
 \end{figure}
@@ -750,7 +758,7 @@ The concepts file we will discuss is found in Figure~\ref{fig:concepts_file}.
 Concepts files are an extension of Haskell files, and hence, use the ``.hs'' file extension.
 The following describes important information about specific lines.
 
-\vspace{-1.5mm}
+%\vspace{-1.5mm}
 
 \begin{description}
   \item [Line 1]  This line must be included in all concept files, with the 
@@ -768,7 +776,7 @@ The following describes important information about specific lines.
 
 \end{description}
 
-\vspace{-1mm}
+%\vspace{-1mm}
 
 The lines discussed above are the basics of writing concepts. With this 
 information, a user can write concept files. We have used the 
@@ -777,22 +785,22 @@ state and the operation of this separately, by defining these concepts following
 ``\mintinline{haskell}{where}''. The full circuit specification is then 
 composed of all of these defined concepts. 
 
-\vspace{-4mm}
+\vspace{-2mm}
 
 \subsection{Using \noun{Plato} from within \noun{Workcraft} \label{sec:workcraft_usage}}
 
-\vspace{-4mm}
+%\vspace{-4mm}
 
 \begin{figure*}[t]
 \begin{centering}
-\vspace{-3mm}
+%\vspace{-3mm}
 \includegraphics[scale=0.55]{Images/workcraft_design_flow.png}
 \par\end{centering}
 \begin{centering}
 \protect\caption{\label{fig:design_flow_screenshot}\noun{Workcraft} and 
 			\noun{Plato} usage.}
 \par\end{centering}
-\vspace{-3mm}
+\vspace{-5mm}
 \end{figure*}
 
 \noun{Plato}, can be used on its own using a command-line interface, and has been
@@ -806,7 +814,7 @@ which can be automatically imported from \noun{Plato}, either from concept speci
 This section will discuss how to use \noun{Plato} from within
 \noun{Workcraft}.
 
-\vspace{-3.5mm}
+%\vspace{-3.5mm}
  
 \subsubsection{Translating and authoring concepts}
 
@@ -831,7 +839,7 @@ operations can be made to this STG or to the concepts file.
 
 \subsubsection{Importing concepts directly}
 
-\vspace{-3mm}
+%\vspace{-3mm}
 
 In \noun{Workcraft} it is also possible to import concepts directly from a file,
 without having to view the concepts first. This can be done from the 
@@ -839,8 +847,8 @@ without having to view the concepts first. This can be done from the
 
 \begin{figure}[h]
 \begin{centering}
-\vspace{-3mm}
-\includegraphics[scale=0.35]{Images/import_menu_screenshot.png}
+%\vspace{-3mm}
+\includegraphics[scale=0.4]{Images/import_menu_screenshot.png}
 \par\end{centering}
 
 \begin{centering}
@@ -848,16 +856,16 @@ without having to view the concepts first. This can be done from the
 			option of \emph{.hs} files.}
 
 \par\end{centering}
-\vspace{-5mm}
+\vspace{-4mm}
 \end{figure}
 
 Any concept files imported will be automatically translated to an STG.
 
-\vspace{-3mm}
+\vspace{-2mm}
 
 %\subsection{Errors}
 %
-%\vspace{-2mm}
+%%\vspace{-2mm}
 %
 %If any errors are encountered during the translation process, \noun{Workcraft} 
 %will produce a helpful error message. This usually can tell you with more 
@@ -871,7 +879,7 @@ Any concept files imported will be automatically translated to an STG.
 
 \section{Conclusions and future work\label{sec:conclusions}}
 
-\vspace{-3mm}
+%\vspace{-3mm}
 
 In this work, we have displayed the open-source
 tool, \noun{Plato}~\cite{2016_concepts_github}. This tool implements a 
@@ -907,7 +915,7 @@ from~\cite{2016_concepts_github}, and is included with
 \noun{Workcraft}~\cite{Workcraft_website}. A manual is included with the tool, 
 which contains descriptions of the features. 
 
-\vspace{-2.5mm}
+%\vspace{-2mm}
 
 \bibliographystyle{unsrt}
 \bibliography{publications}
